@@ -342,8 +342,18 @@ quantile_helper.hermite_estimator <- function(this, p)
   if (p < 0 | p > 1){
     return(NA)
   }
-  est <- stats::uniroot(f = function(x){cum_prob_quantile_helper(this,x)-p},interval = c(-50,50))$root
-  est <- est*sqrt(this$running_variance/(this$num_obs-1)) + this$running_mean
+  est = tryCatch({
+    uniroot(f = function(x){cum_prob_quantile_helper(this,x)-p},interval = c(-100,100))$root
+  }, warning = function(w) {
+  }, error = function(e) {
+    NA
+  }, finally = {
+  })
+  if (is.na(this$exp_weight)){
+    est <- est*sqrt(this$running_variance/(this$num_obs-1)) + this$running_mean
+  } else {
+    est <- est*sqrt(this$running_variance) + this$running_mean
+  }
   return(est)
 }
 

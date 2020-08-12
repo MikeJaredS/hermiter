@@ -1,6 +1,0 @@
-"0","x <- seq(-15,15,0.1)"
-"0","pdf_est <- hermite_est %>% dens(x)"
-"0","cdf_est <- hermite_est %>% cum_prob(x)"
-"0",""
-"0","p <- seq(0.05,0.95,0.05)"
-"0","quantile_est <- hermite_est %>% quant(p)"

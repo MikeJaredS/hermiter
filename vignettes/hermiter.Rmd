@@ -21,6 +21,8 @@ library(magrittr)
 library(ggplot2)
 library(dplyr)
 library(data.table)
+library(gifski)
+library(gganimate)
 ```
 
 # Introduction
@@ -143,8 +145,85 @@ estimates <- test_data %>% group_by(dist_name,idx) %>% summarise(hermest = list(
 combined_estimates <- estimates %>% group_by(dist_name) %>% summarise(herm_comb = list(combine_hermite(hermest)))
 ```
 
-# Applying on sequential data
+# Applying to sequential data
 
+```{r}
+num_obs <-2000
+test <- rlnorm(num_obs)
+test <- c(test,rlogis(num_obs))
+test <- c(test,rnorm(num_obs))
+h_est <- hermite_estimator(N=20,normalize = T,exp_weight_lambda = 0.0075)
+count <- 1
+x <- seq(-10,10,by=0.1)
+actual_cdf_lognorm <- plnorm(x)
+actual_cdf_logis <- plogis(x)
+actual_cdf_norm <- pnorm(x)
+actual_pdf_lognorm <- dlnorm(x)
+actual_pdf_logis <- dlogis(x)
+actual_pdf_norm <- dnorm(x)
+p <- seq(0.05,0.95,by=0.05)
+actual_quantiles_lognorm <- qlnorm(p)
+actual_quantiles_logis <- qlogis(p)
+actual_quantiles_norm <- qnorm(p)
+res <- data.frame()
+res_q <- data.frame()
+for (idx in c(1:length(test))) {
+  h_est <- h_est %>% update_sequential(test[idx])
+  if (idx %% 100 == 0){
+    if (floor(idx/num_obs)==0){
+      actual_cdf_vals <- actual_cdf_lognorm
+      actual_pdf_vals <-actual_pdf_lognorm
+      actual_quantile_vals <- actual_quantiles_lognorm
+    }
+    if (floor(idx/num_obs)==1){
+      actual_cdf_vals <- actual_cdf_logis
+      actual_pdf_vals <-actual_pdf_logis
+      actual_quantile_vals <- actual_quantiles_logis
+    }
+    if (floor(idx/num_obs)==2){
+      actual_cdf_vals <- actual_cdf_norm
+      actual_pdf_vals <- actual_pdf_norm
+      actual_quantile_vals <- actual_quantiles_norm
+    }
+    idx_vals <- rep(count,length(x))
+    cdf_est_vals <- h_est %>% cum_prob(x, clipped=T)
+    pdf_est_vals <- h_est %>% dens(x, clipped=T)
+    quantile_est_vals <- h_est %>% quant(p)
+    res <- rbind(res,data.frame(idx_vals,x,cdf_est_vals,actual_cdf_vals,pdf_est_vals,actual_pdf_vals))
+    res_q <- rbind(res_q,data.frame(idx_vals=rep(count,length(p)),p,quantile_est_vals,actual_quantile_vals))
+    count <- count +1
+  }
+}
+res <- res %>% mutate(idx_vals=idx_vals*100)
+res_q <- res_q %>% mutate(idx_vals=idx_vals*100)
+```
+
+```{r eval=FALSE}
+p <- ggplot(res) + geom_line(aes(x=x,y=pdf_est_vals), colour="green") + geom_line(aes(x=x,y=actual_pdf_vals)) +transition_states(idx_vals,
+                                                                                                                                 transition_length = 2,
+                                                                                                                                 state_length = 1)
+anim_save("pdf.gif",p)
+```
+
+![](pdf.gif)
+
+```{r eval=FALSE}
+p <- ggplot(res) + geom_line(aes(x=x,y=cdf_est_vals), colour="green") + geom_line(aes(x=x,y=actual_cdf_vals)) +transition_states(idx_vals,
+                                                                  transition_length = 2,
+                                                                  state_length = 1)+ ggtitle('Observation index {closest_state}')
+anim_save("cdf.gif", p)
+```
+
+![](cdf.gif)
+
+```{r eval=FALSE}
+p <- ggplot(res_q) + geom_point(aes(x=actual_quantile_vals,y=quantile_est_vals)) +geom_abline(slope=1,intercept = 0) +transition_states(idx_vals,
+                                                                                                                 transition_length = 2,
+                                                                                                                 state_length = 1)
+anim_save("quant.gif",p)
+```
+
+![](quant.gif)
 
 # Citing this package
 
