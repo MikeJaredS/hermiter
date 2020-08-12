@@ -1,0 +1,24 @@
+{
+    "id": "BD333B51",
+    "path": "C:/git_repos/outp/hermiter/src/RcppExports.cpp",
+    "project_path": "src/RcppExports.cpp",
+    "type": "cpp",
+    "hash": "2841309755",
+    "contents": "",
+    "dirty": false,
+    "created": 1596913336120.0,
+    "source_on_save": false,
+    "relative_order": 5,
+    "properties": {
+        "cursorPosition": "97,23",
+        "scrollLine": "0"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1596985882,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1596985882,
+    "read_only": true,
+    "read_only_alternatives": []
+}

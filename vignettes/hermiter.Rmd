@@ -1,0 +1,156 @@
+---
+title: "hermiter"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{hermiter}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+# set.seed(10)
+```
+
+```{r setup}
+library(hermiter)
+library(magrittr)
+library(ggplot2)
+library(dplyr)
+library(data.table)
+```
+
+# Introduction
+
+Hermite series based distribution function and quantile function estimators have been studied in:
+
+https://projecteuclid.org/euclid.ejs/1488531636, 
+
+https://link.springer.com/article/10.1007/s00184-020-00785-z.
+
+They are well suited to sequential estimation in both stationary and non-stationary settings. In addition, they are useful in efficient, one-pass batch estimation which is particularly relevant in the context of massive data sets. Finally, the Hermite series based estimators are applicable in decentralized (distributed) settings in that estimators formed on subsets of the data can be consistently combined. The Hermite series based estimators have the distinct advantage of being able to estimate the full density function, distribution function and quantile function.
+
+
+# Construct Estimator
+
+```{r}
+hermite_est <- hermite_estimator(N=10, normalize=TRUE)
+```
+
+# Batch Estimation
+
+## Standard syntax
+
+```{r}
+observations <- rlogis(n=1000)
+hermite_est <- hermite_estimator(N=10, normalize=TRUE)
+hermite_est <- update_batch(hermite_est,observations)
+```
+
+## Functional piped syntax
+
+```{r}
+observations <- rlogis(n=1000)
+hermite_est <- hermite_estimator(N=10, normalize=TRUE)
+hermite_est <- hermite_est %>% update_batch(observations)
+```
+
+# Calculate pdf, cdf and quantile function
+
+## Standard syntax
+
+```{r}
+x <- seq(-15,15,0.1)
+pdf_est <- dens(hermite_est,x)
+cdf_est <- cum_prob(hermite_est,x)
+
+p <- seq(0.05,1,0.05)
+quantile_est <- quant(hermite_est,p)
+```
+
+## Functional piped syntax
+
+```{r}
+x <- seq(-15,15,0.1)
+pdf_est <- hermite_est %>% dens(x)
+cdf_est <- hermite_est %>% cum_prob(x)
+
+p <- seq(0.05,0.95,0.05)
+quantile_est <- hermite_est %>% quant(p)
+```
+
+## Visualizing the results
+
+```{r}
+actual_pdf <- dlogis(x)
+actual_cdf <- plogis(x)
+df_pdf_cdf <- data.frame(x,pdf_est,cdf_est,actual_pdf,actual_cdf)
+
+actual_quantiles <- qlogis(p)
+df_quant <- data.frame(p,quantile_est,actual_quantiles)
+
+ggplot(df_pdf_cdf) + geom_line(aes(x=x, y=pdf_est), colour="blue") + geom_line(aes(x=x,y=actual_pdf))
+
+ggplot(df_pdf_cdf) + geom_line(aes(x=x, y=cdf_est), colour="blue") + geom_line(aes(x=x,y=actual_cdf))
+
+ggplot(df_quant) + geom_point(aes(x=actual_quantiles, y=quantile_est)) + geom_abline(slope=1,intercept = 0)
+```
+
+# Applying on grouped data in a batch setting
+
+## Using dplyr
+
+```{r}
+# Create Test Data
+test_data <- data.frame()
+for (i in c(1:5)) {
+  exponential_data <- rexp(n=1000)
+  logistic_data <- rlogis(n=1000)
+  logn_data <- rlnorm(n=1000)
+  test_data <- rbind(test_data,data.frame(dist_name=rep("exponential",length(exponential_data)),idx=i,observations=exponential_data))
+  test_data <- rbind(test_data,data.frame(dist_name=rep("logistic",length(logistic_data)),idx=i,observations=logistic_data))
+  test_data <- rbind(test_data,data.frame(dist_name=rep("lognormal",length(logn_data)),idx=i,observations=logn_data))
+}
+
+# Group observations by distribution and idx and create Hermite estimator
+estimates <- test_data %>% group_by(dist_name,idx) %>% summarise(hermest = list(hermite_estimator(N=10,normalize = TRUE) %>% update_batch(observations)))
+
+# Group observations by distribution and combine Hermite estimators
+combined_estimates <- estimates %>% group_by(dist_name) %>% summarise(herm_comb = list(combine_hermite(hermest)))
+```
+
+## Using data.table
+
+```{r}
+# Create Test Data
+test_data <- data.frame()
+for (i in c(1:5)) {
+  exponential_data <- rexp(n=1000)
+  logistic_data <- rlogis(n=1000)
+  logn_data <- rlnorm(n=1000)
+  test_data <- rbind(test_data,data.frame(dist_name=rep("exponential",length(exponential_data)),idx=i,observations=exponential_data))
+  test_data <- rbind(test_data,data.frame(dist_name=rep("logistic",length(logistic_data)),idx=i,observations=logistic_data))
+  test_data <- rbind(test_data,data.frame(dist_name=rep("lognormal",length(logn_data)),idx=i,observations=logn_data))
+}
+
+# Group observations by distribution and idx and create Hermite estimator
+estimates <- test_data %>% group_by(dist_name,idx) %>% summarise(hermest = list(hermite_estimator(N=10,normalize = TRUE) %>% update_batch(observations)))
+
+# Group observations by distribution and combine Hermite estimators
+combined_estimates <- estimates %>% group_by(dist_name) %>% summarise(herm_comb = list(combine_hermite(hermest)))
+```
+
+# Applying on sequential data
+
+
+# Citing this package
+
+Use the following code to auto generate a BibTex entry.
+
+```{r}
+citation("hermiter")
+```
+

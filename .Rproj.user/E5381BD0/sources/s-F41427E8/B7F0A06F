@@ -1,0 +1,24 @@
+{
+    "id": "B7F0A06F",
+    "path": "C:/git_repos/stats/benchmarkCDFEst2.R",
+    "project_path": null,
+    "type": "r_source",
+    "hash": "0",
+    "contents": "",
+    "dirty": false,
+    "created": 1597125066596.0,
+    "source_on_save": false,
+    "relative_order": 10,
+    "properties": {
+        "cursorPosition": "98,89",
+        "scrollLine": "69"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1596867421,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1596867421,
+    "read_only": false,
+    "read_only_alternatives": []
+}

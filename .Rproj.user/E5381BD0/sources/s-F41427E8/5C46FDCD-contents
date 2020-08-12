@@ -1,0 +1,79 @@
+Rcpp::sourceCpp('C:\\git_repos\\stats\\hermite_utils.cpp')
+
+Rcpp::sourceCpp('/Users/michaelstephanou/Desktop/R\ Code/Statistics\ Research/stats/hermite_utils.cpp')
+
+# data_in <- data.table::fread(file = "C:\\Users\\Mike\\Desktop\\G1_1e7_1e2_0_0.csv")
+data_in <- data.table::fread(file = "C:\\git_repos\\stats\\G1_1e7_1e2_0_0.csv")
+
+microbenchmark::microbenchmark({
+res <- data_in %>% group_by(id4,id5,.drop = T) %>% summarize(median_v3=median(v3),sd_v3=sd(v3))
+},times=2)
+
+microbenchmark::microbenchmark({
+  res <- data_in %>% group_by(id4,id5,.drop = T) %>% summarize(hermest_v3 = list(hermite_estimator(N=6,normalize = T) %>% update_batch(v3)),sd_v3=sd(v3))
+},times=2)
+
+microbenchmark::microbenchmark({
+  res <- data_in %>% group_by(id4,id5,.drop = T) %>% summarize(hermest_v3 = hermite_estimator(N=10,normalize = T) %>% update_batch(v3) %>% quant(0.5),sd_v3=sd(v3))
+},times=2)
+
+tt <- res %>% mutate(med = hermest_v3[[1]] %>% cum_prob(2))
+tt <- res %>% mutate(med = hermest_v3[[1]] %>% quantile(0.5))
+
+setDT(data_in)
+microbenchmark::microbenchmark({
+res_orig <- data_in[,.(median_v3=median(v3),sd_v3=sd(v3)),by=.(id4,id5)]
+},times=2)
+
+
+setDT(data_in)
+microbenchmark::microbenchmark({
+  res <- data_in[,.(hermest_v3 = list(hermite_estimator(N=10,normalize = T) %>% update_batch(v3)),sd_v3=sd(v3)),by=.(id4,id5)]
+},times=2)
+
+setDT(data_in)
+microbenchmark::microbenchmark({
+  res <- data_in[,.(median_v3 = list(hermite_estimator(N=10,normalize = T) %>% update_batch(v3) %>% quant(seq(0.1,0.9,by = 0.05))),sd_v3=sd(v3)),by=.(id4,id5)]
+},times=2)
+
+setDT(data_in)
+microbenchmark::microbenchmark({
+  res <- data_in[,.(median_v3 = hermite_estimator(N=10,normalize = T) %>% update_batch(v3) %>% quant(0.5),sd_v3=sd(v3)),by=.(id4,id5)]
+},times=2)
+
+
+setDT(data_in)
+microbenchmark::microbenchmark({
+  res <- data_in[,.(median_v3 = HermiteQuantileEstimator(N=10) %>% updateBatch(v3) %>% getQuantileEst(0.95),sd_v3=sd(v3)),by=.(id4,id5)]
+},times=2)
+
+dnum=22
+test <- rberdev(n=10000000,dnum = dnum)
+r <- seq(-25,25,by = 0.01)
+
+microbenchmark::microbenchmark({
+h_est <- hermite_estimator(N=20,normalize = T) %>% update_batch(test)
+},times=1)
+
+dens_est <- h_est %>% dens(r, clipped=T)
+cdf_est <- h_est %>% cum_prob(r, clipped=T)
+quant_est <-  h_est %>% quant(seq(0.1,0.9,by = 0.05))
+
+df <- data.frame(r,dens = dberdev(r,dnum),dens_est,cdf=pberdev(r,dnum),cdf_est)
+df_q <- data.frame(p=seq(0.1,0.9,by = 0.05),quant = qberdev(seq(0.1,0.9,by = 0.05),dnum),quant_est)
+
+ggplot(df, aes(x=r,y=dens)) + geom_line() +geom_line(aes(y=dens_est),color="green")
+
+ggplot(df_q, aes(x=quant,y=quant_est)) + geom_point() + geom_abline(slope=1,intercept = 0, color="blue")
+
+
+ggplot(df, aes(x=r,y=cdf)) + geom_line() +geom_line(aes(y=cdf_est),color="green")
+
+integrate(function(x){h_est %>% dens(x)},lower = -20,upper = 0.7)
+
+h_est %>% cum_prob(0.7)
+
+pberdev(0.7,dnum)
+
+h_est %>% cum_prob_quantile_adapted((h_est %>% quant(0.992) - h_est$running_mean)/sqrt(h_est$running_variance/(h_est$num_obs-1)))
+

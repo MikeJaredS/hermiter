@@ -1,0 +1,162 @@
+distro_name <- "Log-Normal"
+FUNCDF_rv <-function(x1){plnorm(x1)} 
+FUNPDF_rv <- function(x2){dlnorm(x2)}
+FUNSample_rv <- function(num_obs){rlnorm(n = num_obs)}
+lognList <- list(distro_name,FUNCDF_rv,FUNPDF_rv,FUNSample_rv)
+
+distro_name <- "Logistic"
+FUNCDF_rv <-function(x1){plogis(x1)} 
+FUNPDF_rv <- function(x2){dlogis(x2)}
+FUNSample_rv <- function(num_obs){rlogis(n = num_obs)}
+logisList <- list(distro_name,FUNCDF_rv,FUNPDF_rv,FUNSample_rv)
+
+distro_name <- "Laplace"
+FUNCDF_rv <-function(x1){plaplace(x1)} 
+FUNPDF_rv <- function(x2){dlaplace(x2)}
+FUNSample_rv <- function(num_obs){rlaplace(n = num_obs)}
+laplaceList <- list(distro_name,FUNCDF_rv,FUNPDF_rv,FUNSample_rv)
+
+distro_name <- "Exponential"
+FUNCDF_rv <-function(x1){pexp(x1)} 
+FUNPDF_rv <- function(x2){dexp(x2)}
+FUNSample_rv <- function(num_obs){rexp(n = num_obs)}
+expList <- list(distro_name,FUNCDF_rv,FUNPDF_rv,FUNSample_rv)
+
+
+# distro_name <- "Log-Normal"
+# FUNCDF_rv <-function(x1){plnorm((x1-1)/exp(1))} 
+# FUNPDF_rv <- function(x2){dlnorm((x2-1)/exp(1))}
+# FUNSample_rv <- function(num_obs){data<-rlnorm(n = num_obs)
+# data<-(data - mean(data))/sd(data)
+# return(data)
+# }
+# lognListStd <- list(distro_name,FUNCDF_rv,FUNPDF_rv,FUNSample_rv)
+# 
+# distro_name <- "Logistic"
+# FUNCDF_rv <-function(x1){plogis(x1*3/pi)} 
+# FUNPDF_rv <- function(x2){dlogis(x2*3/pi)}
+# FUNSample_rv <- function(num_obs){data <- rlogis(n = num_obs)
+# data <- (data-mean(data))/sd(data)
+# return(data)}
+# logisListStd <- list(distro_name,FUNCDF_rv,FUNPDF_rv,FUNSample_rv)
+# 
+# distro_name <- "Laplace"
+# FUNCDF_rv <-function(x1){plaplace(x1/sqrt(2))} 
+# FUNPDF_rv <- function(x2){dlaplace(x2/sqrt(2))}
+# FUNSample_rv <- function(num_obs){data <- rlaplace(n = num_obs)
+# data <- (data -mean(data))/sd(data)
+# return(data)}
+# laplaceListStd <- list(distro_name,FUNCDF_rv,FUNPDF_rv,FUNSample_rv)
+# 
+# distro_name <- "Exponential"
+# FUNCDF_rv <-function(x1){pexp((x1-1))} 
+# FUNPDF_rv <- function(x2){dexp((x2-1))}
+# FUNSample_rv <- function(num_obs){data <- rexp(n = num_obs)
+# data <- (data - mean(data))/sd(data)
+# return(data)
+# }
+# expListStd <- list(distro_name,FUNCDF_rv,FUNPDF_rv,FUNSample_rv)
+# 
+# distro_name <- "Beta(10,10)"
+# FUNCDF_rv <-function(x1){pbeta(x1,shape1 = 10, shape2 = 10)} 
+# FUNPDF_rv <- function(x2){dbeta(x2,shape1 = 10, shape2 = 10)}
+# FUNSample_rv <- function(num_obs){rbeta(n = num_obs,shape1 = 10, shape2 = 10)}
+# beta10List <- list(distro_name,FUNCDF_rv,FUNPDF_rv,FUNSample_rv)
+# 
+# distro_name <- "Beta(2,1)"
+# FUNCDF_rv <-function(x1){pbeta(x1,shape1 = 2, shape2 = 1)} 
+# FUNPDF_rv <- function(x2){dbeta(x2,shape1 = 2, shape2 = 1)}
+# FUNSample_rv <- function(num_obs){rbeta(n = num_obs,shape1 = 2, shape2 = 1)}
+# beta2List <- list(distro_name,FUNCDF_rv,FUNPDF_rv,FUNSample_rv)
+
+distro_list <- list(lognList,logisList,laplaceList,expList)
+# distro_list <- list(lognListStd,logisListStd,laplaceListStd,expListStd)
+# distro_list <- list(beta10List,beta2List)
+  
+# runs <- 10000
+runs <- 20
+num_obs_vec <- c(20,50,100,500,1000)
+
+# microbenchmark::microbenchmark({
+#   results_GH_alt <- data.frame()
+#   for (dist_idx in c(1:length(distro_list))) {
+#     for (num_obs_idx in c(1:length(num_obs_vec))) {
+#       for (N_current in seq(6,20,1)) {
+#         current_distro <- distro_list[[dist_idx]]
+#         results_GH_alt <- rbind(results_GH_alt,calculate_GH_MISE_Parallel(dist_title = current_distro[[1]],method_title="Hermite Variant",runs=runs,num_obs=num_obs_vec[num_obs_idx],FUNSample_rv=current_distro[[4]],FUNCDF_rv=current_distro[[2]],FUNPDF_rv=current_distro[[3]],N_inpt = N_current))
+#       }
+#     }
+#   }
+# },times=1)
+
+microbenchmark::microbenchmark({
+  results_GH <- data.frame()
+  for (dist_idx in c(1:length(distro_list))) {
+    for (num_obs_idx in c(1:length(num_obs_vec))) {
+      for (N_current in seq(6,20,1)) {
+        current_distro <- distro_list[[dist_idx]]
+        results_GH <- rbind(results_GH,calculate_GH_MISE(dist_title = current_distro[[1]],method_title="Hermite",runs=runs,num_obs=num_obs_vec[num_obs_idx],FUNSample_rv=current_distro[[4]],FUNCDF_rv=current_distro[[2]],FUNPDF_rv=current_distro[[3]],N_inpt = N_current))
+      }
+    }
+  }
+},times=1)
+
+
+microbenchmark::microbenchmark({
+  results_ECDF <- data.frame()
+  for (dist_idx in c(1:length(distro_list))) {
+    for (num_obs_idx in c(1:length(num_obs_vec))) {
+        current_distro <- distro_list[[dist_idx]]
+        results_ECDF <- rbind(results_ECDF,calculate_ECDF_MISE(dist_title = current_distro[[1]],method_title="Empirical",runs=runs,num_obs=num_obs_vec[num_obs_idx],FUNSample_rv=current_distro[[4]],FUNCDF_rv=current_distro[[2]],FUNPDF_rv=current_distro[[3]]))
+    }
+  }
+},times=1)
+
+microbenchmark::microbenchmark({
+  results_kern <- data.frame()
+  for (dist_idx in c(1:length(distro_list))) {
+    for (num_obs_idx in c(1:length(num_obs_vec))) {
+      for (i in seq(20,250,1)) {
+        bw_current <- i/1000
+        current_distro <- distro_list[[dist_idx]]
+        results_kern <- rbind(results_kern,calculate_kernel_MISE_Parallel(dist_title = current_distro[[1]],method_title="Kernel",runs=runs,num_obs=num_obs_vec[num_obs_idx],FUNSample_rv=current_distro[[4]],FUNCDF_rv=current_distro[[2]],FUNPDF_rv=current_distro[[3]],bw_inpt = bw_current))
+      }
+    }
+  }
+},times=1)
+
+overall_results <- rbind(results_GH,results_kern,results_ECDF)
+# overall_results <- rbind(results_kern,results_ECDF)
+
+# overall_results <- read.csv("./Desktop/R Code/Statistics Research/stats/CDFStatsPaperSims/resSum.csv")
+
+summary_view_res <- overall_results %>% group_by(Method,Distribution,Observation_Count) %>% filter(MISE == min(MISE))
+View(overall_results %>% group_by(Method,Distribution,Observation_Count) %>% filter(MISE == min(MISE)))
+
+
+
+mise <- summary_view_res %>% group_by(Distribution, Observation_Count) %>% select(Distribution, Method, Observation_Count ,MISE) %>% spread(Method, MISE)
+se <- summary_view_res %>% group_by(Distribution, Observation_Count) %>% select(Distribution, Method, Observation_Count ,Standard_Error) %>% spread(Method, Standard_Error)
+param <- summary_view_res %>% group_by(Distribution, Observation_Count) %>% select(Distribution, Method, Observation_Count ,param ) %>% spread(Method, param )
+
+overall <- merge(mise,se,by=c("Distribution", "Observation_Count"))
+overall <- merge(overall,param, by=c("Distribution", "Observation_Count"))
+
+overall <- overall[,colnames(overall)!="Empirical"]
+
+overall[,c(3:8)] <- overall[,c(3:8)]*1000
+
+overall <- overall %>% group_by(Distribution, Observation_Count) %>% arrange(Observation_Count, .by_group=TRUE)
+
+# overall <- overall[,c(1,2,4,3,5,7,6,8,9,10)]
+
+# write_csv(overall,"./Desktop/R Code/Statistics Research/stats/CDFStatsPaperSims/res3.csv")
+
+# overall <- read.csv("./Desktop/R Code/Statistics Research/stats/CDFStatsPaperSims/res3.csv")
+
+kable(overall,digits=c(rep(2,9),3), longtable = T, booktabs = T,format = "latex", col.names = c("Distribution", "Observations","Hermite","Kernel","Empirical","Hermite","Kernel","Empirical","Hermite (N)","Kernel (h)")) %>%
+  kable_styling(c("striped", "bordered")) %>%
+  collapse_rows(1:3,row_group_label_position = 'stack') %>%
+  add_header_above(c(" " = 1," " = 1, "MISE (x10^-3)" = 3, "Standard Error (x10^-3)" = 3, "Optimal Parameter" = 2))
+
+

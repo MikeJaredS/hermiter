@@ -1,0 +1,24 @@
+{
+    "id": "DF5D7FA1",
+    "path": "C:/git_repos/hermiter/R/hermite_estimator.R",
+    "project_path": "R/hermite_estimator.R",
+    "type": "r_source",
+    "hash": "0",
+    "contents": "",
+    "dirty": false,
+    "created": 1597048791635.0,
+    "source_on_save": false,
+    "relative_order": 3,
+    "properties": {
+        "cursorPosition": "13,2",
+        "scrollLine": "1"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1597210941,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1597210941342,
+    "read_only": false,
+    "read_only_alternatives": []
+}

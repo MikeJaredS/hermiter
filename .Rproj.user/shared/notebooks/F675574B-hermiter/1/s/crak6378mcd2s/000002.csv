@@ -1,0 +1,3 @@
+"0","observations <- rlogis(n=500)"
+"0","# hermite_est <- hermite_estimator(N=10, normalize=TRUE)"
+"0","hermite_est <- hermite_est %>% update_batch(observations)"

@@ -1,0 +1,25 @@
+{
+    "id": "C95B69AE",
+    "path": "C:/git_repos/hermiter/vignettes/hermiter.Rmd",
+    "project_path": "vignettes/hermiter.Rmd",
+    "type": "r_markdown",
+    "hash": "0",
+    "contents": "",
+    "dirty": false,
+    "created": 1597123166380.0,
+    "source_on_save": false,
+    "relative_order": 8,
+    "properties": {
+        "cursorPosition": "151,0",
+        "scrollLine": "129",
+        "last_setup_crc32": "F41427E8faa08c9a"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1597211968,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1597211968934,
+    "read_only": false,
+    "read_only_alternatives": []
+}

@@ -1,0 +1,26 @@
+{
+    "id": "A17ED116",
+    "path": "C:/git_repos/outp/hermiter/man/hermite_function.Rd",
+    "project_path": "man/hermite_function.Rd",
+    "type": "r_doc",
+    "hash": "4062220388",
+    "contents": "",
+    "dirty": false,
+    "created": 1596983203772.0,
+    "source_on_save": false,
+    "relative_order": 8,
+    "properties": {
+        "cursorPosition": "0,0",
+        "scrollLine": "0"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1596987809,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1596987809,
+    "read_only": true,
+    "read_only_alternatives": [
+        "R/RcppExports.R"
+    ]
+}

@@ -1,0 +1,99 @@
+# test <- rlogis(n = 50000)
+Rcpp::sourceCpp('C:\\Users\\Mike\\Desktop\\Stats code\\stats\\hermite_utils.cpp')
+
+Rcpp::sourceCpp('/Users/michaelstephanou/Desktop/R\ Code/Statistics\ Research/stats/hermite_utils.cpp')
+
+dnum=27
+test <- rberdev(n=10000,dnum = dnum)
+# test <- rexp(n=100000)
+r <- seq(-25,25,by = 0.001)
+# plan(multicore)
+
+gh1<- hermite_estimator(10,normalize = T) 
+
+microbenchmark::microbenchmark({
+  gh2<- gh1 %>% update_batch(test)},times=10)
+
+gh3<- hermite_estimator(10,normalize = T) 
+microbenchmark::microbenchmark({
+for (i in c(1:length(test))) {
+  gh3 <- gh3 %>% update_sequential(test[i])
+}
+},times=1)
+
+ghc <- combine(gh2,list(gh2,gh3))
+ghc <- combine_pair(gh2,gh3)
+
+gh3<- hermite_estimator(10,normalize = T) 
+microbenchmark::microbenchmark({
+  gh4<- gh3 %>% update_batch(test)},times=10)
+
+
+microbenchmark::microbenchmark({
+  ec<-ecdf(test)},times=10)
+
+microbenchmark::microbenchmark({
+  # ghcdfval <- rep(NA,length(r))
+  # for (j in c(1:length(r))) {
+  #   ghcdfval[j]<-gh1 %>% getCumProbEst(r[j])
+  # }
+  ghcdfval <-ghc %>% cum_prob(r)
+  
+},times=100)
+
+
+
+microbenchmark::microbenchmark({
+  
+  # ghcdfval <- rep(NA,length(r))
+  # for (j in c(1:length(r))) {
+  #   ghcdfval[j]<-ec(r[j])
+  # }
+  
+  ghcdfval <- ec(r)
+},times=100)
+
+plot(r,ghcdfval,ylim=c(-0.5,1.5),type="l")
+lines(r,pberdev(r,dnum = dnum),col="green")
+
+plot(r,ghcdfval,ylim=c(-0.5,1.5),type="l")
+lines(r,dlnorm(r),col="green")
+
+Rcpp::sourceCpp('C:\\Users\\Mike\\Desktop\\Stats code\\stats\\cpp_stats_utils.cpp')
+
+noml <- normalizationHermiteFunction(5)
+hvec <- HermiteFunctionCVec(N = 5,x = c(1,2),normalization =noml )
+v1 <- hermite_integral_val(N = 5,x = c(1,2),hermite_function_mat = hvec)
+v2 <- HermiteIntegralVal(N = 5,x = c(1,2),hvec)
+
+
+d <- hermite_integral_val(N=50,x=c(1,2,3),HermiteFunction(N=50,c(1,2,3)))-HermiteIntegralVal(N=50,x=c(1,2,3),HermiteFunction(N=50,c(1,2,3)))
+
+max(d)
+
+hvec <- HermiteFunction(N=80,c(1,2,3))
+
+microbenchmark::microbenchmark({HermiteIntegralVal(N=80,x=c(1,2,3,4,5),h_vec = hvec)},times=1000)
+
+microbenchmark::microbenchmark({hermite_integral_val(N=80,x=c(1,2,3,4,5),hvec)},times=10000)
+
+
+
+result_frame <- data.frame()
+for (i in c(1:1000)) {
+  # name_dist <- nberdev(dnum = i)
+  name_dist=i
+  print(name_dist)
+  test <- rberdev(n=10000,dnum = 3)
+  result_frame <- bind_rows(result_frame, data.frame(dist=rep(name_dist,length(test)), obs_val=test ))
+}
+
+microbenchmark::microbenchmark({
+vv <- result_frame %>% group_by(dist) %>% summarise(hermest = list(hermite_estimator(N=20,normalize = T) %>% update_batch(obs_val)))
+},times=1)
+
+
+vv <- vv %>% mutate(dist_even = dist %% 2 ==0)
+
+
+nn <- vv %>% group_by(dist_even) %>% summarise(herm_est = list(combine_hermite(hermest)))
