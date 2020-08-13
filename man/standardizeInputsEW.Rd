@@ -23,5 +23,5 @@ second element is the updated variance times n_obs. The third element is the
 updated, standardized value of x.
 }
 \description{
-Standardizes the observation x and updates the online moment inputs
+The online moments are updated via exponential weighting.
 }

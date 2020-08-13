@@ -154,6 +154,8 @@ NumericVector standardizeInputs(double x, double n_obs, double current_mean, dou
 }
 
 //' Standardizes the observation x and updates the online moment inputs
+//' 
+//' The online moments are updated via exponential weighting.
 //'
 //' @param x A numeric value.
 //' @param n_obs A numeric value. The number of observations.

@@ -17,5 +17,8 @@ An object of class hermite_estimator.
 }
 \description{
 This method can be applied in one-pass batch estimation settings. This 
-cannot be used with an exponentially weighted estimator.
+method cannot be used with an exponentially weighted estimator.
+}
+\examples{
+hermite_estimator <- update_batch(hermite_estimator(N=10, standardize=TRUE), x=c(1,2))
 }

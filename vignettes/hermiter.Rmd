@@ -15,52 +15,91 @@ knitr::opts_chunk$set(
 # set.seed(10)
 ```
 
-```{r setup}
+# Introduction
+
+Hermite series based distribution function and quantile function estimators are well suited to sequential estimation in both stationary and non-stationary settings. In addition, they are useful in efficient, one-pass batch estimation which is particularly relevant in the context of large data sets. Finally, the Hermite series based estimators are applicable in decentralized (distributed) settings in that estimators formed on subsets of the data can be consistently combined. The Hermite series based estimators have the distinct advantage of being able to estimate the full density function, distribution function and quantile function in an online manner.The theoretical and empirical properties of these estimators have been studied in,
+
+https://projecteuclid.org/euclid.ejs/1488531636, 
+
+https://link.springer.com/article/10.1007/s00184-020-00785-z.
+
+# Load Packages
+
+In order to utilize the hermiter package, the package must be loaded using the following command:
+
+```{r setup, message=FALSE, warning=FALSE}
 library(hermiter)
+```
+
+Other packages that are used in this vignette are loaded as follows:
+
+```{r message=FALSE, warning=FALSE}
 library(magrittr)
 library(ggplot2)
 library(dplyr)
 library(data.table)
 library(gifski)
 library(gganimate)
+library(DT)
 ```
-
-# Introduction
-
-Hermite series based distribution function and quantile function estimators have been studied in:
-
-https://projecteuclid.org/euclid.ejs/1488531636, 
-
-https://link.springer.com/article/10.1007/s00184-020-00785-z.
-
-They are well suited to sequential estimation in both stationary and non-stationary settings. In addition, they are useful in efficient, one-pass batch estimation which is particularly relevant in the context of massive data sets. Finally, the Hermite series based estimators are applicable in decentralized (distributed) settings in that estimators formed on subsets of the data can be consistently combined. The Hermite series based estimators have the distinct advantage of being able to estimate the full density function, distribution function and quantile function.
-
 
 # Construct Estimator
 
+A hermite_estimator S3 object is constructed as below. 
+
 ```{r}
-hermite_est <- hermite_estimator(N=10, normalize=TRUE)
+hermite_est <- hermite_estimator(N=10, standardize=TRUE)
 ```
 
-# Batch Estimation
+# Batch Estimator Updating
+
+Once the hermite_estimator object has been constructed, it can be updated with a batch of observations as below. The argument, N, adjusts the number of terms in the Hermite series based estimator and controls the trade-off between bias and variance. A lower N value implies a higher bias but lower variance and vice versa for higher values of N. The argument, standardize, controls whether or not to standardize the batch of observations before applying the estimator. Standarization usually yields better results and is recommended for most estimation settings. 
 
 ## Standard syntax
 
 ```{r}
 observations <- rlogis(n=1000)
-hermite_est <- hermite_estimator(N=10, normalize=TRUE)
+hermite_est <- hermite_estimator(N=10, standardize=TRUE)
 hermite_est <- update_batch(hermite_est,observations)
 ```
 
-## Functional piped syntax
+Functional piped syntax can also be used as below provided the magrittr package is installed.
+
+## Piped syntax
 
 ```{r}
 observations <- rlogis(n=1000)
-hermite_est <- hermite_estimator(N=10, normalize=TRUE)
+hermite_est <- hermite_estimator(N=10, standardize=TRUE)
 hermite_est <- hermite_est %>% update_batch(observations)
 ```
 
-# Calculate pdf, cdf and quantile function
+# Sequential Estimator Updating
+
+In the sequential setting, observations are revealed one at a time. A hermite_estimator object can be updated sequentially with a single new observation by utilizing the update_sequential method. Note that when updating the Hermite series based estimator sequentially, a running mean and running standard deviation is maintained in order to standardize the observations in an online manner. 
+
+## Standard syntax
+
+```{r}
+observations <- rlogis(n=1000)
+hermite_est <- hermite_estimator(N=10, standardize=TRUE)
+for (idx in c(1:length(observations))) {
+  hermite_est <- update_sequential(hermite_est,observations[idx])
+}
+```
+
+## Piped syntax
+
+```{r}
+observations <- rlogis(n=1000)
+hermite_est <- hermite_estimator(N=10, standardize=TRUE)
+for (idx in c(1:length(observations))) {
+  hermite_est <- hermite_est %>% update_sequential(observations[idx])
+}
+```
+
+# Estimate pdf, cdf and quantile function
+
+The central advantage of Hermite series based estimators is that they can be updated in a sequential/one-pass manner as above and subsequently probability densities and cumulative probabilities at arbitrary x values can be obtained, along with arbitrary quantiles. The hermite_estimator object only has to update a small and fixed number of coefficients and thus uses minimal memory. The syntax to calculate probability densities, cumulative probabilities and quantiles is presented below.
 
 ## Standard syntax
 
@@ -73,7 +112,7 @@ p <- seq(0.05,1,0.05)
 quantile_est <- quant(hermite_est,p)
 ```
 
-## Functional piped syntax
+## Piped syntax
 
 ```{r}
 x <- seq(-15,15,0.1)
@@ -93,78 +132,164 @@ df_pdf_cdf <- data.frame(x,pdf_est,cdf_est,actual_pdf,actual_cdf)
 
 actual_quantiles <- qlogis(p)
 df_quant <- data.frame(p,quantile_est,actual_quantiles)
-
-ggplot(df_pdf_cdf) + geom_line(aes(x=x, y=pdf_est), colour="blue") + geom_line(aes(x=x,y=actual_pdf))
-
-ggplot(df_pdf_cdf) + geom_line(aes(x=x, y=cdf_est), colour="blue") + geom_line(aes(x=x,y=actual_cdf))
-
-ggplot(df_quant) + geom_point(aes(x=actual_quantiles, y=quantile_est)) + geom_abline(slope=1,intercept = 0)
 ```
-
-# Applying on grouped data in a batch setting
-
-## Using dplyr
 
 ```{r}
-# Create Test Data
-test_data <- data.frame()
-for (i in c(1:5)) {
-  exponential_data <- rexp(n=1000)
-  logistic_data <- rlogis(n=1000)
-  logn_data <- rlnorm(n=1000)
-  test_data <- rbind(test_data,data.frame(dist_name=rep("exponential",length(exponential_data)),idx=i,observations=exponential_data))
-  test_data <- rbind(test_data,data.frame(dist_name=rep("logistic",length(logistic_data)),idx=i,observations=logistic_data))
-  test_data <- rbind(test_data,data.frame(dist_name=rep("lognormal",length(logn_data)),idx=i,observations=logn_data))
-}
-
-# Group observations by distribution and idx and create Hermite estimator
-estimates <- test_data %>% group_by(dist_name,idx) %>% summarise(hermest = list(hermite_estimator(N=10,normalize = TRUE) %>% update_batch(observations)))
-
-# Group observations by distribution and combine Hermite estimators
-combined_estimates <- estimates %>% group_by(dist_name) %>% summarise(herm_comb = list(combine_hermite(hermest)))
+ggplot(df_pdf_cdf,aes(x=x)) + geom_line(aes(y=pdf_est, colour="Estimated")) + geom_line(aes(y=actual_pdf, colour="Actual")) +
+  scale_colour_manual("", 
+                      breaks = c("Estimated", "Actual"),
+                      values = c("blue", "black")) + ylab("Probability Density")
 ```
+
+
+```{r}
+ggplot(df_pdf_cdf,aes(x=x)) + geom_line(aes(y=cdf_est, colour="Estimated")) + geom_line(aes(y=actual_cdf, colour="Actual")) +
+  scale_colour_manual("", 
+                      breaks = c("Estimated", "Actual"),
+                      values = c("blue", "black")) + ylab("Cumulative Probability")
+```
+
+
+```{r}
+ggplot(df_quant,aes(x=actual_quantiles)) + geom_point(aes(y=quantile_est), color="blue") + geom_abline(slope=1,intercept = 0) +xlab("Theoretical Quantiles") + ylab("Estimated Quantiles")
+```
+
+
+# Applying to grouped data (batch setting)
+
+A useful application of the hermite_estimator class is to obtain pdf, cdf and quantile function estimates on groups of data. The fact that the memory usage of hermite_estimator objects is small and fixed irrespective of group size and that batch estimation is fast, implies that it is practical to perform estimation on a very large number of groups. We illustrate this in the example below.
 
 ## Using data.table
 
+We first present the example using the data.table package.
+
 ```{r}
-# Create Test Data
+# Prepare Test Data
 test_data <- data.frame()
 for (i in c(1:5)) {
   exponential_data <- rexp(n=1000)
   logistic_data <- rlogis(n=1000)
   logn_data <- rlnorm(n=1000)
-  test_data <- rbind(test_data,data.frame(dist_name=rep("exponential",length(exponential_data)),idx=i,observations=exponential_data))
-  test_data <- rbind(test_data,data.frame(dist_name=rep("logistic",length(logistic_data)),idx=i,observations=logistic_data))
-  test_data <- rbind(test_data,data.frame(dist_name=rep("lognormal",length(logn_data)),idx=i,observations=logn_data))
+  test_data <- rbind(test_data,data.frame(dist_name=rep("exp",length(exponential_data)),idx=i,observations=exponential_data))
+  test_data <- rbind(test_data,data.frame(dist_name=rep("logis",length(logistic_data)),idx=i,observations=logistic_data))
+  test_data <- rbind(test_data,data.frame(dist_name=rep("lnorm",length(logn_data)),idx=i,observations=logn_data))
 }
-
-# Group observations by distribution and idx and create Hermite estimator
-estimates <- test_data %>% group_by(dist_name,idx) %>% summarise(hermest = list(hermite_estimator(N=10,normalize = TRUE) %>% update_batch(observations)))
-
-# Group observations by distribution and combine Hermite estimators
-combined_estimates <- estimates %>% group_by(dist_name) %>% summarise(herm_comb = list(combine_hermite(hermest)))
+setDT(test_data)
 ```
 
-# Applying to sequential data
+```{r}
+# Group observations by distribution and idx and create Hermite estimator
+estimates <- test_data[,.(herm_est = list(hermite_estimator(N=10,standardize = TRUE) %>% update_batch(observations))),by=.(dist_name,idx)]
+estimates
+```
+
+Hermite series based estimators can also be consistently combined. In particular, when standardize = FALSE, the pdf, cdf and quantile value results obtained from combining distinct hermite_estimators updated on subsets of a data set are exactly equal to those obtaind by constructing a single hermite_estimator and updating on the full data set (corresponding to the concatenation of the aforementioned subsets). When standardize = TRUE, the equivalence is no longer exact, but is accurate enough to be practically useful. Combining hermite_estimators is illustrated below.
 
 ```{r}
+# Group observations by distribution and combine Hermite estimators
+combined_estimates <- estimates[,.(herm_comb = list(combine_hermite(herm_est))),by=.(dist_name)]
+combined_estimates
+```
+
+```{r}
+# Estimate probability densities, cumulative probabilities and quantiles
+dens_vals <- combined_estimates[,.(dens_est = list(dens(herm_comb[[1]],c(0.5,1,1.5,2)))),by=.(dist_name)]
+cum_prob_vals <- combined_estimates[,.(cum_prob_est = list(cum_prob(herm_comb[[1]],c(0.5,1,1.5,2)))),by=.(dist_name)]
+quantile_vals <- combined_estimates[,.(quantile_est = list(quant(herm_comb[[1]],c(0.25,0.5,0.75)))),by=.(dist_name)]
+```
+
+## Using dplyr
+
+The same illustrative example is presented using the dplyr package instead of the data.table package below.
+
+```{r}
+# Prepare Test Data
+test_data <- data.frame()
+for (i in c(1:5)) {
+  exponential_data <- rexp(n=1000)
+  logistic_data <- rlogis(n=1000)
+  logn_data <- rlnorm(n=1000)
+  test_data <- rbind(test_data,data.frame(dist_name=rep("exp",length(exponential_data)),idx=i,observations=exponential_data))
+  test_data <- rbind(test_data,data.frame(dist_name=rep("logis",length(logistic_data)),idx=i,observations=logistic_data))
+  test_data <- rbind(test_data,data.frame(dist_name=rep("lnorm",length(logn_data)),idx=i,observations=logn_data))
+}
+```
+
+```{r}
+# Group observations by distribution and idx and create Hermite estimator
+estimates <- test_data %>% group_by(dist_name,idx) %>% summarise(herm_est = list(hermite_estimator(N=10,standardize = TRUE) %>% update_batch(observations)))
+estimates
+```
+
+
+```{r}
+# Group observations by distribution and combine Hermite estimators
+combined_estimates <- estimates %>% group_by(dist_name) %>% summarise(herm_comb = list(combine_hermite(herm_est)))
+combined_estimates
+```
+
+```{r}
+# Estimate probability densities, cumulative probabilities and quantiles
+dens_vals <- combined_estimates %>%
+  rowwise() %>% mutate(dens_est = list(dens(herm_comb,c(0.5,1,1.5,2))))
+cum_prob_vals <- combined_estimates %>%
+  rowwise() %>% mutate(cum_prob_est = list(cum_prob(herm_comb,c(0.5,1,1.5,2))))
+quantile_vals <- combined_estimates %>%
+  rowwise() %>% mutate(quantile_est = list(quant(herm_comb,c(0.25,0.5,0.75))))
+```
+
+## Checking the results (calculate mean absolute error)
+
+```{r}
+# Compute Mean Absolute Error
+dens_vals <- dens_vals %>%
+  rowwise() %>% mutate(dens_actual = list(do.call(paste0("d",dist_name),list(c(0.5,1,1.5,2))))) %>% mutate(mean_abs_error_density = mean(abs(dens_est-dens_actual)))
+cum_prob_vals <- cum_prob_vals %>%
+  rowwise() %>% mutate(cum_prob_actual = list(do.call(paste0("p",dist_name),list(c(0.5,1,1.5,2)))))%>% mutate(mean_abs_error_cum_prob = mean(abs(cum_prob_est-cum_prob_actual)))
+quantile_vals <- quantile_vals %>%
+  rowwise() %>% mutate(quantile_actual= list(do.call(paste0("q",dist_name),list(c(0.25,0.5,0.75)))))%>% mutate(mean_abs_error_quantiles = mean(abs(quantile_est-quantile_actual)))
+mean_abs_error_summary <- data.frame(dist_name=dens_vals$dist_name, mean_abs_error_density=dens_vals$mean_abs_error_density, mean_abs_error_cum_prob=cum_prob_vals$mean_abs_error_cum_prob,mean_abs_error_quantiles=quantile_vals$mean_abs_error_quantiles)
+```
+
+```{r}
+DT::datatable(mean_abs_error_summary) %>% formatRound(columns =c("mean_abs_error_density","mean_abs_error_cum_prob","mean_abs_error_quantiles"),digits = 3)
+```
+
+# Applying to nonstationary data (sequential setting)
+
+Another useful application of the hermite_estimator class is to obtain pdf, cdf and quantile function estimates on streaming data. The speed of estimation allows the pdf, cdf and quantile functions to be estimated in real time. In addition, by applying an exponentially weighted form of the Hermite series based estimator, nonstationary streams can be handled. The estimator will adapt to the new distribution and "forget" the old distribution as illustrated in the example below. In order to use the exponentially weighted form of the hermite_estimator, the exp_weight_lambda argument must be set to a non-NA value. Typical values for this parameter are 0.01, 0.05 and 0.1. The lower the exponential weighting parameter, the slower the estimator adapts and vice versa for higher values of the parameter. However, variance increases with higher values of exp_weight_lambda, so there is a trade-off to bear in mind.
+
+```{r}
+# Prepare Test Data
 num_obs <-2000
-test <- rlnorm(num_obs)
+test <- rchisq(num_obs,5)
 test <- c(test,rlogis(num_obs))
 test <- c(test,rnorm(num_obs))
-h_est <- hermite_estimator(N=20,normalize = T,exp_weight_lambda = 0.0075)
-count <- 1
-x <- seq(-10,10,by=0.1)
-actual_cdf_lognorm <- plnorm(x)
-actual_cdf_logis <- plogis(x)
-actual_cdf_norm <- pnorm(x)
-actual_pdf_lognorm <- dlnorm(x)
+```
+
+```{r}
+# Calculate theoretical pdf, cdf and quantile values for comparison
+x <- seq(-15,15,by=0.1)
+actual_pdf_lognorm <- dchisq(x,5)
 actual_pdf_logis <- dlogis(x)
 actual_pdf_norm <- dnorm(x)
+actual_cdf_lognorm <- pchisq(x,5)
+actual_cdf_logis <- plogis(x)
+actual_cdf_norm <- pnorm(x)
 p <- seq(0.05,0.95,by=0.05)
-actual_quantiles_lognorm <- qlnorm(p)
+actual_quantiles_lognorm <- qchisq(p,5)
 actual_quantiles_logis <- qlogis(p)
 actual_quantiles_norm <- qnorm(p)
+```
+
+```{r}
+# Construct Hermite Estimator 
+h_est <- hermite_estimator(N=20,standardize = T,exp_weight_lambda = 0.005)
+```
+
+```{r}
+# Loop through test data and update h_est to simulate observations arriving sequentially
+count <- 1
 res <- data.frame()
 res_q <- data.frame()
 for (idx in c(1:length(test))) {
@@ -199,27 +324,30 @@ res_q <- res_q %>% mutate(idx_vals=idx_vals*100)
 ```
 
 ```{r eval=FALSE}
-p <- ggplot(res) + geom_line(aes(x=x,y=pdf_est_vals), colour="green") + geom_line(aes(x=x,y=actual_pdf_vals)) +transition_states(idx_vals,
-                                                                                                                                 transition_length = 2,
-                                                                                                                                 state_length = 1)
+# Visualize Results for PDF
+p <- ggplot(res,aes(x=x)) + geom_line(aes(y=pdf_est_vals, colour="Estimated")) + geom_line(aes(y=actual_pdf_vals, colour="Actual")) +
+  scale_colour_manual("", 
+                      breaks = c("Estimated", "Actual"),
+                      values = c("blue", "black")) + ylab("Probability Density") +transition_states(idx_vals,transition_length = 2,state_length = 1) + ggtitle('Observation index {closest_state}')
 anim_save("pdf.gif",p)
 ```
 
 ![](pdf.gif)
 
 ```{r eval=FALSE}
-p <- ggplot(res) + geom_line(aes(x=x,y=cdf_est_vals), colour="green") + geom_line(aes(x=x,y=actual_cdf_vals)) +transition_states(idx_vals,
-                                                                  transition_length = 2,
-                                                                  state_length = 1)+ ggtitle('Observation index {closest_state}')
+# Visualize Results for CDF
+p <- ggplot(res,aes(x=x)) + geom_line(aes(y=cdf_est_vals, colour="Estimated")) + geom_line(aes(y=actual_cdf_vals, colour="Actual")) +
+  scale_colour_manual("", 
+                      breaks = c("Estimated", "Actual"),
+                      values = c("blue", "black")) + ylab("Cumulative Probability") +transition_states(idx_vals, transition_length = 2,state_length = 1)+ ggtitle('Observation index {closest_state}')
 anim_save("cdf.gif", p)
 ```
 
 ![](cdf.gif)
 
 ```{r eval=FALSE}
-p <- ggplot(res_q) + geom_point(aes(x=actual_quantile_vals,y=quantile_est_vals)) +geom_abline(slope=1,intercept = 0) +transition_states(idx_vals,
-                                                                                                                 transition_length = 2,
-                                                                                                                 state_length = 1)
+# Visualize Results for Quantiles
+p <- ggplot(res_q,aes(x=actual_quantile_vals)) + geom_point(aes(y=quantile_est_vals), color="blue") + geom_abline(slope=1,intercept = 0) +xlab("Theoretical Quantiles") + ylab("Estimated Quantiles") +transition_states(idx_vals,transition_length = 2, state_length = 1)+ ggtitle('Observation index {closest_state}')
 anim_save("quant.gif",p)
 ```
 
@@ -227,9 +355,9 @@ anim_save("quant.gif",p)
 
 # Citing this package
 
-Use the following code to auto generate a BibTex entry.
+Use the following code to automatically generate an appropriate BibTex entry.
 
-```{r}
+```{r eval=FALSE}
 citation("hermiter")
 ```
 

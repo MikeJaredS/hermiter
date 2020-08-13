@@ -4,13 +4,13 @@
 \alias{hermite_estimator}
 \title{A class to sequentially estimate pdfs, cdfs and quantile functions}
 \usage{
-hermite_estimator(N = 10, normalize = FALSE, exp_weight_lambda = NA)
+hermite_estimator(N = 10, standardize = FALSE, exp_weight_lambda = NA)
 }
 \arguments{
 \item{N}{An integer between 0 and 100. The Hermite series based estimator 
 is truncated at N+1 terms.}
 
-\item{normalize}{A boolean value. Determines whether the observations are 
+\item{standardize}{A boolean value. Determines whether the observations are 
 standardized, a transformation which often improves performance.}
 
 \item{exp_weight_lambda}{A numerical value between 0 and 1. This parameter
@@ -38,5 +38,5 @@ is based on the research presented in:
 \url{https://link.springer.com/article/10.1007/s00184-020-00785-z}
 }
 \examples{
-hermite_est <- hermite_estimator(N=10, normalize=TRUE)
+hermite_est <- hermite_estimator(N=10, standardize=TRUE)
 }

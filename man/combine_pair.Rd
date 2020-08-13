@@ -21,7 +21,7 @@ This method allows a pair of Hermite based estimators of class
 hermite_estimator to be consistently combined.
 }
 \details{
-Note that the N and normalize arguments must be the same for the two 
+Note that the N and standardize arguments must be the same for the two 
 estimators in order to combine them. In addition, note that exponentially
 weighted estimators cannot be combined.
 }

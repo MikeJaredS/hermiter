@@ -16,7 +16,7 @@
 #'
 #' @param N An integer between 0 and 100. The Hermite series based estimator 
 #' is truncated at N+1 terms.
-#' @param normalize A boolean value. Determines whether the observations are 
+#' @param standardize A boolean value. Determines whether the observations are 
 #' standardized, a transformation which often improves performance.
 #' @param exp_weight_lambda A numerical value between 0 and 1. This parameter
 #' controls the exponential weighting of the Hermite series based estimator. 
@@ -25,19 +25,21 @@
 #' density function, distribution function and quantile function estimation.
 #' @export
 #' @examples 
-#' hermite_est <- hermite_estimator(N=10, normalize=TRUE)
-hermite_estimator <- function(N=10, normalize=FALSE,exp_weight_lambda=NA)
+#' hermite_est <- hermite_estimator(N=10, standardize=TRUE)
+hermite_estimator <- function(N=10, standardize=FALSE,exp_weight_lambda=NA)
 {
+  if (!is.numeric(N)) stop("N must be numeric.")
   if (N<0 | N>100) stop("N must be greater than or equal to 0 and smaller than or equal to 100.")
-  if (!(normalize == TRUE | normalize == FALSE)) stop("normalize can only take on values TRUE or FALSE.")
+  if (!(standardize == TRUE | standardize == FALSE)) stop("standardize can only take on values TRUE or FALSE.")
   if (!is.na(exp_weight_lambda)){
+    if (!is.numeric(exp_weight_lambda)) stop("exp_weight_lambda must be numeric.")
     if (exp_weight_lambda <=0 | exp_weight_lambda >1) stop("exp_weight_lambda must be a real number greater than 0 and less than or equal to 1.")
   }
   this <- list(
     N_param = N,
     coeff_vec=rep(0,N+1),
     num_obs=0,
-    normalize_obs = normalize,
+    standardize_obs = standardize,
     running_mean=0,
     running_variance=0,
     exp_weight=exp_weight_lambda,
@@ -53,9 +55,14 @@ hermite_estimator <- function(N=10, normalize=FALSE,exp_weight_lambda=NA)
 #' This method allows a pair of Hermite based estimators of class 
 #' hermite_estimator to be consistently combined. 
 #' 
-#' Note that the N and normalize arguments must be the same for the two 
+#' Note that the N and standardize arguments must be the same for the two 
 #' estimators in order to combine them. In addition, note that exponentially
-#' weighted estimators cannot be combined.
+#' weighted estimators cannot be combined. If the Hermite estimators are not
+#' standardized, the combined estimator will be exactly equivalent to 
+#' constructing a single estimator on the data set formed by combining the 
+#' data sets used to update the respective hermite_estimator inputs. 
+#' If the input Hermite estimators are standardized however, then the 
+#' equivalence will be approximate.
 #' 
 #' @param this A hermite_estimator object. The first Hermite series based 
 #' estimator.
@@ -71,10 +78,11 @@ combine_pair <- function(this, hermite_estimator_other)
 #' @export
 combine_pair.hermite_estimator <- function(this, hermite_estimator_other)
 {
+  if (!is(hermite_estimator_other,"hermite_estimator")) stop("combine_pair can only be applied to hermite_estimator objects.")
   if (this$N_param != hermite_estimator_other$N_param) stop("N must be equal to combine estimators.")
-  if (this$normalize_obs != hermite_estimator_other$normalize_obs) stop("Normalization setting must be the same to combine estimators.")
+  if (this$standardize_obs != hermite_estimator_other$standardize_obs) stop("Standardization setting must be the same to combine estimators.")
   if (!is.na(this$exp_weight) | !is.na(hermite_estimator_other$exp_weight)) stop("Cannot combine exponentially weighted estimators.")
-  hermite_estimator_combined <- hermite_estimator(N=this$N_param,normalize=this$normalize_obs)
+  hermite_estimator_combined <- hermite_estimator(N=this$N_param,standardize=this$standardize_obs)
   hermite_estimator_combined$coeff_vec <- (this$coeff_vec * this$num_obs + hermite_estimator_other$coeff_vec * hermite_estimator_other$num_obs)/(this$num_obs+hermite_estimator_other$num_obs)
   hermite_estimator_combined$num_obs <- this$num_obs+hermite_estimator_other$num_obs
   hermite_estimator_combined$running_mean <- (this$running_mean * this$num_obs + hermite_estimator_other$running_mean * hermite_estimator_other$num_obs)/(this$num_obs+hermite_estimator_other$num_obs)
@@ -87,9 +95,14 @@ combine_pair.hermite_estimator <- function(this, hermite_estimator_other)
 #' This method allows a list of Hermite based estimators of class 
 #' hermite_estimator to be consistently combined. 
 #' 
-#' Note that the N and normalize arguments must be the same for all estimators 
+#' Note that the N and standardize arguments must be the same for all estimators 
 #' in order to combine them. In addition, note that exponentially weighted 
-#' estimators cannot be combined.
+#' estimators cannot be combined. If the Hermite estimators are not
+#' standardized, the combined estimator will be exactly equivalent to 
+#' constructing a single estimator on the data set formed by combining the 
+#' data sets used to update the respective hermite_estimator inputs. 
+#' If the input Hermite estimators are standardized however, then the 
+#' equivalence will be approximate.
 #' 
 #' @param hermite_estimators A list of hermite_estimator objects. 
 #' @return An object of class hermite_estimator.
@@ -121,6 +134,8 @@ combine_hermite.list <- function(hermite_estimators)
 #' estimator.
 #' @return An object of class hermite_estimator.
 #' @export
+#' @examples 
+#' hermite_estimator <- update_sequential(hermite_estimator(N=10, standardize=TRUE), x=2)
 update_sequential <- function(this, x)
 {
   UseMethod("update_sequential",this)
@@ -129,9 +144,10 @@ update_sequential <- function(this, x)
 #' @export
 update_sequential.hermite_estimator <- function(this, x)
 {
+  if (!is.numeric(x)) stop("x must be numeric.")
   if (length(x)!=1) stop("The sequential method is only applicable to one observation at a time.")
   this$num_obs <- this$num_obs +1
-  if (this$normalize_obs==TRUE){
+  if (this$standardize_obs==TRUE){
     if (is.na(this$exp_weight)){
       processed_vec <- standardizeInputs(x,this$num_obs,this$running_mean,this$running_variance)
       this$running_mean <- processed_vec[1]
@@ -159,13 +175,15 @@ update_sequential.hermite_estimator <- function(this, x)
 #' Updates the Hermite series based estimator with a batch of data 
 #' 
 #' This method can be applied in one-pass batch estimation settings. This 
-#' cannot be used with an exponentially weighted estimator.
+#' method cannot be used with an exponentially weighted estimator.
 #' 
 #' @param this A hermite_estimator object.
 #' @param x A numeric vector. A vector of observations to be incorporated 
 #' into the estimator.
 #' @return An object of class hermite_estimator.
 #' @export
+#' @examples 
+#' hermite_estimator <- update_batch(hermite_estimator(N=10, standardize=TRUE), x=c(1,2))
 update_batch<- function(this, x)
 {
   UseMethod("update_batch",this)
@@ -174,9 +192,10 @@ update_batch<- function(this, x)
 #' @export
 update_batch.hermite_estimator <- function(this, x)
 {
+  if (!is.numeric(x)) stop("x must be numeric.")
   if (!is.na(this$exp_weight)) stop("The Hermite estimator cannot be exponentially weighted.")
   this$num_obs <- this$num_obs + length(x)
-  if (this$normalize_obs==TRUE){
+  if (this$standardize_obs==TRUE){
     this$running_mean <- (this$running_mean * (this$num_obs-length(x)) + length(x)*mean(x))/this$num_obs
     this$running_variance <- (this$running_variance * (this$num_obs-length(x)) + length(x)*stats::var(x)*(length(x)-1))/this$num_obs
     x <- (x - this$running_mean)/sqrt(this$running_variance/(this$num_obs-1))
@@ -202,6 +221,7 @@ standardize_value <- function(this, x)
 
 #' @export
 standardize_value.hermite_estimator <- function(this,x){
+  if (!is.numeric(x)) stop("x must be numeric.")
   if (is.na(this$exp_weight)){
     running_std <- sqrt(this$running_variance/(this$num_obs-1))
   } else {
@@ -232,10 +252,11 @@ cum_prob <- function(this, x, clipped)
 #' @export
 cum_prob.hermite_estimator <- function(this, x, clipped=FALSE)
 {
+  if (!is.numeric(x)) stop("x must be numeric.")
   if (this$num_obs < 2){
     return(NA)
   }
-  if (this$normalize_obs==TRUE){
+  if (this$standardize_obs==TRUE){
     x <- standardize_value(this,x)
   }
   h_k <- hermite_function(this$N_param,x,this$normalization_hermite_vec)
@@ -244,7 +265,7 @@ cum_prob.hermite_estimator <- function(this, x, clipped=FALSE)
   if (clipped==TRUE){
     cdf_val <- pmin(pmax(cdf_val,1e-8),1)
   }
-  return(cdf_val)
+  return(as.vector(cdf_val))
 }
 
 #' Estimates the probability density for a vector of x values
@@ -269,11 +290,12 @@ dens <- function(this, x, clipped)
 #' @export
 dens.hermite_estimator <- function(this, x, clipped=FALSE)
 {
+  if (!is.numeric(x)) stop("x must be numeric.")
   if (this$num_obs < 2){
     return(NA)
   }
   factor <- 1
-  if (this$normalize_obs==TRUE){
+  if (this$standardize_obs==TRUE){
     if (is.na(this$exp_weight)){
       running_std <- sqrt(this$running_variance/(this$num_obs-1))
     } else {
@@ -287,7 +309,7 @@ dens.hermite_estimator <- function(this, x, clipped=FALSE)
   if (clipped==TRUE){
     pdf_val <- pmax(pdf_val,1e-8)
   }
-  return(pdf_val)
+  return(as.vector(pdf_val))
 }
 
 #' Estimates the cumulative probability for quantile estimation
@@ -314,6 +336,7 @@ cum_prob_quantile_helper <- function(this, x)
 #' @export
 cum_prob_quantile_helper.hermite_estimator <- function(this, x)
 {
+  if (!is.numeric(x)) stop("x must be numeric.")
   h_k <- hermite_function(this$N_param,x,this$normalization_hermite_vec)
   integrals_hermite <- hermite_integral_val_quantile_adap(this$N_param,x,h_k)
   cdf_val<- 1-as.vector(as.vector(this$coeff_vec)%*%integrals_hermite)
@@ -335,10 +358,10 @@ quantile_helper <- function(this, p)
   UseMethod("quantile_helper",this)
 }
 
-
 #' @export
 quantile_helper.hermite_estimator <- function(this, p)
 {
+  if (!is.numeric(p)) stop("p must be numeric.")
   if (p < 0 | p > 1){
     return(NA)
   }
@@ -372,7 +395,8 @@ quant <- function(this, p)
 #' @export
 quant.hermite_estimator <- function(this, p)
 {
-  if (this$normalize_obs != TRUE) stop("Quantile estimation requires normalization to be true.")
+  if (!is.numeric(p)) stop("p must be numeric.")
+  if (this$standardize_obs != TRUE) stop("Quantile estimation requires standardization to be true.")
   if (length(p)<1) stop("At least one quantile must be specified.")
   if (this$num_obs < 2){
     return(NA)

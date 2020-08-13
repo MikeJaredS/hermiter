@@ -18,3 +18,6 @@ An object of class hermite_estimator.
 \description{
 This method can be applied in sequential estimation settings.
 }
+\examples{
+hermite_estimator <- update_sequential(hermite_estimator(N=10, standardize=TRUE), x=2)
+}
