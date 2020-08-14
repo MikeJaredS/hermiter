@@ -3,7 +3,9 @@ Type: Package
 Title: Efficient Sequential and Batch estimation of PDFs, CDFs and Quantiles
 Version: 0.1.0
 Date: 2020-08-08
-Author: Michael Stephanou
+Authors@R: c(
+  person("Michael","Stephanou",           role=c("aut","cre"), email="michael.stephanou@gmail.com"),
+  person("Melvin","Varughese",          role="ctb"))
 Maintainer: Michael Stephanou <michael.stephanou@gmail.com>
 Description: This package facilitates estimation of the full probability density function, cumulative distribution function and quantile function using Hermite series based estimators. These estimators are particularly useful in the sequential setting (both stationary and nonstationary) and one-pass batch estimation setting for large data sets. 
 License: MIT + file LICENSE
