@@ -252,7 +252,7 @@ mean_abs_error_summary <- data.frame(dist_name=dens_vals$dist_name, mean_abs_err
 ```
 
 ```{r}
-DT::datatable(mean_abs_error_summary) %>% formatRound(columns =c("mean_abs_error_density","mean_abs_error_cum_prob","mean_abs_error_quantiles"),digits = 3)
+datatable(mean_abs_error_summary) %>% formatRound(columns =c("mean_abs_error_density","mean_abs_error_cum_prob","mean_abs_error_quantiles"),digits = 3)
 ```
 
 # Applying to nonstationary data (sequential setting)

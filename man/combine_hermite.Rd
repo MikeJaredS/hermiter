@@ -19,5 +19,10 @@ hermite_estimator to be consistently combined.
 \details{
 Note that the N and standardize arguments must be the same for all estimators 
 in order to combine them. In addition, note that exponentially weighted 
-estimators cannot be combined.
+estimators cannot be combined. If the Hermite estimators are not
+standardized, the combined estimator will be exactly equivalent to 
+constructing a single estimator on the data set formed by combining the 
+data sets used to update the respective hermite_estimator inputs. 
+If the input Hermite estimators are standardized however, then the 
+equivalence will be approximate.
 }

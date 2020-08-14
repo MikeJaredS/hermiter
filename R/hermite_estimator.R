@@ -70,6 +70,12 @@ hermite_estimator <- function(N=10, standardize=FALSE,exp_weight_lambda=NA)
 #' series based estimator.  
 #' @return An object of class hermite_estimator.
 #' @export
+#' @examples 
+#' hermite_est_1 <- hermite_estimator(N=10, standardize=FALSE)
+#' hermite_est_1 <- update_batch(hermite_est_1, rnorm(30))
+#' hermite_est_2 <- hermite_estimator(N=10, standardize=FALSE)
+#' hermite_est_2 <- update_batch(hermite_est_2, rnorm(30))
+#' hermite_combined <- combine_pair(hermite_est_1,hermite_est_2)
 combine_pair <- function(this, hermite_estimator_other)
 {
   UseMethod("combine_pair",this)
@@ -78,7 +84,7 @@ combine_pair <- function(this, hermite_estimator_other)
 #' @export
 combine_pair.hermite_estimator <- function(this, hermite_estimator_other)
 {
-  if (!is(hermite_estimator_other,"hermite_estimator")) stop("combine_pair can only be applied to hermite_estimator objects.")
+  if (!methods::is(hermite_estimator_other,"hermite_estimator")) stop("combine_pair can only be applied to hermite_estimator objects.")
   if (this$N_param != hermite_estimator_other$N_param) stop("N must be equal to combine estimators.")
   if (this$standardize_obs != hermite_estimator_other$standardize_obs) stop("Standardization setting must be the same to combine estimators.")
   if (!is.na(this$exp_weight) | !is.na(hermite_estimator_other$exp_weight)) stop("Cannot combine exponentially weighted estimators.")
@@ -366,7 +372,7 @@ quantile_helper.hermite_estimator <- function(this, p)
     return(NA)
   }
   est = tryCatch({
-    uniroot(f = function(x){cum_prob_quantile_helper(this,x)-p},interval = c(-100,100))$root
+    stats::uniroot(f = function(x){cum_prob_quantile_helper(this,x)-p},interval = c(-100,100))$root
   }, warning = function(w) {
   }, error = function(e) {
     NA

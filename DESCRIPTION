@@ -19,5 +19,8 @@ Suggests:
     rmarkdown,
     dplyr,
     data.table,
-    ggplot2
+    ggplot2,
+    DT,
+    gifski,
+    gganimate
 VignetteBuilder: knitr
