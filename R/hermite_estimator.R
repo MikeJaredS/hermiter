@@ -113,6 +113,12 @@ combine_pair.hermite_estimator <- function(this, hermite_estimator_other)
 #' @param hermite_estimators A list of hermite_estimator objects. 
 #' @return An object of class hermite_estimator.
 #' @export
+#' @examples 
+#' hermite_est_1 <- hermite_estimator(N=10, standardize=FALSE)
+#' hermite_est_1 <- update_batch(hermite_est_1, rnorm(30))
+#' hermite_est_2 <- hermite_estimator(N=10, standardize=FALSE)
+#' hermite_est_2 <- update_batch(hermite_est_2, rnorm(30))
+#' hermite_combined <- combine_hermite(list(hermite_est_1,hermite_est_2))
 combine_hermite <- function(hermite_estimators)
 {
   UseMethod("combine_hermite",hermite_estimators)
@@ -250,6 +256,10 @@ standardize_value.hermite_estimator <- function(this,x){
 #' probabilities are clipped to lie within the range [0,1].
 #' @return A numeric vector of cumulative probability values.
 #' @export
+#' @examples
+#' hermite_est <- hermite_estimator(N=10, standardize=TRUE)
+#' hermite_est <- update_batch(hermite_est, rnorm(30))
+#' cdf_est <- cum_prob(hermite_est,c(0,0.5,1))
 cum_prob <- function(this, x, clipped)
 {
   UseMethod("cum_prob",this)
@@ -288,6 +298,10 @@ cum_prob.hermite_estimator <- function(this, x, clipped=FALSE)
 #' probability densities are clipped to be bigger than zero.
 #' @return A numeric vector of probability density values.
 #' @export
+#' @examples
+#' hermite_est <- hermite_estimator(N=10, standardize=TRUE)
+#' hermite_est <- update_batch(hermite_est, rnorm(30))
+#' pdf_est <- dens(hermite_est,c(0,0.5,1))
 dens <- function(this, x, clipped)
 {
   UseMethod("dens",this)
@@ -393,6 +407,10 @@ quantile_helper.hermite_estimator <- function(this, p)
 #' @return A numeric vector. The vector of quantile values associated with the
 #' probabilites p.
 #' @export
+#' @examples
+#' hermite_est <- hermite_estimator(N=10, standardize=TRUE)
+#' hermite_est <- update_batch(hermite_est, rnorm(30))
+#' quant_est <- quant(hermite_est,c(0.25,0.5,0.75))
 quant <- function(this, p)
 {
   UseMethod("quant",this)

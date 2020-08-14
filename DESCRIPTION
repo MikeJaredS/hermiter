@@ -1,7 +1,7 @@
 Package: hermiter
 Type: Package
 Title: Efficient Sequential and Batch estimation of PDFs, CDFs and Quantiles
-Version: 0.1
+Version: 0.1.0
 Date: 2020-08-08
 Author: Michael Stephanou
 Maintainer: Michael Stephanou <michael.stephanou@gmail.com>
