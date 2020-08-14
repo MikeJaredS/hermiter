@@ -84,7 +84,7 @@ combine_pair <- function(this, hermite_estimator_other)
 #' @export
 combine_pair.hermite_estimator <- function(this, hermite_estimator_other)
 {
-  if (!methods::is(hermite_estimator_other,"hermite_estimator")) stop("combine_pair can only be applied to hermite_estimator objects.")
+  if (!is(hermite_estimator_other,"hermite_estimator")) stop("combine_pair can only be applied to hermite_estimator objects.")
   if (this$N_param != hermite_estimator_other$N_param) stop("N must be equal to combine estimators.")
   if (this$standardize_obs != hermite_estimator_other$standardize_obs) stop("Standardization setting must be the same to combine estimators.")
   if (!is.na(this$exp_weight) | !is.na(hermite_estimator_other$exp_weight)) stop("Cannot combine exponentially weighted estimators.")

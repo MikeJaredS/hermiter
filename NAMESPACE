@@ -1,5 +1,6 @@
 useDynLib("hermiter", .registration=TRUE)
 importFrom(Rcpp, evalCpp)
+importFrom("methods", "is")
 S3method(combine_hermite,list)
 S3method(combine_pair,hermite_estimator)
 S3method(cum_prob,hermite_estimator)

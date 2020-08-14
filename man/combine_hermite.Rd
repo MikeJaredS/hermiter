@@ -26,3 +26,10 @@ data sets used to update the respective hermite_estimator inputs.
 If the input Hermite estimators are standardized however, then the 
 equivalence will be approximate.
 }
+\examples{
+hermite_est_1 <- hermite_estimator(N=10, standardize=FALSE)
+hermite_est_1 <- update_batch(hermite_est_1, rnorm(30))
+hermite_est_2 <- hermite_estimator(N=10, standardize=FALSE)
+hermite_est_2 <- update_batch(hermite_est_2, rnorm(30))
+hermite_combined <- combine_hermite(list(hermite_est_1,hermite_est_2))
+}

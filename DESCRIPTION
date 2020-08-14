@@ -7,7 +7,9 @@ Author: Michael Stephanou
 Maintainer: Michael Stephanou <michael.stephanou@gmail.com>
 Description: This package facilitates estimation of the full probability density function, cumulative distribution function and quantile function using Hermite series based estimators. These estimators are particularly useful in the sequential setting (both stationary and nonstationary) and one-pass batch estimation setting for large data sets. 
 License: MIT + file LICENSE
-Imports: Rcpp (>= 1.0.5)
+Imports: 
+  Rcpp (>= 1.0.5),
+  methods
 LinkingTo: 
   Rcpp,
   BH

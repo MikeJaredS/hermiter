@@ -18,3 +18,8 @@ probabilites p.
 \description{
 Estimates the quantiles at a vector of probability values
 }
+\examples{
+hermite_est <- hermite_estimator(N=10, standardize=TRUE)
+hermite_est <- update_batch(hermite_est, rnorm(30))
+quant_est <- quant(hermite_est,c(0.25,0.5,0.75))
+}
