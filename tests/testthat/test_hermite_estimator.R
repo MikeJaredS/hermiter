@@ -144,7 +144,7 @@ test_that("sequential updates of hermite_estimator work as expected", {
       -0.02434694
     )
   hermite_est <- hermite_estimator(N = 10, standardize = TRUE)
-  for (idx in c(1:length(test_observations))) {
+  for (idx in seq_along(test_observations)) {
     hermite_est <-
       hermite_est %>% update_sequential(test_observations[idx])
   }
@@ -153,7 +153,7 @@ test_that("sequential updates of hermite_estimator work as expected", {
                tolerance = 1e-07)
   
   hermite_est <- hermite_estimator(N = 10, standardize = FALSE)
-  for (idx in c(1:length(test_observations))) {
+  for (idx in seq_along(test_observations)) {
     hermite_est <-
       hermite_est %>% update_sequential(test_observations[idx])
   }
@@ -162,7 +162,8 @@ test_that("sequential updates of hermite_estimator work as expected", {
                tolerance = 1e-07)
 })
 
-test_that("sequential updates of exponentially weighted hermite_estimator work as expected",
+test_that("sequential updates of exponentially weighted hermite_estimator 
+          work as expected",
           {
             test_observations <- c(
               0.3719336,
@@ -228,7 +229,7 @@ test_that("sequential updates of exponentially weighted hermite_estimator work a
               hermite_estimator(N = 10,
                                 standardize = TRUE,
                                 exp_weight_lambda = 0.05)
-            for (idx in c(1:length(test_observations))) {
+            for (idx in seq_along(test_observations)) {
               hermite_est <-
                 hermite_est %>% update_sequential(test_observations[idx])
             }
@@ -240,7 +241,7 @@ test_that("sequential updates of exponentially weighted hermite_estimator work a
               hermite_estimator(N = 10,
                                 standardize = FALSE,
                                 exp_weight_lambda = 0.05)
-            for (idx in c(1:length(test_observations))) {
+            for (idx in seq_along(test_observations)) {
               hermite_est <-
                 hermite_est %>% update_sequential(test_observations[idx])
             }
@@ -283,13 +284,17 @@ test_that("hermite_estimators combine consistently", {
     2.214421
   )
   hermite_est <-
-    hermite_estimator(N = 10, standardize = FALSE) %>% update_batch(test_observations)
+    hermite_estimator(N = 10, standardize = FALSE) %>% 
+    update_batch(test_observations)
   hermite_est_1 <-
-    hermite_estimator(N = 10, standardize = FALSE) %>% update_batch(test_observations[1:10])
+    hermite_estimator(N = 10, standardize = FALSE) %>% 
+    update_batch(test_observations[1:10])
   hermite_est_2 <-
-    hermite_estimator(N = 10, standardize = FALSE) %>% update_batch(test_observations[11:20])
+    hermite_estimator(N = 10, standardize = FALSE) %>% 
+    update_batch(test_observations[11:20])
   hermite_est_3 <-
-    hermite_estimator(N = 10, standardize = FALSE) %>% update_batch(test_observations[21:30])
+    hermite_estimator(N = 10, standardize = FALSE) %>% 
+    update_batch(test_observations[21:30])
   hermite_comb <-
     combine_hermite(list(hermite_est_1, hermite_est_2, hermite_est_3))
   expect_equal(hermite_est, hermite_comb, tolerance = 1e-07)
@@ -330,7 +335,8 @@ test_that("probability density estimation works as expected", {
   )
   x <- seq(-2, 2, by = 0.5)
   hermite_est <-
-    hermite_estimator(N = 10, standardize = FALSE) %>% update_batch(test_observations)
+    hermite_estimator(N = 10, standardize = FALSE) %>% 
+    update_batch(test_observations)
   pdf_vals <- hermite_est %>% dens(x)
   target_pdf_vals_unstandardized <-
     c(
@@ -347,7 +353,8 @@ test_that("probability density estimation works as expected", {
   expect_equal(pdf_vals, target_pdf_vals_unstandardized, tolerance = 1e-07)
   
   hermite_est <-
-    hermite_estimator(N = 10, standardize = TRUE) %>% update_batch(test_observations)
+    hermite_estimator(N = 10, standardize = TRUE) %>%
+    update_batch(test_observations)
   pdf_vals <- hermite_est %>% dens(x)
   target_pdf_vals_standardized <-
     c(
@@ -367,7 +374,7 @@ test_that("probability density estimation works as expected", {
     hermite_estimator(N = 10,
                       standardize = FALSE,
                       exp_weight_lambda = 0.1)
-  for (idx in c(1:length(test_observations))) {
+  for (idx in seq_along(test_observations)) {
     hermite_est <-
       hermite_est %>% update_sequential(test_observations[idx])
   }
@@ -390,7 +397,7 @@ test_that("probability density estimation works as expected", {
     hermite_estimator(N = 10,
                       standardize = TRUE,
                       exp_weight_lambda = 0.1)
-  for (idx in c(1:length(test_observations))) {
+  for (idx in seq_along(test_observations)) {
     hermite_est <-
       hermite_est %>% update_sequential(test_observations[idx])
   }
@@ -445,7 +452,8 @@ test_that("cumulative distribution function estimation works as expected",
               2.214421
             )
             hermite_est <-
-              hermite_estimator(N = 10, standardize = FALSE) %>% update_batch(test_observations)
+              hermite_estimator(N = 10, standardize = FALSE) %>%
+              update_batch(test_observations)
             cdf_from_pdf <- stats::integrate(
               f = function(x) {
                 hermite_est %>% dens(x)
@@ -458,7 +466,8 @@ test_that("cumulative distribution function estimation works as expected",
             expect_equal(cdf_from_pdf, cdf_est, tolerance = 1e-07)
             
             hermite_est <-
-              hermite_estimator(N = 10, standardize = TRUE) %>% update_batch(test_observations)
+              hermite_estimator(N = 10, standardize = TRUE) %>%
+              update_batch(test_observations)
             cdf_from_pdf <- stats::integrate(
               f = function(x) {
                 hermite_est %>% dens(x)
@@ -474,7 +483,7 @@ test_that("cumulative distribution function estimation works as expected",
               hermite_estimator(N = 10,
                                 standardize = FALSE,
                                 exp_weight_lambda = 0.1)
-            for (idx in c(1:length(test_observations))) {
+            for (idx in seq_along(test_observations)) {
               hermite_est <-
                 hermite_est %>% update_sequential(test_observations[idx])
             }
@@ -493,7 +502,7 @@ test_that("cumulative distribution function estimation works as expected",
               hermite_estimator(N = 10,
                                 standardize = TRUE,
                                 exp_weight_lambda = 0.1)
-            for (idx in c(1:length(test_observations))) {
+            for (idx in seq_along(test_observations)) {
               hermite_est <-
                 hermite_est %>% update_sequential(test_observations[idx])
             }
@@ -543,19 +552,22 @@ test_that("quantile estimation works as expected", {
     2.214421
   )
   hermite_est <-
-    hermite_estimator(N = 10, standardize = TRUE) %>% update_batch(test_observations)
+    hermite_estimator(N = 10, standardize = TRUE) %>%
+    update_batch(test_observations)
   quantiles_est <- hermite_est %>% quant(c(0.25, 0.5, 0.75))
   expect_equal(quantiles_est,
                c(-1.54823599, 0.04145506, 0.90889172),
                tolerance = 1e-07)
   cum_prob_check <-
-    hermite_est %>% cum_prob_quantile_helper((hermite_est %>% quant(0.75) - hermite_est$running_mean) / sqrt(hermite_est$running_variance / (hermite_est$num_obs -
-                                                                                                                                               1))
+    hermite_est %>% cum_prob_quantile_helper((hermite_est %>% quant(0.75)
+                                              - hermite_est$running_mean) /
+                                              sqrt(hermite_est$running_variance 
+                                                    / (hermite_est$num_obs -1))
     )
   expect_equal(cum_prob_check, 0.75, tolerance = 0.001)
   
   hermite_est <- hermite_estimator(N = 10, standardize = TRUE)
-  for (idx in c(1:length(test_observations))) {
+  for (idx in seq_along(test_observations)) {
     hermite_est <-
       hermite_est %>% update_sequential(test_observations[idx])
   }
@@ -564,8 +576,10 @@ test_that("quantile estimation works as expected", {
                c(-0.7546552, 0.1538964, 1.1258244),
                tolerance = 1e-06)
   cum_prob_check <-
-    hermite_est %>% cum_prob_quantile_helper((hermite_est %>% quant(0.75) - hermite_est$running_mean) / sqrt(hermite_est$running_variance / (hermite_est$num_obs -
-                                                                                                                                               1))
+    hermite_est %>% cum_prob_quantile_helper((hermite_est %>% quant(0.75)
+                                              - hermite_est$running_mean) /
+                                               sqrt(hermite_est$running_variance
+                                                    / (hermite_est$num_obs -1))
     )
   expect_equal(cum_prob_check, 0.75, tolerance = 0.001)
   
@@ -573,14 +587,17 @@ test_that("quantile estimation works as expected", {
     hermite_estimator(N = 10,
                       standardize = TRUE,
                       exp_weight_lambda = 0.1)
-  for (idx in c(1:length(test_observations))) {
+  for (idx in seq_along(test_observations)) {
     hermite_est <-
       hermite_est %>% update_sequential(test_observations[idx])
   }
   quantiles_est <- hermite_est %>% quant(c(0.25, 0.5, 0.75))
-  expect_equal(quantiles_est, c(-1.396857, 0.360104, 1.437417), tolerance = 1e-06)
+  expect_equal(quantiles_est, c(-1.396857, 0.360104, 1.437417), 
+               tolerance = 1e-06)
   cum_prob_check <-
-    hermite_est %>% cum_prob_quantile_helper((hermite_est %>% quant(0.75) - hermite_est$running_mean) / sqrt(hermite_est$running_variance)
+    hermite_est %>% cum_prob_quantile_helper((hermite_est %>% quant(0.75) -
+                                            hermite_est$running_mean) /
+                                              sqrt(hermite_est$running_variance)
     )
   expect_equal(cum_prob_check, 0.75, tolerance = 0.001)
 })

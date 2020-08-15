@@ -43,7 +43,8 @@ NumericVector hermite_normalization(int N) {
 //' @return A numeric matrix with N+1 rows and length(x) columns.
 //' @export
 // [[Rcpp::export]]
-NumericVector hermite_function(int N, NumericVector x, NumericVector normalization) {
+NumericVector hermite_function(int N, NumericVector x, 
+                               NumericVector normalization) {
   int x_size = x.size();
   NumericMatrix hermite(N + 1, x_size);
   NumericMatrix out(N + 1, x_size);
@@ -56,7 +57,8 @@ NumericVector hermite_function(int N, NumericVector x, NumericVector normalizati
   }
   for(int j = 0; j < x_size; ++j) {
     for(int i = 2; i <= N; ++i) {
-      hermite(i,j) = 2 * x[j] * hermite(i - 1,j) - 2 * (i - 1) * hermite(i - 2,j);
+      hermite(i,j) = 2 * x[j] * hermite(i - 1,j) - 2 
+      * (i - 1) * hermite(i - 2,j);
       out(i,j) = hermite(i,j) * normalization[i] * exp(-1 * x[j] * x[j] / 2);
     }
   }
@@ -65,8 +67,8 @@ NumericVector hermite_function(int N, NumericVector x, NumericVector normalizati
 
 //' Outputs a definite integral of the orthonormal Hermite functions
 //' 
-//' The method calculates \eqn{\int_{-\infty}^{x} h_k(t) dt} for \eqn{k=0,\dots,N}
-//' and the vector of values x.
+//' The method calculates \eqn{\int_{-\infty}^{x} h_k(t) dt} 
+//' for \eqn{k=0,\dots,N} and the vector of values x.
 //' 
 //' @author Michael Stephanou <michael.stephanou@gmail.com>
 //'
@@ -77,11 +79,13 @@ NumericVector hermite_function(int N, NumericVector x, NumericVector normalizati
 //' @return A numeric matrix with N+1 rows and length(x) columns.
 //' @export
 // [[Rcpp::export]]
-NumericVector hermite_integral_val(int N, NumericVector x, NumericMatrix hermite_function_mat) {
+NumericVector hermite_integral_val(int N, NumericVector x, 
+                                   NumericMatrix hermite_function_mat) {
   int x_size = x.size();
   NumericMatrix out(N + 1, x_size);
   for(int i = 0; i < x_size; ++i) {
-    out(0,i) = pow(M_PI,0.25)/sqrt(2) * boost::math::erfc<double>((double) -1 * (1 / sqrt(2)) * x[i]); 
+    out(0,i) = pow(M_PI,0.25)/sqrt(2) 
+    * boost::math::erfc<double>((double) -1 * (1 / sqrt(2)) * x[i]); 
   }
   if (N == 0){
     return out;
@@ -94,7 +98,8 @@ NumericVector hermite_integral_val(int N, NumericVector x, NumericMatrix hermite
   }
   for(int i = 2; i <= N; ++i) {
     for(int j = 0; j < x_size; ++j) {
-      out(i,j) = -1 * sqrt(2/((double)i)) * hermite_function_mat(i - 1,j) + sqrt((((double)i) - 1)/((double)i)) * out(i - 2,j);
+      out(i,j) = -1 * sqrt(2/((double)i)) * hermite_function_mat(i - 1,j) 
+      + sqrt((((double)i) - 1)/((double)i)) * out(i - 2,j);
     }
   }
   return out;
@@ -102,8 +107,8 @@ NumericVector hermite_integral_val(int N, NumericVector x, NumericMatrix hermite
 
 //' Outputs a definite integral of the orthonormal Hermite functions
 //' 
-//' The method calculates \eqn{\int_{x}^{\infty} h_k(t) dt} for \eqn{k=0,\dots,N}
-//' and the vector of values x.
+//' The method calculates \eqn{\int_{x}^{\infty} h_k(t) dt} 
+//' for \eqn{k=0,\dots,N} and the vector of values x.
 //' 
 //' @author Michael Stephanou <michael.stephanou@gmail.com>
 //'
@@ -114,11 +119,13 @@ NumericVector hermite_integral_val(int N, NumericVector x, NumericMatrix hermite
 //' @return A numeric matrix with N+1 rows and length(x) columns.
 //' @export
 // [[Rcpp::export]]
-NumericVector hermite_integral_val_quantile_adap(int N, NumericVector x, NumericMatrix hermite_function_mat) {
+NumericVector hermite_integral_val_quantile_adap(int N,
+                         NumericVector x, NumericMatrix hermite_function_mat) {
   int x_size = x.size();
   NumericMatrix out(N + 1, x_size);
   for(int i = 0; i < x_size; ++i) {
-    out(0,i) = pow(M_PI,0.25)/sqrt(2) * boost::math::erfc<double>((double) (1 / sqrt(2)) * x[i]); 
+    out(0,i) = pow(M_PI,0.25)/sqrt(2) 
+    * boost::math::erfc<double>((double) (1 / sqrt(2)) * x[i]); 
   }
   if (N == 0){
     return out;
@@ -131,7 +138,8 @@ NumericVector hermite_integral_val_quantile_adap(int N, NumericVector x, Numeric
   }
   for(int i = 2; i <= N; ++i) {
     for(int j = 0; j < x_size; ++j) {
-      out(i,j) = sqrt(2 / ((double)i)) * hermite_function_mat(i-1,j) + sqrt((((double)i)-1)/((double)i)) * out(i-2,j);
+      out(i,j) = sqrt(2 / ((double)i)) * hermite_function_mat(i-1,j) 
+      + sqrt((((double)i)-1)/((double)i)) * out(i-2,j);
     }
   }
   return out;
@@ -150,7 +158,8 @@ NumericVector hermite_integral_val_quantile_adap(int N, NumericVector x, Numeric
 //' updated, standardized value of x.
 //' @export
 // [[Rcpp::export]]
-NumericVector standardizeInputs(double x, double n_obs, double current_mean, double current_var) {
+NumericVector standardizeInputs(double x, double n_obs, double current_mean,
+                                double current_var) {
   NumericVector outputVec(3);
   double prev_running_mean = current_mean;
   outputVec[0] =  (current_mean * (n_obs - 1) + x) / n_obs;
@@ -179,7 +188,8 @@ NumericVector standardizeInputs(double x, double n_obs, double current_mean, dou
 //' updated, standardized value of x.
 //' @export
 // [[Rcpp::export]]
-NumericVector standardizeInputsEW(double x, double n_obs,double lambda, double current_mean, double current_var) {
+NumericVector standardizeInputsEW(double x, double n_obs,double lambda,
+                                  double current_mean, double current_var) {
   NumericVector outputVec(3);
   if (n_obs < 2){
     current_mean = x;

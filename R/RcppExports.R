@@ -36,8 +36,8 @@ hermite_function <- function(N, x, normalization) {
 
 #' Outputs a definite integral of the orthonormal Hermite functions
 #' 
-#' The method calculates \eqn{\int_{-\infty}^{x} h_k(t) dt} for \eqn{k=0,\dots,N}
-#' and the vector of values x.
+#' The method calculates \eqn{\int_{-\infty}^{x} h_k(t) dt} 
+#' for \eqn{k=0,\dots,N} and the vector of values x.
 #' 
 #' @author Michael Stephanou <michael.stephanou@gmail.com>
 #'
@@ -53,8 +53,8 @@ hermite_integral_val <- function(N, x, hermite_function_mat) {
 
 #' Outputs a definite integral of the orthonormal Hermite functions
 #' 
-#' The method calculates \eqn{\int_{x}^{\infty} h_k(t) dt} for \eqn{k=0,\dots,N}
-#' and the vector of values x.
+#' The method calculates \eqn{\int_{x}^{\infty} h_k(t) dt} 
+#' for \eqn{k=0,\dots,N} and the vector of values x.
 #' 
 #' @author Michael Stephanou <michael.stephanou@gmail.com>
 #'

@@ -1,7 +1,7 @@
 [
     {
         "file": "C:/git_repos/hermiter/src/hermite_utils.cpp",
-        "file_last_write": 1597490956.0,
+        "file_last_write": 1597513372.0,
         "definitions": [
             {
                 "usr": "c:@F@hermite_normalization#I#",
@@ -27,7 +27,7 @@
                 "parent_name": "",
                 "name": "hermite_integral_val(int, Rcpp::NumericVector, Rcpp::NumericMatrix)",
                 "file": "C:/git_repos/hermiter/src/hermite_utils.cpp",
-                "line": 80,
+                "line": 82,
                 "column": 15
             },
             {
@@ -36,7 +36,7 @@
                 "parent_name": "",
                 "name": "hermite_integral_val_quantile_adap(int, Rcpp::NumericVector, Rcpp::NumericMatrix)",
                 "file": "C:/git_repos/hermiter/src/hermite_utils.cpp",
-                "line": 117,
+                "line": 122,
                 "column": 15
             },
             {
@@ -45,7 +45,7 @@
                 "parent_name": "",
                 "name": "standardizeInputs(double, double, double, double)",
                 "file": "C:/git_repos/hermiter/src/hermite_utils.cpp",
-                "line": 153,
+                "line": 161,
                 "column": 15
             },
             {
@@ -54,7 +54,7 @@
                 "parent_name": "",
                 "name": "standardizeInputsEW(double, double, double, double, double)",
                 "file": "C:/git_repos/hermiter/src/hermite_utils.cpp",
-                "line": 182,
+                "line": 191,
                 "column": 15
             }
         ]

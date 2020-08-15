@@ -32,7 +32,7 @@ hermite_estimator <-
       stop("N must be numeric.")
     }
     if (N < 0 | N > 100) {
-      stop("N must be greater than or equal to 0 and smaller than or equal to 100.")
+      stop("N must be >= 0 and N < 100.")
     }
     if (!(standardize == TRUE | standardize == FALSE)) {
       stop("standardize can only take on values TRUE or FALSE.")
@@ -42,7 +42,7 @@ hermite_estimator <-
         stop("exp_weight_lambda must be numeric.")
       }
       if (exp_weight_lambda <= 0 | exp_weight_lambda > 1) {
-        stop("exp_weight_lambda must be a real number greater than 0 and less than or equal to 1.")
+        stop("exp_weight_lambda must be a real number > 0 and <= 1.")
       }
     }
     this <-
@@ -113,13 +113,15 @@ combine_pair.hermite_estimator <-
                         standardize = this$standardize_obs)
     hermite_estimator_combined$coeff_vec <-
       (
-        this$coeff_vec * this$num_obs + hermite_estimator_other$coeff_vec * hermite_estimator_other$num_obs
+        this$coeff_vec * this$num_obs + hermite_estimator_other$coeff_vec 
+        * hermite_estimator_other$num_obs
       ) / (this$num_obs + hermite_estimator_other$num_obs)
     hermite_estimator_combined$num_obs <-
       this$num_obs + hermite_estimator_other$num_obs
     hermite_estimator_combined$running_mean <-
       (
-        this$running_mean * this$num_obs + hermite_estimator_other$running_mean * hermite_estimator_other$num_obs
+        this$running_mean * this$num_obs + hermite_estimator_other$running_mean
+        * hermite_estimator_other$num_obs
       ) / (this$num_obs + hermite_estimator_other$num_obs)
     hermite_estimator_combined$running_variance <-
       this$running_variance + hermite_estimator_other$running_variance
@@ -158,11 +160,7 @@ combine_hermite.list <- function(hermite_estimators) {
   if (length(hermite_estimators) == 1) {
     return(hermite_estimators[[1]])
   }
-  hermite_estimator_combined <- hermite_estimators[[1]]
-  for (idx in c(2:length(hermite_estimators))) {
-    hermite_estimator_combined <-
-      combine_pair(hermite_estimator_combined, hermite_estimators[[idx]])
-  }
+  hermite_estimator_combined <- Reduce(combine_pair,hermite_estimators)
   return(hermite_estimator_combined)
 }
 
@@ -177,7 +175,8 @@ combine_hermite.list <- function(hermite_estimators) {
 #' @return An object of class hermite_estimator.
 #' @export
 #' @examples
-#' hermite_estimator <- update_sequential(hermite_estimator(N = 10, standardize = TRUE), x = 2)
+#' hermite_estimator <- hermite_estimator(N = 10, standardize = TRUE)
+#' hermite_estimator <- update_sequential(hermite_estimator, x = 2)
 update_sequential <- function(this, x) {
   UseMethod("update_sequential", this)
 }
@@ -188,7 +187,8 @@ update_sequential.hermite_estimator <- function(this, x) {
     stop("x must be numeric.")
   }
   if (length(x) != 1) {
-    stop("The sequential method is only applicable to one observation at a time.")
+    stop("The sequential method is only 
+         applicable to one observation at a time.")
   }
   this$num_obs <- this$num_obs + 1
   if (this$standardize_obs == TRUE) {
@@ -239,7 +239,8 @@ update_sequential.hermite_estimator <- function(this, x) {
 #' @return An object of class hermite_estimator.
 #' @export
 #' @examples
-#' hermite_estimator <- update_batch(hermite_estimator(N = 10, standardize = TRUE), x = c(1, 2))
+#' hermite_estimator <- hermite_estimator(N = 10, standardize = TRUE)
+#' hermite_estimator <- update_batch(hermite_estimator, x = c(1, 2))
 update_batch <- function(this, x) {
   UseMethod("update_batch", this)
 }
@@ -255,10 +256,12 @@ update_batch.hermite_estimator <- function(this, x) {
   this$num_obs <- this$num_obs + length(x)
   if (this$standardize_obs == TRUE) {
     this$running_mean <-
-      (this$running_mean * (this$num_obs - length(x)) + length(x) * mean(x)) / this$num_obs
+      (this$running_mean * (this$num_obs - length(x)) + length(x) * mean(x)) / 
+      this$num_obs
     this$running_variance <-
       (
-        this$running_variance * (this$num_obs - length(x)) + length(x) * stats::var(x) * (length(x) - 1)
+        this$running_variance * (this$num_obs - length(x)) 
+        + length(x) * stats::var(x) * (length(x) - 1)
       ) / this$num_obs
     x <-
       (x - this$running_mean) / sqrt(this$running_variance / (this$num_obs - 1))
@@ -500,7 +503,7 @@ quant.hermite_estimator <- function(this, p) {
     return(NA)
   }
   result <- rep(0, length(p))
-  for (idx in c(1:length(p))) {
+  for (idx in seq_along(p)) {
     result[idx] <- quantile_helper(this, p[idx])
   }
   return(result)
