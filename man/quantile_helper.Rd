@@ -9,7 +9,7 @@ quantile_helper(this, p)
 \arguments{
 \item{this}{A hermite_estimator object.}
 
-\item{p}{A numeric value. The probability at which to calculate the 
+\item{p}{A numeric value. The probability at which to calculate the
 associated quantile.}
 }
 \value{

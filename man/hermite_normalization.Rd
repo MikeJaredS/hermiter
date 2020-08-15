@@ -17,3 +17,6 @@ The method returns numeric normalization factors that, when multiplied by
 the physicist Hermite polynomials \eqn{H_k(x)}, yield orthonormal 
 Hermite functions \eqn{h_k(x)} for \eqn{k=0,\dots,N}.
 }
+\author{
+Michael Stephanou <michael.stephanou@gmail.com>
+}

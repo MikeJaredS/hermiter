@@ -9,24 +9,24 @@ dens(this, x, clipped)
 \arguments{
 \item{this}{A hermite_estimator object.}
 
-\item{x}{A numeric vector. Values at which to estimate the probability 
+\item{x}{A numeric vector. Values at which to estimate the probability
 density.}
 
-\item{clipped}{A boolean value. This value determines whether 
+\item{clipped}{A boolean value. This value determines whether
 probability densities are clipped to be bigger than zero.}
 }
 \value{
 A numeric vector of probability density values.
 }
 \description{
-This method calculates the probability density values at a vector of 
+This method calculates the probability density values at a vector of
 x values using the hermite_estimator object (this).
 }
 \details{
 The object must be updated with observations prior to the use of the method.
 }
 \examples{
-hermite_est <- hermite_estimator(N=10, standardize=TRUE)
+hermite_est <- hermite_estimator(N = 10, standardize = TRUE)
 hermite_est <- update_batch(hermite_est, rnorm(30))
-pdf_est <- dens(hermite_est,c(0,0.5,1))
+pdf_est <- dens(hermite_est, c(0, 0.5, 1))
 }

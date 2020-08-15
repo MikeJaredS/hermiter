@@ -9,16 +9,16 @@ update_batch(this, x)
 \arguments{
 \item{this}{A hermite_estimator object.}
 
-\item{x}{A numeric vector. A vector of observations to be incorporated 
+\item{x}{A numeric vector. A vector of observations to be incorporated
 into the estimator.}
 }
 \value{
 An object of class hermite_estimator.
 }
 \description{
-This method can be applied in one-pass batch estimation settings. This 
+This method can be applied in one-pass batch estimation settings. This
 method cannot be used with an exponentially weighted estimator.
 }
 \examples{
-hermite_estimator <- update_batch(hermite_estimator(N=10, standardize=TRUE), x=c(1,2))
+hermite_estimator <- update_batch(hermite_estimator(N = 10, standardize = TRUE), x = c(1, 2))
 }

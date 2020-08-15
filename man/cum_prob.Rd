@@ -19,14 +19,14 @@ probabilities are clipped to lie within the range [0,1].}
 A numeric vector of cumulative probability values.
 }
 \description{
-This method calculates the cumulative probability values at a vector of 
+This method calculates the cumulative probability values at a vector of
 x values using the hermite_estimator object (this).
 }
 \details{
 The object must be updated with observations prior to the use of this method.
 }
 \examples{
-hermite_est <- hermite_estimator(N=10, standardize=TRUE)
+hermite_est <- hermite_estimator(N = 10, standardize = TRUE)
 hermite_est <- update_batch(hermite_est, rnorm(30))
-cdf_est <- cum_prob(hermite_est,c(0,0.5,1))
+cdf_est <- cum_prob(hermite_est, c(0, 0.5, 1))
 }

@@ -15,6 +15,6 @@ standardize_value(this, x)
 An object of class hermite_estimator.
 }
 \description{
-This helper method standardizes the observations x using the online mean and 
+This helper method standardizes the observations x using the online mean and
 online standard deviation contained in the hermite_estimator object (this).
 }

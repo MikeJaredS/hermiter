@@ -25,3 +25,6 @@ updated, standardized value of x.
 \description{
 The online moments are updated via exponential weighting.
 }
+\author{
+Michael Stephanou <michael.stephanou@gmail.com>
+}

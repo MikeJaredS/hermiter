@@ -7,7 +7,7 @@
 combine_pair(this, hermite_estimator_other)
 }
 \arguments{
-\item{this}{A hermite_estimator object. The first Hermite series based 
+\item{this}{A hermite_estimator object. The first Hermite series based
 estimator.}
 
 \item{hermite_estimator_other}{A hermite_estimator object. The second Hermite
@@ -17,23 +17,23 @@ series based estimator.}
 An object of class hermite_estimator.
 }
 \description{
-This method allows a pair of Hermite based estimators of class 
+This method allows a pair of Hermite based estimators of class
 hermite_estimator to be consistently combined.
 }
 \details{
-Note that the N and standardize arguments must be the same for the two 
+Note that the N and standardize arguments must be the same for the two
 estimators in order to combine them. In addition, note that exponentially
 weighted estimators cannot be combined. If the Hermite estimators are not
-standardized, the combined estimator will be exactly equivalent to 
-constructing a single estimator on the data set formed by combining the 
-data sets used to update the respective hermite_estimator inputs. 
-If the input Hermite estimators are standardized however, then the 
+standardized, the combined estimator will be exactly equivalent to
+constructing a single estimator on the data set formed by combining the
+data sets used to update the respective hermite_estimator inputs.
+If the input Hermite estimators are standardized however, then the
 equivalence will be approximate.
 }
 \examples{
-hermite_est_1 <- hermite_estimator(N=10, standardize=FALSE)
+hermite_est_1 <- hermite_estimator(N = 10, standardize = FALSE)
 hermite_est_1 <- update_batch(hermite_est_1, rnorm(30))
-hermite_est_2 <- hermite_estimator(N=10, standardize=FALSE)
+hermite_est_2 <- hermite_estimator(N = 10, standardize = FALSE)
 hermite_est_2 <- update_batch(hermite_est_2, rnorm(30))
-hermite_combined <- combine_pair(hermite_est_1,hermite_est_2)
+hermite_combined <- combine_pair(hermite_est_1, hermite_est_2)
 }

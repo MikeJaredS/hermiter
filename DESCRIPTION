@@ -1,13 +1,13 @@
 Package: hermiter
-Type: Package
-Title: Efficient Sequential and Batch estimation of PDFs, CDFs and Quantiles
+Title: Efficient Sequential and Batch Estimation of Probability Density Functions, Cumulative Distribution Functions and Quantiles
 Version: 0.1.0
-Date: 2020-08-08
 Authors@R: c(
-  person("Michael","Stephanou",           role=c("aut","cre"), email="michael.stephanou@gmail.com"),
-  person("Melvin","Varughese",          role="ctb"))
+  person("Michael","Stephanou",role=c("aut","cre"), email="michael.stephanou@gmail.com"),
+  person("Melvin","Varughese",role="ctb"))
+Author: Michael Stephanou [aut, cre],
+  Melvin Varughese [ctb]
 Maintainer: Michael Stephanou <michael.stephanou@gmail.com>
-Description: This package facilitates estimation of the full probability density function, cumulative distribution function and quantile function using Hermite series based estimators. These estimators are particularly useful in the sequential setting (both stationary and nonstationary) and one-pass batch estimation setting for large data sets. 
+Description: Facilitates estimation of the full probability density function, cumulative distribution function and quantile function using Hermite series based estimators. These estimators are particularly useful in the sequential setting (both stationary and non-stationary) and one-pass batch estimation setting for large data sets. 
 License: MIT + file LICENSE
 Imports: 
   Rcpp (>= 1.0.5),
@@ -24,7 +24,7 @@ Suggests:
     dplyr,
     data.table,
     ggplot2,
-    DT,
-    gifski,
-    gganimate
+    DT
 VignetteBuilder: knitr
+URL: https://github.com/MikeJaredS/hermiter
+BugReports: https://github.com/MikeJaredS/hermiter/issues

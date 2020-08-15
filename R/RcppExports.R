@@ -7,6 +7,8 @@
 #' the physicist Hermite polynomials \eqn{H_k(x)}, yield orthonormal 
 #' Hermite functions \eqn{h_k(x)} for \eqn{k=0,\dots,N}.
 #'
+#' @author Michael Stephanou <michael.stephanou@gmail.com>
+#'
 #' @param N An integer number.
 #' @return A numeric vector of length N+1
 #' @export
@@ -19,6 +21,8 @@ hermite_normalization <- function(N) {
 #' 
 #' The method calculates the orthonormal Hermite functions, \eqn{h_k(x)} 
 #' from \eqn{k=0,\dots,N} for the vector of values, x.
+#' 
+#' @author Michael Stephanou <michael.stephanou@gmail.com>
 #'
 #' @param N An integer number.
 #' @param x A numeric vector.
@@ -34,6 +38,8 @@ hermite_function <- function(N, x, normalization) {
 #' 
 #' The method calculates \eqn{\int_{-\infty}^{x} h_k(t) dt} for \eqn{k=0,\dots,N}
 #' and the vector of values x.
+#' 
+#' @author Michael Stephanou <michael.stephanou@gmail.com>
 #'
 #' @param N An integer number.
 #' @param x A numeric vector.
@@ -49,6 +55,8 @@ hermite_integral_val <- function(N, x, hermite_function_mat) {
 #' 
 #' The method calculates \eqn{\int_{x}^{\infty} h_k(t) dt} for \eqn{k=0,\dots,N}
 #' and the vector of values x.
+#' 
+#' @author Michael Stephanou <michael.stephanou@gmail.com>
 #'
 #' @param N An integer number.
 #' @param x A numeric vector.
@@ -61,6 +69,8 @@ hermite_integral_val_quantile_adap <- function(N, x, hermite_function_mat) {
 }
 
 #' Standardizes the observation x and updates the online moment inputs
+#' 
+#' @author Michael Stephanou <michael.stephanou@gmail.com>
 #' 
 #' @param x A numeric value.
 #' @param n_obs A numeric value. The number of observations.
@@ -77,6 +87,8 @@ standardizeInputs <- function(x, n_obs, current_mean, current_var) {
 #' Standardizes the observation x and updates the online moment inputs
 #' 
 #' The online moments are updated via exponential weighting.
+#' 
+#' @author Michael Stephanou <michael.stephanou@gmail.com>
 #'
 #' @param x A numeric value.
 #' @param n_obs A numeric value. The number of observations.

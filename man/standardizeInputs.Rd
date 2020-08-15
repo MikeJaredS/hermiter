@@ -23,3 +23,6 @@ updated, standardized value of x.
 \description{
 Standardizes the observation x and updates the online moment inputs
 }
+\author{
+Michael Stephanou <michael.stephanou@gmail.com>
+}

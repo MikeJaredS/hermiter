@@ -15,11 +15,11 @@ cum_prob_quantile_helper(this, x)
 A numeric vector of cumulative probability values.
 }
 \description{
-This helper method uses a modified distribution function estimator which 
+This helper method uses a modified distribution function estimator which
 differs from the cum_prob.hermite_estimator.
 }
 \details{
-The modified distribution function estimator appears more accurate for 
+The modified distribution function estimator appears more accurate for
 quantile estimation as validated empirically in:
 
 \url{https://projecteuclid.org/euclid.ejs/1488531636}

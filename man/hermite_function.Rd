@@ -21,3 +21,6 @@ A numeric matrix with N+1 rows and length(x) columns.
 The method calculates the orthonormal Hermite functions, \eqn{h_k(x)} 
 from \eqn{k=0,\dots,N} for the vector of values, x.
 }
+\author{
+Michael Stephanou <michael.stephanou@gmail.com>
+}

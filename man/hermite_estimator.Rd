@@ -7,36 +7,35 @@
 hermite_estimator(N = 10, standardize = FALSE, exp_weight_lambda = NA)
 }
 \arguments{
-\item{N}{An integer between 0 and 100. The Hermite series based estimator 
+\item{N}{An integer between 0 and 100. The Hermite series based estimator
 is truncated at N+1 terms.}
 
-\item{standardize}{A boolean value. Determines whether the observations are 
+\item{standardize}{A boolean value. Determines whether the observations are
 standardized, a transformation which often improves performance.}
 
 \item{exp_weight_lambda}{A numerical value between 0 and 1. This parameter
-controls the exponential weighting of the Hermite series based estimator. 
+controls the exponential weighting of the Hermite series based estimator.
 If this parameter is NA, no exponential weighting is applied.}
 }
 \value{
-An S3 object of class hermite_estimator, with methods for 
+An S3 object of class hermite_estimator, with methods for
 density function, distribution function and quantile function estimation.
 }
 \description{
-This method constructs an S3 object with associated methods for univariate 
+This method constructs an S3 object with associated methods for univariate
 nonparametric estimation of pdfs, cdfs and quantiles.
 }
 \details{
-The hermite_estimator class allows the sequential or one-pass batch 
-estimation of the full probability density function, cumulative distribution 
+The hermite_estimator class allows the sequential or one-pass batch
+estimation of the full probability density function, cumulative distribution
 function and quantile function. It is well suited to streaming data (both
-stationary and non-stationary) and to efficient estimation in the context of 
+stationary and non-stationary) and to efficient estimation in the context of
 massive or distributed data sets. Indeed, estimators constructed on different
-subsets of a distributed data set can be consistently combined. The estimator
-is based on the research presented in:
-
-\url{https://projecteuclid.org/euclid.ejs/1488531636}, 
-\url{https://link.springer.com/article/10.1007/s00184-020-00785-z}
+subsets of a distributed data set can be consistently combined.
 }
 \examples{
-hermite_est <- hermite_estimator(N=10, standardize=TRUE)
+hermite_est <- hermite_estimator(N = 10, standardize = TRUE)
+}
+\author{
+Michael Stephanou <michael.stephanou@gmail.com>
 }

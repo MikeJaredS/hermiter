@@ -12,16 +12,18 @@ using namespace Rcpp;
 //' the physicist Hermite polynomials \eqn{H_k(x)}, yield orthonormal 
 //' Hermite functions \eqn{h_k(x)} for \eqn{k=0,\dots,N}.
 //'
+//' @author Michael Stephanou <michael.stephanou@gmail.com>
+//'
 //' @param N An integer number.
 //' @return A numeric vector of length N+1
 //' @export
 // [[Rcpp::export]]
 NumericVector hermite_normalization(int N) {
-  NumericVector out(N+1);
+  NumericVector out(N + 1);
   double sqrt_pi = sqrt(M_PI);
   for(int i = 0; i <= N; ++i) {
     double fact = boost::math::factorial<double>((double)i);
-    out(i) = 1/sqrt(pow(2,i) * fact *sqrt_pi); 
+    out(i) = 1/sqrt(pow(2,i) * fact * sqrt_pi); 
   }
   return out;
 }
@@ -31,6 +33,8 @@ NumericVector hermite_normalization(int N) {
 //' 
 //' The method calculates the orthonormal Hermite functions, \eqn{h_k(x)} 
 //' from \eqn{k=0,\dots,N} for the vector of values, x.
+//' 
+//' @author Michael Stephanou <michael.stephanou@gmail.com>
 //'
 //' @param N An integer number.
 //' @param x A numeric vector.
@@ -41,19 +45,19 @@ NumericVector hermite_normalization(int N) {
 // [[Rcpp::export]]
 NumericVector hermite_function(int N, NumericVector x, NumericVector normalization) {
   int x_size = x.size();
-  NumericMatrix hermite(N+1, x_size);
-  NumericMatrix out(N+1, x_size);
+  NumericMatrix hermite(N + 1, x_size);
+  NumericMatrix out(N + 1, x_size);
   for(int i = 0; i < x_size; ++i) {
-    double exp_val = exp(-1*x[i]*x[i]/2);
+    double exp_val = exp(-1 * x[i] * x[i] / 2);
     hermite(0,i) = 1;
-    hermite(1,i) = 2*x[i];
-    out(0,i) = hermite(0,i) *normalization[0]*exp_val;
-    out(1,i) = hermite(1,i) *normalization[1]*exp_val;
+    hermite(1,i) = 2 * x[i];
+    out(0,i) = hermite(0,i) * normalization[0] * exp_val;
+    out(1,i) = hermite(1,i) * normalization[1] * exp_val;
   }
   for(int j = 0; j < x_size; ++j) {
     for(int i = 2; i <= N; ++i) {
-      hermite(i,j) = 2*x[j]*hermite(i-1,j) - 2*(i-1)*hermite(i-2,j);
-      out(i,j) = hermite(i,j)*normalization[i]*exp(-1*x[j]*x[j]/2);
+      hermite(i,j) = 2 * x[j] * hermite(i - 1,j) - 2 * (i - 1) * hermite(i - 2,j);
+      out(i,j) = hermite(i,j) * normalization[i] * exp(-1 * x[j] * x[j] / 2);
     }
   }
   return out;
@@ -63,6 +67,8 @@ NumericVector hermite_function(int N, NumericVector x, NumericVector normalizati
 //' 
 //' The method calculates \eqn{\int_{-\infty}^{x} h_k(t) dt} for \eqn{k=0,\dots,N}
 //' and the vector of values x.
+//' 
+//' @author Michael Stephanou <michael.stephanou@gmail.com>
 //'
 //' @param N An integer number.
 //' @param x A numeric vector.
@@ -73,22 +79,22 @@ NumericVector hermite_function(int N, NumericVector x, NumericVector normalizati
 // [[Rcpp::export]]
 NumericVector hermite_integral_val(int N, NumericVector x, NumericMatrix hermite_function_mat) {
   int x_size = x.size();
-  NumericMatrix out(N+1, x_size);
+  NumericMatrix out(N + 1, x_size);
   for(int i = 0; i < x_size; ++i) {
-    out(0,i) = pow(M_PI,0.25)/sqrt(2) * boost::math::erfc<double>((double) -1*(1/sqrt(2))*x[i]); 
+    out(0,i) = pow(M_PI,0.25)/sqrt(2) * boost::math::erfc<double>((double) -1 * (1 / sqrt(2)) * x[i]); 
   }
-  if (N==0){
+  if (N == 0){
     return out;
   }
   for(int i = 0; i < x_size; ++i) {
-    out(1,i) = -1*sqrt(2)/pow(M_PI,0.25) *exp(-1*x[i]*x[i]/2); 
+    out(1,i) = -1 * sqrt(2)/pow(M_PI,0.25) *exp(-1 * x[i] * x[i] / 2); 
   }
-  if (N==1){
+  if (N == 1){
     return out;
   }
   for(int i = 2; i <= N; ++i) {
     for(int j = 0; j < x_size; ++j) {
-      out(i,j) = -1*sqrt(2/((double)i))*hermite_function_mat(i-1,j) + sqrt((((double)i)-1)/((double)i)) * out(i-2,j);
+      out(i,j) = -1 * sqrt(2/((double)i)) * hermite_function_mat(i - 1,j) + sqrt((((double)i) - 1)/((double)i)) * out(i - 2,j);
     }
   }
   return out;
@@ -98,6 +104,8 @@ NumericVector hermite_integral_val(int N, NumericVector x, NumericMatrix hermite
 //' 
 //' The method calculates \eqn{\int_{x}^{\infty} h_k(t) dt} for \eqn{k=0,\dots,N}
 //' and the vector of values x.
+//' 
+//' @author Michael Stephanou <michael.stephanou@gmail.com>
 //'
 //' @param N An integer number.
 //' @param x A numeric vector.
@@ -108,28 +116,30 @@ NumericVector hermite_integral_val(int N, NumericVector x, NumericMatrix hermite
 // [[Rcpp::export]]
 NumericVector hermite_integral_val_quantile_adap(int N, NumericVector x, NumericMatrix hermite_function_mat) {
   int x_size = x.size();
-  NumericMatrix out(N+1, x_size);
+  NumericMatrix out(N + 1, x_size);
   for(int i = 0; i < x_size; ++i) {
-    out(0,i) = pow(M_PI,0.25)/sqrt(2) * boost::math::erfc<double>((double) (1/sqrt(2))*x[i]); 
+    out(0,i) = pow(M_PI,0.25)/sqrt(2) * boost::math::erfc<double>((double) (1 / sqrt(2)) * x[i]); 
   }
-  if (N==0){
+  if (N == 0){
     return out;
   }
   for(int i = 0; i < x_size; ++i) {
-    out(1,i) = sqrt(2)/pow(M_PI,0.25) *exp(-1*x[i]*x[i]/2); 
+    out(1,i) = sqrt(2)/pow(M_PI,0.25) *exp(-1 * x[i] * x[i] / 2); 
   }
-  if (N==1){
+  if (N == 1){
     return out;
   }
   for(int i = 2; i <= N; ++i) {
     for(int j = 0; j < x_size; ++j) {
-      out(i,j) = sqrt(2/((double)i))*hermite_function_mat(i-1,j) + sqrt((((double)i)-1)/((double)i)) * out(i-2,j);
+      out(i,j) = sqrt(2 / ((double)i)) * hermite_function_mat(i-1,j) + sqrt((((double)i)-1)/((double)i)) * out(i-2,j);
     }
   }
   return out;
 }
 
 //' Standardizes the observation x and updates the online moment inputs
+//' 
+//' @author Michael Stephanou <michael.stephanou@gmail.com>
 //' 
 //' @param x A numeric value.
 //' @param n_obs A numeric value. The number of observations.
@@ -143,19 +153,21 @@ NumericVector hermite_integral_val_quantile_adap(int N, NumericVector x, Numeric
 NumericVector standardizeInputs(double x, double n_obs, double current_mean, double current_var) {
   NumericVector outputVec(3);
   double prev_running_mean = current_mean;
-  outputVec[0] =  (current_mean*(n_obs-1) + x)/n_obs;
+  outputVec[0] =  (current_mean * (n_obs - 1) + x) / n_obs;
   if (n_obs < 2){
     return outputVec;
   }
-  outputVec[1] = current_var + (x-prev_running_mean)*(x-outputVec[0]);
-  double running_std = sqrt(outputVec[1]/(n_obs-1));
-  outputVec[2] = (x-outputVec[0])/running_std;
+  outputVec[1] = current_var + (x - prev_running_mean) * (x - outputVec[0]);
+  double running_std = sqrt(outputVec[1] / (n_obs - 1));
+  outputVec[2] = (x - outputVec[0]) / running_std;
   return outputVec;
 }
 
 //' Standardizes the observation x and updates the online moment inputs
 //' 
 //' The online moments are updated via exponential weighting.
+//' 
+//' @author Michael Stephanou <michael.stephanou@gmail.com>
 //'
 //' @param x A numeric value.
 //' @param n_obs A numeric value. The number of observations.
@@ -176,10 +188,10 @@ NumericVector standardizeInputsEW(double x, double n_obs,double lambda, double c
     outputVec[1] = current_var;
     return outputVec;
   }
-  outputVec[0] =  (1-lambda) * current_mean + lambda*x;
-  current_var = (1-lambda) * current_var + lambda* pow((x-outputVec[0]),2);
+  outputVec[0] =  (1 - lambda) * current_mean + lambda * x;
+  current_var = (1 - lambda) * current_var + lambda * pow((x - outputVec[0]),2);
   outputVec[1] = current_var;
   double running_std = sqrt(current_var);
-  outputVec[2] = (x-outputVec[0])/running_std;
+  outputVec[2] = (x - outputVec[0]) / running_std;
   return outputVec;
 }

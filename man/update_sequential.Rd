@@ -9,7 +9,7 @@ update_sequential(this, x)
 \arguments{
 \item{this}{A hermite_estimator object.}
 
-\item{x}{A numeric value. An observation to be incorporated into the 
+\item{x}{A numeric value. An observation to be incorporated into the
 estimator.}
 }
 \value{
@@ -19,5 +19,5 @@ An object of class hermite_estimator.
 This method can be applied in sequential estimation settings.
 }
 \examples{
-hermite_estimator <- update_sequential(hermite_estimator(N=10, standardize=TRUE), x=2)
+hermite_estimator <- update_sequential(hermite_estimator(N = 10, standardize = TRUE), x = 2)
 }

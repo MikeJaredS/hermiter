@@ -1,10 +1,11 @@
 ---
 title: "hermiter"
+author: Michael Stephanou
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{hermiter}
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+  \usepackage[utf8]{inputenc} 
 ---
 
 ```{r, include = FALSE}
@@ -12,14 +13,14 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-# set.seed(10)
+set.seed(10)
 ```
 
-## What does hermiter do?
+# What does hermiter do?
 
-`hermiter` facilitates the estimation of the full probability density function, cumulative distribution function and quantile function using Hermite series based estimators. The package is applicable to streaming, batch and grouped data.
+`hermiter` facilitates the estimation of the full probability density function, cumulative distribution function and quantile function using Hermite series based estimators. The package is applicable to streaming, batch and grouped data. The core methods of the package are written in C++ for speed.
 
-These estimators are particularly useful in the sequential setting (both stationary and nonstationary data streams). In addition, they are useful in efficient, one-pass batch estimation which is particularly relevant in the context of large data sets. Finally, the Hermite series based estimators are applicable in decentralized (distributed) settings in that estimators formed on subsets of the data can be consistently combined. The Hermite series based estimators have the distinct advantage of being able to estimate the full density function, distribution function and quantile function in an online manner.The theoretical and empirical properties of these estimators have been studied in,
+These estimators are particularly useful in the sequential setting (both stationary and non-stationary data streams). In addition, they are useful in efficient, one-pass batch estimation which is particularly relevant in the context of large data sets. Finally, the Hermite series based estimators are applicable in decentralized (distributed) settings in that estimators formed on subsets of the data can be consistently combined. The Hermite series based estimators have the distinct advantage of being able to estimate the full density function, distribution function and quantile function in an online manner.The theoretical and empirical properties of these estimators have been studied in-depth in the following articles,
 
 * [Stephanou, Michael, Melvin Varughese, and Iain Macdonald. "Sequential quantiles via Hermite series density estimation." Electronic Journal of Statistics 11.1 (2017): 570-607.](https://projecteuclid.org/euclid.ejs/1488531636) 
 * [Stephanou, Michael, and Melvin Varughese. "On the properties of hermite series based distribution function estimators." Metrika (2020): 1-25.](https://link.springer.com/article/10.1007/s00184-020-00785-z)
@@ -39,14 +40,12 @@ library(magrittr)
 library(ggplot2)
 library(dplyr)
 library(data.table)
-library(gifski)
-library(gganimate)
 library(DT)
 ```
 
 # Construct Estimator
 
-A hermite_estimator S3 object is constructed as below. 
+A hermite_estimator S3 object is constructed as below. The argument, N, adjusts the number of terms in the Hermite series based estimator and controls the trade-off between bias and variance. A lower N value implies a higher bias but lower variance and vice versa for higher values of N. The argument, standardize, controls whether or not to standardize the batch of observations before applying the estimator. Standardization usually yields better results and is recommended for most estimation settings. 
 
 ```{r}
 hermite_est <- hermite_estimator(N=10, standardize=TRUE)
@@ -54,7 +53,7 @@ hermite_est <- hermite_estimator(N=10, standardize=TRUE)
 
 # Batch Estimator Updating
 
-Once the hermite_estimator object has been constructed, it can be updated with a batch of observations as below. The argument, N, adjusts the number of terms in the Hermite series based estimator and controls the trade-off between bias and variance. A lower N value implies a higher bias but lower variance and vice versa for higher values of N. The argument, standardize, controls whether or not to standardize the batch of observations before applying the estimator. Standarization usually yields better results and is recommended for most estimation settings. 
+Once the hermite_estimator object has been constructed, it can be updated with a batch of observations as below. 
 
 ## Standard syntax
 
@@ -64,7 +63,7 @@ hermite_est <- hermite_estimator(N=10, standardize=TRUE)
 hermite_est <- update_batch(hermite_est,observations)
 ```
 
-Functional piped syntax can also be used as below provided the magrittr package is installed.
+Functional piped syntax can also be used as below provided the `magrittr` package is installed.
 
 ## Piped syntax
 
@@ -100,7 +99,7 @@ for (idx in c(1:length(observations))) {
 
 # Estimate pdf, cdf and quantile function
 
-The central advantage of Hermite series based estimators is that they can be updated in a sequential/one-pass manner as above and subsequently probability densities and cumulative probabilities at arbitrary x values can be obtained, along with arbitrary quantiles. The hermite_estimator object only has to update a small and fixed number of coefficients and thus uses minimal memory. The syntax to calculate probability densities, cumulative probabilities and quantiles is presented below.
+The central advantage of Hermite series based estimators is that they can be updated in a sequential/one-pass manner as above and subsequently probability densities and cumulative probabilities at arbitrary x values can be obtained, along with arbitrary quantiles. The hermite_estimator object only maintains a small and fixed number of coefficients and thus uses minimal memory. The syntax to calculate probability densities, cumulative probabilities and quantiles is presented below.
 
 ## Standard syntax
 
@@ -142,7 +141,6 @@ ggplot(df_pdf_cdf,aes(x=x)) + geom_line(aes(y=pdf_est, colour="Estimated")) + ge
                       values = c("blue", "black")) + ylab("Probability Density")
 ```
 
-
 ```{r}
 ggplot(df_pdf_cdf,aes(x=x)) + geom_line(aes(y=cdf_est, colour="Estimated")) + geom_line(aes(y=actual_cdf, colour="Actual")) +
   scale_colour_manual("", 
@@ -150,19 +148,17 @@ ggplot(df_pdf_cdf,aes(x=x)) + geom_line(aes(y=cdf_est, colour="Estimated")) + ge
                       values = c("blue", "black")) + ylab("Cumulative Probability")
 ```
 
-
 ```{r}
 ggplot(df_quant,aes(x=actual_quantiles)) + geom_point(aes(y=quantile_est), color="blue") + geom_abline(slope=1,intercept = 0) +xlab("Theoretical Quantiles") + ylab("Estimated Quantiles")
 ```
 
-
 # Applying to grouped data (batch setting)
 
-A useful application of the hermite_estimator class is to obtain pdf, cdf and quantile function estimates on groups of data. The fact that the memory usage of hermite_estimator objects is small and fixed irrespective of group size and that batch estimation is fast, implies that it is practical to perform estimation on a very large number of groups. We illustrate this in the example below.
+A useful application of the hermite_estimator class is to obtain pdf, cdf and quantile function estimates on groups of data as illustrated in the example below. The fact that the memory usage of hermite_estimator objects is small and fixed irrespective of group size and that batch estimation is fast, implies that it is practical to perform estimation on a very large number of groups. 
 
 ## Using data.table
 
-We first present the example using the data.table package.
+We first present the example using the `data.table` package.
 
 ```{r}
 # Prepare Test Data
@@ -179,12 +175,12 @@ setDT(test_data)
 ```
 
 ```{r}
-# Group observations by distribution and idx and create Hermite estimator
+# Group observations by distribution and idx and create Hermite estimators
 estimates <- test_data[,.(herm_est = list(hermite_estimator(N=10,standardize = TRUE) %>% update_batch(observations))),by=.(dist_name,idx)]
 estimates
 ```
 
-Hermite series based estimators can also be consistently combined. In particular, when standardize = FALSE, the pdf, cdf and quantile value results obtained from combining distinct hermite_estimators updated on subsets of a data set are exactly equal to those obtaind by constructing a single hermite_estimator and updating on the full data set (corresponding to the concatenation of the aforementioned subsets). When standardize = TRUE, the equivalence is no longer exact, but is accurate enough to be practically useful. Combining hermite_estimators is illustrated below.
+Hermite series based estimators can also be consistently combined. In particular, when standardize = FALSE, the pdf, cdf and quantile value results obtained from combining distinct hermite_estimators updated on subsets of a data set are exactly equal to those obtained by constructing a single hermite_estimator and updating on the full data set (corresponding to the concatenation of the aforementioned subsets). When standardize = TRUE, the equivalence is no longer exact, but is accurate enough to be practically useful. Combining hermite_estimators is illustrated below.
 
 ```{r}
 # Group observations by distribution and combine Hermite estimators
@@ -201,7 +197,7 @@ quantile_vals <- combined_estimates[,.(quantile_est = list(quant(herm_comb[[1]],
 
 ## Using dplyr
 
-The same illustrative example is presented using the dplyr package instead of the data.table package below.
+The same illustrative example is presented using the `dplyr` package instead of the `data.table` package below.
 
 ```{r}
 # Prepare Test Data
@@ -217,7 +213,7 @@ for (i in c(1:5)) {
 ```
 
 ```{r}
-# Group observations by distribution and idx and create Hermite estimator
+# Group observations by distribution and idx and create Hermite estimators
 estimates <- test_data %>% group_by(dist_name,idx) %>% summarise(herm_est = list(hermite_estimator(N=10,standardize = TRUE) %>% update_batch(observations)))
 estimates
 ```
@@ -256,9 +252,9 @@ mean_abs_error_summary <- data.frame(dist_name=dens_vals$dist_name, mean_abs_err
 datatable(mean_abs_error_summary) %>% formatRound(columns =c("mean_abs_error_density","mean_abs_error_cum_prob","mean_abs_error_quantiles"),digits = 3)
 ```
 
-# Applying to nonstationary data (sequential setting)
+# Applying to non-stationary data (sequential setting)
 
-Another useful application of the hermite_estimator class is to obtain pdf, cdf and quantile function estimates on streaming data. The speed of estimation allows the pdf, cdf and quantile functions to be estimated in real time. In addition, by applying an exponentially weighted form of the Hermite series based estimator, nonstationary streams can be handled. The estimator will adapt to the new distribution and "forget" the old distribution as illustrated in the example below. In order to use the exponentially weighted form of the hermite_estimator, the exp_weight_lambda argument must be set to a non-NA value. Typical values for this parameter are 0.01, 0.05 and 0.1. The lower the exponential weighting parameter, the slower the estimator adapts and vice versa for higher values of the parameter. However, variance increases with higher values of exp_weight_lambda, so there is a trade-off to bear in mind.
+Another useful application of the hermite_estimator class is to obtain pdf, cdf and quantile function estimates on streaming data. The speed of estimation allows the pdf, cdf and quantile functions to be estimated in real time. In addition, by applying an exponentially weighted form of the Hermite series based estimator, non-stationary streams can be handled. The estimator will adapt to the new distribution and "forget" the old distribution as illustrated in the example below. In this example, the  distribution from which the observations are drawn switches from a Chi-square distribution to a logistic distribution and finally to a normal distribution. In order to use the exponentially weighted form of the hermite_estimator, the exp_weight_lambda argument must be set to a non-NA value. Typical values for this parameter are 0.01, 0.05 and 0.1. The lower the exponential weighting parameter, the slower the estimator adapts and vice versa for higher values of the parameter. However, variance increases with higher values of exp_weight_lambda, so there is a trade-off to bear in mind.
 
 ```{r}
 # Prepare Test Data
@@ -325,7 +321,7 @@ res_q <- res_q %>% mutate(idx_vals=idx_vals*100)
 ```
 
 ```{r eval=FALSE}
-# Visualize Results for PDF
+# Visualize Results for PDF (Not run, requires gganimate, gifski and transformr packages)
 p <- ggplot(res,aes(x=x)) + geom_line(aes(y=pdf_est_vals, colour="Estimated")) + geom_line(aes(y=actual_pdf_vals, colour="Actual")) +
   scale_colour_manual("", 
                       breaks = c("Estimated", "Actual"),
@@ -336,7 +332,7 @@ anim_save("pdf.gif",p)
 ![](pdf.gif)
 
 ```{r eval=FALSE}
-# Visualize Results for CDF
+# Visualize Results for CDF (Not run, requires gganimate, gifski and transformr packages)
 p <- ggplot(res,aes(x=x)) + geom_line(aes(y=cdf_est_vals, colour="Estimated")) + geom_line(aes(y=actual_cdf_vals, colour="Actual")) +
   scale_colour_manual("", 
                       breaks = c("Estimated", "Actual"),
@@ -347,7 +343,7 @@ anim_save("cdf.gif", p)
 ![](cdf.gif)
 
 ```{r eval=FALSE}
-# Visualize Results for Quantiles
+# Visualize Results for Quantiles (Not run, requires gganimate, gifski and transformr packages)
 p <- ggplot(res_q,aes(x=actual_quantile_vals)) + geom_point(aes(y=quantile_est_vals), color="blue") + geom_abline(slope=1,intercept = 0) +xlab("Theoretical Quantiles") + ylab("Estimated Quantiles") +transition_states(idx_vals,transition_length = 2, state_length = 1)+ ggtitle('Observation index {closest_state}')
 anim_save("quant.gif",p)
 ```
