@@ -72,13 +72,13 @@ test_that("batch updates of hermite_estimator work as expected", {
   hermite_est <- hermite_estimator(N = 10, standardize = TRUE)
   hermite_est <- hermite_est %>% update_batch(test_observations)
   expect_equal(target_coeff_vec_standardized,
-               hermite_est$coeff_vec,
+               get_coefficients(hermite_est),
                tolerance = 1e-07)
   
   hermite_est <- hermite_estimator(N = 10, standardize = FALSE)
   hermite_est <- hermite_est %>% update_batch(test_observations)
   expect_equal(target_coeff_vec_unstandardized,
-               hermite_est$coeff_vec,
+               get_coefficients(hermite_est),
                tolerance = 1e-07)
 })
 
@@ -149,7 +149,7 @@ test_that("sequential updates of hermite_estimator work as expected", {
       hermite_est %>% update_sequential(test_observations[idx])
   }
   expect_equal(target_coeff_vec_standardized,
-               hermite_est$coeff_vec,
+               get_coefficients(hermite_est),
                tolerance = 1e-07)
   
   hermite_est <- hermite_estimator(N = 10, standardize = FALSE)
@@ -158,7 +158,7 @@ test_that("sequential updates of hermite_estimator work as expected", {
       hermite_est %>% update_sequential(test_observations[idx])
   }
   expect_equal(target_coeff_vec_unstandardized,
-               hermite_est$coeff_vec,
+               get_coefficients(hermite_est),
                tolerance = 1e-07)
 })
 
@@ -234,7 +234,7 @@ test_that("sequential updates of exponentially weighted hermite_estimator
                 hermite_est %>% update_sequential(test_observations[idx])
             }
             expect_equal(target_coeff_vec_standardized,
-                         hermite_est$coeff_vec,
+                         get_coefficients(hermite_est),
                          tolerance = 1e-07)
             
             hermite_est <-
@@ -246,7 +246,7 @@ test_that("sequential updates of exponentially weighted hermite_estimator
                 hermite_est %>% update_sequential(test_observations[idx])
             }
             expect_equal(target_coeff_vec_unstandardized,
-                         hermite_est$coeff_vec,
+                         get_coefficients(hermite_est),
                          tolerance = 1e-07)
           })
 
@@ -370,6 +370,9 @@ test_that("probability density estimation works as expected", {
     )
   expect_equal(pdf_vals, target_pdf_vals_standardized, tolerance = 1e-07)
   
+  pdf_vals <- hermite_est %>% dens(x, clipped=T)
+  expect_equal(pdf_vals, target_pdf_vals_standardized, tolerance = 1e-07)
+  
   hermite_est <-
     hermite_estimator(N = 10,
                       standardize = FALSE,
@@ -392,6 +395,30 @@ test_that("probability density estimation works as expected", {
       0.2352683
     )
   expect_equal(pdf_vals, target_pdf_vals_unstandardized, tolerance = 1e-07)
+  
+  hermite_est <-
+    hermite_estimator(N = 10,
+                      standardize = FALSE,
+                      exp_weight_lambda = 0.1)
+  for (idx in seq_along(test_observations)) {
+    hermite_est <-
+      hermite_est %>% update_sequential(test_observations[idx])
+  }
+  pdf_vals <- hermite_est %>% dens(x, clipped = TRUE)
+  target_pdf_vals_unstandardized_clipped <-
+    c(
+      0.2632709,
+      0.2498718,
+      1e-8,
+      0.1122043,
+      0.4209524,
+      0.2511466,
+      0.07670513,
+      0.1983007,
+      0.2352683
+    )
+  expect_equal(pdf_vals, target_pdf_vals_unstandardized_clipped,
+               tolerance = 1e-07)
   
   hermite_est <-
     hermite_estimator(N = 10,
@@ -464,6 +491,12 @@ test_that("cumulative distribution function estimation works as expected",
             cdf_est <- hermite_est %>% cum_prob(0.5)
             expect_equal(cdf_est, 0.6549575, tolerance = 1e-07)
             expect_equal(cdf_from_pdf, cdf_est, tolerance = 1e-07)
+            
+            cdf_est <- hermite_est %>% cum_prob(0.5, clipped=TRUE)
+            expect_equal(cdf_est, 0.6549575, tolerance = 1e-07)
+            
+            cdf_est <- hermite_est %>% cum_prob(3, clipped=TRUE)
+            expect_equal(cdf_est, 1, tolerance = 1e-07)
             
             hermite_est <-
               hermite_estimator(N = 10, standardize = TRUE) %>%

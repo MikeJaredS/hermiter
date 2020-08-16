@@ -62,6 +62,26 @@ hermite_estimator <-
     return(this)
   }
 
+#' Returns Hermite series expansion coefficients
+#'
+#'
+#' @param this A hermite_estimator object. 
+#' @return Numeric vector of length N+1
+#' @export
+#' @examples
+#' hermite_est_1 <- hermite_estimator(N = 10, standardize = FALSE)
+#' hermite_est_1 <- update_batch(hermite_est_1, rnorm(30))
+#' coefficient_vec <- get_coefficients(hermite_est_1)
+get_coefficients <- function(this) {
+  UseMethod("get_coefficients", this)
+}
+
+#' @export
+get_coefficients.hermite_estimator <-
+  function(this) {
+    return(this$coeff_vec)
+  }
+
 #' Combines two Hermite estimators
 #'
 #' This method allows a pair of Hermite based estimators of class
