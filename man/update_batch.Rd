@@ -20,5 +20,6 @@ This method can be applied in one-pass batch estimation settings. This
 method cannot be used with an exponentially weighted estimator.
 }
 \examples{
-hermite_estimator <- update_batch(hermite_estimator(N = 10, standardize = TRUE), x = c(1, 2))
+hermite_estimator <- hermite_estimator(N = 10, standardize = TRUE)
+hermite_estimator <- update_batch(hermite_estimator, x = c(1, 2))
 }

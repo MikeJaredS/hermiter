@@ -19,5 +19,6 @@ An object of class hermite_estimator.
 This method can be applied in sequential estimation settings.
 }
 \examples{
-hermite_estimator <- update_sequential(hermite_estimator(N = 10, standardize = TRUE), x = 2)
+hermite_estimator <- hermite_estimator(N = 10, standardize = TRUE)
+hermite_estimator <- update_sequential(hermite_estimator, x = 2)
 }
