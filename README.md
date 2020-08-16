@@ -16,7 +16,9 @@ subsets of the data can be consistently combined. The Hermite series based
 estimators have the distinct advantage of being able to estimate the full 
 density function, distribution function and quantile function in an online 
 manner.The theoretical and empirical properties of these estimators have been 
-studied in-depth in the following articles,
+studied in-depth in the articles below. The investigations demonstrate that
+the Hermite series based estimators are particularly effective in distribution
+function and quantile estimation.
 
 * [Stephanou, Michael, Melvin Varughese, and Iain Macdonald. "Sequential quantiles via Hermite series density estimation." Electronic Journal of Statistics 11.1 (2017): 570-607.](https://projecteuclid.org/euclid.ejs/1488531636) 
 * [Stephanou, Michael, and Melvin Varughese. "On the properties of hermite series based distribution function estimators." Metrika (2020): 1-25.](https://link.springer.com/article/10.1007/s00184-020-00785-z)
