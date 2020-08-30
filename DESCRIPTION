@@ -1,6 +1,6 @@
 Package: hermiter
 Title: Efficient Sequential and Batch Estimation of Probability Density Functions, Cumulative Distribution Functions and Quantiles
-Version: 0.1.0
+Version: 1.0.0
 Authors@R: c(
   person("Michael","Stephanou",role=c("aut","cre"), email="michael.stephanou@gmail.com"),
   person("Melvin","Varughese",role="ctb"))
