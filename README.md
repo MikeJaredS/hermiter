@@ -2,6 +2,7 @@
 
 <!-- badges: start -->
 [![Travis build status](https://travis-ci.com/MikeJaredS/hermiter.svg?branch=master)](https://travis-ci.com/MikeJaredS/hermiter)
+[![codecov](https://codecov.io/gh/MikeJaredS/hermiter/branch/master/graph/badge.svg)](https://codecov.io/gh/MikeJaredS/hermiter)
 <!-- badges: end -->
 
 
