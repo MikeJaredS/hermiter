@@ -442,6 +442,9 @@ test_that("probability density estimation works as expected", {
       0.2253963
     )
   expect_equal(pdf_vals, target_pdf_vals_standardized, tolerance = 1e-07)
+  hermite_est <-
+    hermite_estimator(N = 10)
+  expect_equal(hermite_est %>% dens(x),NA)
 })
 
 test_that("cumulative distribution function estimation works as expected",
@@ -549,6 +552,9 @@ test_that("cumulative distribution function estimation works as expected",
             cdf_est <- hermite_est %>% cum_prob(0.5)
             expect_equal(cdf_est, 0.4344541, tolerance = 1e-07)
             expect_equal(cdf_from_pdf, cdf_est, tolerance = 1e-07)
+            hermite_est <-
+              hermite_estimator(N = 10)
+            expect_equal(hermite_est %>% cum_prob(0.5),NA)
           })
 
 test_that("quantile estimation works as expected", {
@@ -591,6 +597,8 @@ test_that("quantile estimation works as expected", {
   expect_equal(quantiles_est,
                c(-1.54823599, 0.04145506, 0.90889172),
                tolerance = 1e-07)
+  expect_equal(hermite_estimator(N = 10, standardize = TRUE) %>%
+                 quant(c(0.25, 0.5, 0.75)), NA)
   cum_prob_check <-
     hermite_est %>% cum_prob_quantile_helper((hermite_est %>% quant(0.75)
                                               - hermite_est$running_mean) /
