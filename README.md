@@ -123,7 +123,7 @@ for reading streaming data that generates micro-batches of standard exponential
 i.i.d. random data. This stub can easily be swapped out for a method reading 
 micro-batches from a Kafka topic or similar.
 
-The Shiny sample code below is included below.
+The Shiny sample code is included below.
 
 ```{r}
 # Copy and paste into app.R and run.
