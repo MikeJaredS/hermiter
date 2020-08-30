@@ -109,21 +109,19 @@ for (idx in c(1:length(observations))) {
 
 ### Applying to stationary data
 
-Another useful application of the hermite_estimator class is to obtain pdf, cdf 
-and quantile function estimates on streaming data. The speed of estimation 
-allows the pdf, cdf and quantile functions to be estimated in real time. We 
-illustrate this below for cdf and quantile estimation with a sample Shiny 
-application. We reiterate that the particular usefulness is that the full pdf, 
-cdf and quantile functions are updated in real time. Thus, any arbitrary 
-quantile can be evaluated at any point in time. We include a stub for reading 
-streaming data that generates micro-batches of standard exponential i.i.d. 
-random data. This stub can easily be swapped out for a method reading 
+The speed of estimation allows the pdf, cdf and quantile functions to be 
+estimated in real time. We illustrate this below for cdf and quantile estimation
+with a sample Shiny application. We reiterate that the particular usefulness is 
+that the full pdf, cdf and quantile functions are updated in real time. Thus, 
+any arbitrary quantile can be evaluated at any point in time. We include a stub 
+for reading streaming data that generates micro-batches of standard exponential 
+i.i.d. random data. This stub can easily be swapped out for a method reading 
 micro-batches from a Kafka topic or similar.
 
 The Shiny sample code below is included below.
 
 ```{r}
-# Not Run. Copy and paste into app.R and run.
+# Copy and paste into app.R and run.
 library(shiny)
 library(hermiter)
 library(ggplot2)
