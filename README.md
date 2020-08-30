@@ -1,5 +1,10 @@
 # hermiter
 
+<!-- badges: start -->
+[![Travis build status](https://travis-ci.com/MikeJaredS/hermiter.svg?branch=master)](https://travis-ci.com/MikeJaredS/hermiter)
+<!-- badges: end -->
+
+
 ## What does hermiter do?
 
 `hermiter` facilitates the estimation of the full probability density function, 
