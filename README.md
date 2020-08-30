@@ -47,7 +47,7 @@ install.packages("hermiter")
 In order to utilize the hermiter package, the package must be loaded using the 
 following command:
 
-```{r setup, message=FALSE, warning=FALSE}
+```{r}
 library(hermiter)
 ```
 
@@ -107,22 +107,98 @@ for (idx in c(1:length(observations))) {
 }
 ```
 
-### Applying to non-stationary data
+### Applying to stationary data
 
 Another useful application of the hermite_estimator class is to obtain pdf, cdf 
 and quantile function estimates on streaming data. The speed of estimation 
-allows the pdf, cdf and quantile functions to be estimated in real time. In 
-addition, by applying an exponentially weighted form of the Hermite series based
-estimator, non-stationary streams can be handled. The estimator will adapt to 
-the new distribution and "forget" the old distribution as illustrated in the 
-example below. In this example, the  distribution from which the observations 
-are drawn switches from a Chi-square distribution to a logistic distribution and
-finally to a normal distribution. In order to use the exponentially weighted 
-form of the hermite_estimator, the exp_weight_lambda argument must be set to a 
-non-NA value. Typical values for this parameter are 0.01, 0.05 and 0.1. The 
-lower the exponential weighting parameter, the slower the estimator adapts and 
-vice versa for higher values of the parameter. However, variance increases with 
-higher values of exp_weight_lambda, so there is a trade-off to bear in mind.
+allows the pdf, cdf and quantile functions to be estimated in real time. We 
+illustrate this below for cdf and quantile estimation with a sample Shiny 
+application. We reiterate that the particular usefulness is that the full pdf, 
+cdf and quantile functions are updated in real time. Thus, any arbitrary 
+quantile can be evaluated at any point in time. We include a stub for reading 
+streaming data that generates micro-batches of standard exponential i.i.d. 
+random data. This stub can easily be swapped out for a method reading 
+micro-batches from a Kafka topic or similar.
+
+The Shiny sample code below is included below.
+
+```{r}
+# Not Run. Copy and paste into app.R and run.
+library(shiny)
+library(hermiter)
+library(ggplot2)
+library(magrittr)
+
+ui <- fluidPage(
+    titlePanel("Streaming Statistics Analysis Example: Exponential 
+               i.i.d. stream"),
+    sidebarLayout(
+        sidebarPanel(
+            sliderInput("percentile", "Percentile:",
+                        min = 0.01, max = 0.99,
+                        value = 0.5, step = 0.01)
+        ),
+        mainPanel(
+           plotOutput("plot"),
+           textOutput("quantile_text")
+        )
+    )
+)
+
+server <- function(input, output) {
+    values <- reactiveValues(hermite_est = 
+                                 hermite_estimator(N = 10, standardize = TRUE))
+    x <- seq(-15, 15, 0.1)
+    # Note that the stub below could be replaced with code that reads streaming 
+    # data from various sources, Kafka etc.  
+    read_stream_stub_micro_batch <- reactive({
+        invalidateLater(1000)
+        new_observation <- rexp(10)
+        return(new_observation)
+    })
+    updated_cdf_calc <- reactive({
+        micro_batch <- read_stream_stub_micro_batch()
+        for (idx in seq_along(micro_batch)) {
+            values[["hermite_est"]] <- isolate(values[["hermite_est"]]) %>%
+                update_sequential(micro_batch[idx])
+        }
+        cdf_est <- isolate(values[["hermite_est"]]) %>%
+            cum_prob(x, clipped = TRUE)
+        df_cdf <- data.frame(x, cdf_est)
+        return(df_cdf)
+    })
+    updated_quantile_calc <- reactive({
+        values[["hermite_est"]]  %>% quant(input$percentile)
+    })
+    output$plot <- renderPlot({
+        ggplot(updated_cdf_calc(), aes(x = x)) + geom_line(aes(y = cdf_est)) +
+            ylab("Cumulative Probability")
+    }
+    )
+    output$quantile_text <- renderText({ 
+        return(paste(input$percentile * 100, "th Percentile:", 
+                     round(updated_quantile_calc(), 2)))
+    })
+}
+shinyApp(ui = ui, server = server)
+```
+
+![](./vignettes/shiny_stream_example.gif)
+
+### Applying to non-stationary data
+
+The hermite_estimator is also applicable to non-stationary data streams.
+A weighted form of the Hermite series based estimator can be applied to handle 
+this case. The estimator will adapt to the new distribution and 
+"forget" the old distribution as illustrated in the example below. In this 
+example, the  distribution from which the observations are drawn switches from
+a Chi-square distribution to a logistic distribution and finally to a normal 
+distribution. In order to use the exponentially weighted form of the 
+hermite_estimator, the exp_weight_lambda argument must be set to a non-NA value.
+Typical values for this parameter are 0.01, 0.05 and 0.1. The lower the 
+exponential weighting parameter, the slower the estimator adapts and vice versa 
+for higher values of the parameter. However, variance increases with higher 
+values of exp_weight_lambda, so there is a trade-off to bear in mind.
 
 ```{r}
 # Prepare Test Data
@@ -154,7 +230,7 @@ h_est <- hermite_estimator(N=20,standardize = T,exp_weight_lambda = 0.005)
 
 ```{r}
 # Loop through test data and update h_est to simulate observations arriving 
-sequentially
+# sequentially
 count <- 1
 res <- data.frame()
 res_q <- data.frame()
@@ -181,9 +257,9 @@ for (idx in c(1:length(test))) {
     pdf_est_vals <- h_est %>% dens(x, clipped=T)
     quantile_est_vals <- h_est %>% quant(p)
     res <- rbind(res,data.frame(idx_vals,x,cdf_est_vals,actual_cdf_vals,
-    pdf_est_vals,actual_pdf_vals))
+                                pdf_est_vals,actual_pdf_vals))
     res_q <- rbind(res_q,data.frame(idx_vals=rep(count,length(p)),p,
-    quantile_est_vals,actual_quantile_vals))
+                                    quantile_est_vals,actual_quantile_vals))
     count <- count +1
   }
 }
@@ -192,40 +268,42 @@ res_q <- res_q %>% mutate(idx_vals=idx_vals*100)
 ```
 
 ```{r}
-# Visualize Results for PDF (requires gganimate, gifski and transformr packages)
+# Visualize Results for PDF (Not run, requires gganimate, gifski and transformr
+# packages)
 p <- ggplot(res,aes(x=x)) + geom_line(aes(y=pdf_est_vals, colour="Estimated")) + geom_line(aes(y=actual_pdf_vals, colour="Actual")) +
   scale_colour_manual("", 
                       breaks = c("Estimated", "Actual"),
                       values = c("blue", "black")) + ylab("Probability Density") +transition_states(idx_vals,transition_length = 2,state_length = 1) +
-                      ggtitle('Observation index {closest_state}')
+  ggtitle('Observation index {closest_state}')
 anim_save("pdf.gif",p)
 ```
 
 ![](./vignettes/pdf.gif)
 
 ```{r}
-# Visualize Results for CDF (requires gganimate, gifski and transformr packages)
+# Visualize Results for CDF (Not run, requires gganimate, gifski and transformr
+# packages)
 p <- ggplot(res,aes(x=x)) + geom_line(aes(y=cdf_est_vals, colour="Estimated")) + geom_line(aes(y=actual_cdf_vals, colour="Actual")) +
   scale_colour_manual("", 
                       breaks = c("Estimated", "Actual"),
                       values = c("blue", "black")) +
-                      ylab("Cumulative Probability") + 
-                      transition_states(idx_vals, transition_length = 2,
-                      state_length = 1) +
-                      ggtitle('Observation index {closest_state}')
+  ylab("Cumulative Probability") + 
+  transition_states(idx_vals, transition_length = 2,state_length = 1) +
+  ggtitle('Observation index {closest_state}')
 anim_save("cdf.gif", p)
 ```
 
 ![](./vignettes/cdf.gif)
 
 ```{r}
-# Visualize Results for Quantiles (requires gganimate, gifski and
+# Visualize Results for Quantiles (Not run, requires gganimate, gifski and 
 # transformr packages)
 p <- ggplot(res_q,aes(x=actual_quantile_vals)) +
-geom_point(aes(y=quantile_est_vals), color="blue") +
-geom_abline(slope=1,intercept = 0) +xlab("Theoretical Quantiles") +
-ylab("Estimated Quantiles") +transition_states(idx_vals,transition_length = 2,
-state_length = 1)+ ggtitle('Observation index {closest_state}')
+  geom_point(aes(y=quantile_est_vals), color="blue") +
+  geom_abline(slope=1,intercept = 0) +xlab("Theoretical Quantiles") +
+  ylab("Estimated Quantiles") + 
+  transition_states(idx_vals,transition_length = 2, state_length = 1) +
+  ggtitle('Observation index {closest_state}')
 anim_save("quant.gif",p)
 ```
 
