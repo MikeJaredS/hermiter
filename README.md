@@ -44,7 +44,7 @@ at arbitrary x
 ## Installation
 
 ```r
-install.packages("hermiter")
+devtools::install_github("MikeJaredS/hermiter")
 ```
 
 ## Load Package
