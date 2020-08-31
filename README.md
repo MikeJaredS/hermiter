@@ -8,10 +8,11 @@
 
 ## What does hermiter do?
 
-`hermiter` facilitates the estimation of the full probability density function, 
-cumulative distribution function and quantile function using Hermite series 
-based estimators. The package is applicable to streaming, batch and grouped 
-data. The core methods of the package are written in C++ for speed.
+`hermiter` is an R package that facilitates the estimation of the full 
+probability density function, cumulative distribution function and quantile 
+function using Hermite series based estimators. The package is applicable to 
+streaming, batch and grouped data. The core methods of the package are written 
+in C++ for speed.
 
 These estimators are particularly useful in the sequential setting (both 
 stationary and non-stationary data streams). In addition, they are useful in 
