@@ -11,8 +11,8 @@
 `hermiter` is an R package that facilitates the estimation of the full 
 probability density function, cumulative distribution function and quantile 
 function using Hermite series based estimators. The package is applicable to 
-streaming, batch and grouped data. The core methods of the package are written 
-in C++ for speed.
+streaming (sequential), batch and grouped data. The core methods of the package 
+are written in C++ for speed.
 
 These estimators are particularly useful in the sequential setting (both 
 stationary and non-stationary data streams). In addition, they are useful in 
@@ -27,8 +27,8 @@ studied in-depth in the articles below. The investigations demonstrate that
 the Hermite series based estimators are particularly effective in distribution
 function and quantile estimation.
 
-* [Stephanou, Michael, Melvin Varughese, and Iain Macdonald. "Sequential quantiles via Hermite series density estimation." Electronic Journal of Statistics 11.1 (2017): 570-607.](https://projecteuclid.org/euclid.ejs/1488531636) 
-* [Stephanou, Michael, and Melvin Varughese. "On the properties of hermite series based distribution function estimators." Metrika (2020): 1-25.](https://link.springer.com/article/10.1007/s00184-020-00785-z)
+* [Stephanou, Michael, Varughese, Melvin and Macdonald, Iain. "Sequential quantiles via Hermite series density estimation." Electronic Journal of Statistics 11.1 (2017): 570-607.](https://projecteuclid.org/euclid.ejs/1488531636) 
+* [Stephanou, Michael and Varughese, Melvin. "On the properties of hermite series based distribution function estimators." Metrika (2020).](https://link.springer.com/article/10.1007/s00184-020-00785-z)
 
 ## Features
 
