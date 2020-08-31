@@ -45,6 +45,8 @@ at arbitrary x
 
 ## Installation
 
+`hermiter` can be installed using `devtools`:
+
 ```r
 devtools::install_github("MikeJaredS/hermiter")
 ```
