@@ -498,7 +498,7 @@ quantile_helper.hermite_estimator <- function(this, p) {
 #' @param this A hermite_estimator object.
 #' @param p A numeric vector. A vector of probability values.
 #' @return A numeric vector. The vector of quantile values associated with the
-#' probabilites p.
+#' probabilities p.
 #' @export
 #' @examples
 #' hermite_est <- hermite_estimator(N = 10, standardize = TRUE)

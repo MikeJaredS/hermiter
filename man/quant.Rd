@@ -13,7 +13,7 @@ quant(this, p)
 }
 \value{
 A numeric vector. The vector of quantile values associated with the
-probabilites p.
+probabilities p.
 }
 \description{
 Estimates the quantiles at a vector of probability values
