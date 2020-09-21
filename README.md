@@ -41,7 +41,11 @@ weighting
 median at any point in time along with probability densities and cumulative 
 probabilities
 at arbitrary x
-* uses small and fixed memory for the estimator
+* uses small and constant memory for the estimator
+* provides a very compact, simultaneous representation of the pdf, cdf and 
+quantile function that can be efficiently stored and communicated using e.g. 
+saveRDS and readRDS functions (potentially even suitable for data with privacy 
+restrictions since no observations are directly stored in the estimator object)
 
 ## Installation
 
