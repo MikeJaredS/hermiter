@@ -45,7 +45,7 @@ at arbitrary x
 * provides a very compact, simultaneous representation of the pdf, cdf and 
 quantile function that can be efficiently stored and communicated using e.g. 
 saveRDS and readRDS functions (potentially even suitable for data with privacy 
-restrictions since no observations are directly stored in the estimator object)
+restrictions since observations are not directly stored in the estimator object)
 
 ## Installation
 
