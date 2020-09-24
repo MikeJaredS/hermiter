@@ -49,7 +49,13 @@ restrictions since observations are not directly stored in the estimator object)
 
 ## Installation
 
-`hermiter` can be installed using `devtools`:
+The release version of `hermiter` can be installed from CRAN with:
+
+```r
+install.packages("hermiter")
+```
+
+The development version of `hermiter` can be installed using `devtools` with:
 
 ```r
 devtools::install_github("MikeJaredS/hermiter")
