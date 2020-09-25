@@ -20,9 +20,7 @@ differs from the cum_prob.hermite_estimator.
 }
 \details{
 The modified distribution function estimator appears more accurate for
-quantile estimation as validated empirically in:
-
-\url{https://projecteuclid.org/euclid.ejs/1488531636}
+quantile estimation as validated empirically.
 
 This method is intended for internal use by the hermite_estimator class.
 }

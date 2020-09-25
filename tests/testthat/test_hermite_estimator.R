@@ -117,17 +117,17 @@ test_that("sequential updates of hermite_estimator work as expected", {
   )
   target_coeff_vec_standardized <-
     c(
-      0.5492528,
+      0.52421532,
       0.08216913,
-      0.004834347,
+      0.02253855,
       0.01674095,
-      -0.04670184,
+      -0.06203412,
       -0.01720743,
-      -0.003257658,
+      0.01073874,
       -0.02520607,
-      0.04960573,
+      0.03651330,
       0.06876952,
-      -0.07160235
+      -0.05918178
     )
   target_coeff_vec_unstandardized <-
     c(
@@ -555,6 +555,20 @@ test_that("cumulative distribution function estimation works as expected",
             hermite_est <-
               hermite_estimator(N = 10)
             expect_equal(hermite_est %>% cum_prob(0.5),NA)
+            
+            hermite_est <-
+              hermite_estimator(N = 10, standardize = FALSE) %>%
+              update_batch(test_observations)
+            cdf_from_pdf <- 1- stats::integrate(
+              f = function(x) {
+                hermite_est %>% dens(x)
+              },
+              lower = 1,
+              upper = Inf
+            )$value
+            cdf_est <- hermite_est %>% cum_prob_quantile_helper(1)
+            expect_equal(cdf_est, 0.769892, tolerance = 1e-06)
+            expect_equal(cdf_from_pdf, cdf_est, tolerance = 1e-06)
           })
 
 test_that("quantile estimation works as expected", {
@@ -595,7 +609,7 @@ test_that("quantile estimation works as expected", {
     update_batch(test_observations)
   quantiles_est <- hermite_est %>% quant(c(0.25, 0.5, 0.75))
   expect_equal(quantiles_est,
-               c(-1.54823599, 0.04145506, 0.90889172),
+               c(-1.54823599,  0.04145506,  0.90889172),
                tolerance = 1e-07)
   expect_equal(hermite_estimator(N = 10, standardize = TRUE) %>%
                  quant(c(0.25, 0.5, 0.75)), NA)
@@ -614,8 +628,8 @@ test_that("quantile estimation works as expected", {
   }
   quantiles_est <- hermite_est %>% quant(c(0.25, 0.5, 0.75))
   expect_equal(quantiles_est,
-               c(-0.7546552, 0.1538964, 1.1258244),
-               tolerance = 1e-06)
+               c(-0.9205331,  0.1404577,  1.1469203),
+               tolerance = 1e-07)
   cum_prob_check <-
     hermite_est %>% cum_prob_quantile_helper((hermite_est %>% quant(0.75)
                                               - hermite_est$running_mean) /
@@ -633,7 +647,7 @@ test_that("quantile estimation works as expected", {
       hermite_est %>% update_sequential(test_observations[idx])
   }
   quantiles_est <- hermite_est %>% quant(c(0.25, 0.5, 0.75))
-  expect_equal(quantiles_est, c(-1.396857, 0.360104, 1.437417), 
+  expect_equal(quantiles_est, c(-1.396857,  0.360104,  1.437417), 
                tolerance = 1e-06)
   cum_prob_check <-
     hermite_est %>% cum_prob_quantile_helper((hermite_est %>% quant(0.75) -

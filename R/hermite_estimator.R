@@ -221,6 +221,9 @@ update_sequential.hermite_estimator <- function(this, x) {
       this$running_mean <- processed_vec[1]
       this$running_variance <- processed_vec[2]
       x <- processed_vec[3]
+      if (this$num_obs < 2) {
+        return(this)
+      }
     } else {
       processed_vec <-
         standardizeInputsEW(x,
@@ -417,9 +420,7 @@ dens.hermite_estimator <- function(this, x, clipped = FALSE) {
 #' differs from the cum_prob.hermite_estimator.
 #'
 #' The modified distribution function estimator appears more accurate for
-#' quantile estimation as validated empirically in:
-#'
-#' \url{https://projecteuclid.org/euclid.ejs/1488531636}
+#' quantile estimation as validated empirically.
 #'
 #' This method is intended for internal use by the hermite_estimator class.
 #'
