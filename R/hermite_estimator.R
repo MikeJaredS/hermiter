@@ -180,7 +180,7 @@ combine_hermite.list <- function(hermite_estimators) {
   if (length(hermite_estimators) == 1) {
     return(hermite_estimators[[1]])
   }
-  hermite_estimator_combined <- Reduce(combine_pair,hermite_estimators)
+  hermite_estimator_combined <- base::Reduce(combine_pair,hermite_estimators)
   return(hermite_estimator_combined)
 }
 
