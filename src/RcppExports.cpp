@@ -5,6 +5,18 @@
 
 using namespace Rcpp;
 
+// hermite_polynomial
+NumericMatrix hermite_polynomial(int N, NumericVector x);
+RcppExport SEXP _hermiter_hermite_polynomial(SEXP NSEXP, SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type N(NSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(hermite_polynomial(N, x));
+    return rcpp_result_gen;
+END_RCPP
+}
 // hermite_normalization
 NumericVector hermite_normalization(int N);
 RcppExport SEXP _hermiter_hermite_normalization(SEXP NSEXP) {
@@ -17,7 +29,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // hermite_function
-NumericVector hermite_function(int N, NumericVector x, NumericVector normalization);
+NumericMatrix hermite_function(int N, NumericVector x, NumericVector normalization);
 RcppExport SEXP _hermiter_hermite_function(SEXP NSEXP, SEXP xSEXP, SEXP normalizationSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -30,7 +42,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // hermite_integral_val
-NumericVector hermite_integral_val(int N, NumericVector x, NumericMatrix hermite_function_mat);
+NumericMatrix hermite_integral_val(int N, NumericVector x, NumericMatrix hermite_function_mat);
 RcppExport SEXP _hermiter_hermite_integral_val(SEXP NSEXP, SEXP xSEXP, SEXP hermite_function_matSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -43,7 +55,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // hermite_integral_val_quantile_adap
-NumericVector hermite_integral_val_quantile_adap(int N, NumericVector x, NumericMatrix hermite_function_mat);
+NumericMatrix hermite_integral_val_quantile_adap(int N, NumericVector x, NumericMatrix hermite_function_mat);
 RcppExport SEXP _hermiter_hermite_integral_val_quantile_adap(SEXP NSEXP, SEXP xSEXP, SEXP hermite_function_matSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -86,6 +98,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_hermiter_hermite_polynomial", (DL_FUNC) &_hermiter_hermite_polynomial, 2},
     {"_hermiter_hermite_normalization", (DL_FUNC) &_hermiter_hermite_normalization, 1},
     {"_hermiter_hermite_function", (DL_FUNC) &_hermiter_hermite_function, 3},
     {"_hermiter_hermite_integral_val", (DL_FUNC) &_hermiter_hermite_integral_val, 3},

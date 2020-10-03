@@ -6,6 +6,35 @@
 using namespace std;
 using namespace Rcpp;
 
+//' Outputs physicist version of Hermite Polynomials
+//' 
+//' 
+//' The method calculates the physicist version of Hermite polynomials, 
+//' \eqn{H_k(x)} from \eqn{k=0,\dots,N} for the vector of values, x.
+//' 
+//' @author Michael Stephanou <michael.stephanou@gmail.com>
+//'
+//' @param N An integer number.
+//' @param x A numeric vector.
+//' @return A numeric matrix with N+1 rows and length(x) columns.
+//' @export
+// [[Rcpp::export]]
+NumericMatrix hermite_polynomial(int N, NumericVector x) {
+  int x_size = x.size();
+  NumericMatrix hermite(N + 1, x_size);
+  for(int i = 0; i < x_size; ++i) {
+    hermite(0,i) = 1;
+    hermite(1,i) = 2 * x[i];
+  }
+  for(int j = 0; j < x_size; ++j) {
+    for(int i = 2; i <= N; ++i) {
+      hermite(i,j) = 2 * x[j] * hermite(i - 1,j) - 2 
+      * (i - 1) * hermite(i - 2,j);
+    }
+  }
+  return hermite;
+}
+
 //' Outputs Hermite normalization factors 
 //' 
 //' The method returns numeric normalization factors that, when multiplied by 
@@ -43,7 +72,7 @@ NumericVector hermite_normalization(int N) {
 //' @return A numeric matrix with N+1 rows and length(x) columns.
 //' @export
 // [[Rcpp::export]]
-NumericVector hermite_function(int N, NumericVector x, 
+NumericMatrix hermite_function(int N, NumericVector x, 
                                NumericVector normalization) {
   int x_size = x.size();
   NumericMatrix hermite(N + 1, x_size);
@@ -79,7 +108,7 @@ NumericVector hermite_function(int N, NumericVector x,
 //' @return A numeric matrix with N+1 rows and length(x) columns.
 //' @export
 // [[Rcpp::export]]
-NumericVector hermite_integral_val(int N, NumericVector x, 
+NumericMatrix hermite_integral_val(int N, NumericVector x, 
                                    NumericMatrix hermite_function_mat) {
   int x_size = x.size();
   NumericMatrix out(N + 1, x_size);
@@ -119,7 +148,7 @@ NumericVector hermite_integral_val(int N, NumericVector x,
 //' @return A numeric matrix with N+1 rows and length(x) columns.
 //' @export
 // [[Rcpp::export]]
-NumericVector hermite_integral_val_quantile_adap(int N,
+NumericMatrix hermite_integral_val_quantile_adap(int N,
                          NumericVector x, NumericMatrix hermite_function_mat) {
   int x_size = x.size();
   NumericMatrix out(N + 1, x_size);
