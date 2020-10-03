@@ -64,7 +64,6 @@ hermite_estimator <-
 
 #' Returns Hermite series expansion coefficients
 #'
-#'
 #' @param this A hermite_estimator object. 
 #' @return Numeric vector of length N+1
 #' @export
@@ -80,7 +79,69 @@ get_coefficients <- function(this) {
 get_coefficients.hermite_estimator <-
   function(this) {
     return(this$coeff_vec)
+}
+
+
+#' Internal method to consistently combine the number of observations, means and 
+#' variances of two Hermite estimators
+#' 
+#' The algorithm to combine the variances consistently comes from
+#' Schubert, Erich, and Michael Gertz. "Numerically stable parallel computation 
+#' of (co-) variance." Proceedings of the 30th International Conference on 
+#' Scientific and Statistical Database Management. 2018.
+#'
+#' @param hermite_estimator1 A hermite_estimator object.
+#' @param hermite_estimator2 A hermite_estimator object.
+#' @return An object of class hermite_estimator.
+combine_moments_and_count <- function(hermite_estimator1,hermite_estimator2){
+  num_obs_1 <- hermite_estimator1$num_obs
+  num_obs_2 <- hermite_estimator2$num_obs
+  hermite_combined <- hermite_estimator(hermite_estimator1$N_param, 
+                                        hermite_estimator1$standardize_obs)
+  hermite_combined$num_obs <- num_obs_1 + num_obs_2
+  hermite_combined$running_mean <- (num_obs_1*hermite_estimator1$running_mean +
+                num_obs_2*hermite_estimator2$running_mean)/(num_obs_1+num_obs_2)
+  hermite_combined$running_variance <- (hermite_estimator1$running_variance +
+      hermite_estimator2$running_variance) + ((num_obs_1 * num_obs_2) / 
+     (num_obs_1 + num_obs_2)) *(hermite_estimator1$running_mean 
+                                - hermite_estimator2$running_mean)^2
+  return(hermite_combined)
+}
+
+#' Internal method to combine a list of standardized Hermite estimators with 
+#' improved accuracy
+#'
+#'
+#' @param hermite_estimators A list of hermite_estimator objects.
+#' @return An object of class hermite_estimator.
+combine_standardized_helper <- function(hermite_estimators) {
+  N <- hermite_estimators[[1]]$N_param
+  hermite_estimator_combined <- base::Reduce(f=combine_moments_and_count, 
+                                             x = hermite_estimators)
+  integrand <- function(t,hermite_est_current, hermite_estimator_combined,
+                        current_k){
+    normalization_hermite <- hermite_est_current$normalization_hermite_vec
+    t <- sqrt(2) * t
+    original_sd <- sqrt(hermite_est_current$running_variance / 
+                          (hermite_est_current$num_obs-1))
+    original_mean <- hermite_est_current$running_mean
+    new_sd <- sqrt(hermite_estimator_combined$running_variance / 
+                     (hermite_estimator_combined$num_obs-1))
+    new_mean <- hermite_estimator_combined$running_mean
+    herm_mod <- hermite_polynomial(hermite_est_current$N_param, t) *
+      normalization_hermite
+    sqrt(2) * hermite_function(current_k,((t*original_sd +original_mean) - 
+                                            new_mean)/new_sd, 
+              normalization_hermite[1:current_k])[current_k, ] * 
+              as.vector(crossprod(herm_mod, hermite_est_current$coeff_vec))
   }
+  hermite_estimator_combined$coeff_vec <-
+    sapply(1:(N+1),FUN=function(k){sum(sapply(hermite_estimators, 
+          FUN=function(x){(x$num_obs / hermite_estimator_combined$num_obs) *
+      gauss_hermite_quad_100(function(t){integrand(t, x, 
+                                       hermite_estimator_combined, k)})}))})
+  return(hermite_estimator_combined)
+}
 
 #' Combines two Hermite estimators
 #'
@@ -94,7 +155,7 @@ get_coefficients.hermite_estimator <-
 #' constructing a single estimator on the data set formed by combining the
 #' data sets used to update the respective hermite_estimator inputs.
 #' If the input Hermite estimators are standardized however, then the
-#' equivalence will be approximate.
+#' equivalence will be approximate but still accurate in most cases.
 #'
 #' @param this A hermite_estimator object. The first Hermite series based
 #' estimator.
@@ -128,23 +189,18 @@ combine_pair.hermite_estimator <-
         !is.na(hermite_estimator_other$exp_weight)) {
       stop("Cannot combine exponentially weighted estimators.")
     }
-    hermite_estimator_combined <-
-      hermite_estimator(N = this$N_param,
-                        standardize = this$standardize_obs)
-    hermite_estimator_combined$coeff_vec <-
-      (
-        this$coeff_vec * this$num_obs + hermite_estimator_other$coeff_vec 
-        * hermite_estimator_other$num_obs
-      ) / (this$num_obs + hermite_estimator_other$num_obs)
-    hermite_estimator_combined$num_obs <-
-      this$num_obs + hermite_estimator_other$num_obs
-    hermite_estimator_combined$running_mean <-
-      (
-        this$running_mean * this$num_obs + hermite_estimator_other$running_mean
-        * hermite_estimator_other$num_obs
-      ) / (this$num_obs + hermite_estimator_other$num_obs)
-    hermite_estimator_combined$running_variance <-
-      this$running_variance + hermite_estimator_other$running_variance
+    if (this$standardize_obs == FALSE) {
+      hermite_estimator_combined <- combine_moments_and_count(this, 
+                                                      hermite_estimator_other)
+      hermite_estimator_combined$coeff_vec <-
+        (
+          this$coeff_vec * this$num_obs + hermite_estimator_other$coeff_vec 
+          * hermite_estimator_other$num_obs
+        ) / (this$num_obs + hermite_estimator_other$num_obs)
+    } else {
+      hermite_estimator_combined <- combine_standardized_helper(list(this, 
+                                                     hermite_estimator_other))
+    }
     return(hermite_estimator_combined)
   }
 
@@ -160,7 +216,7 @@ combine_pair.hermite_estimator <-
 #' constructing a single estimator on the data set formed by combining the
 #' data sets used to update the respective hermite_estimator inputs.
 #' If the input Hermite estimators are standardized however, then the
-#' equivalence will be approximate.
+#' equivalence will be approximate but still accurate in most cases.
 #'
 #' @param hermite_estimators A list of hermite_estimator objects.
 #' @return An object of class hermite_estimator.
@@ -180,7 +236,11 @@ combine_hermite.list <- function(hermite_estimators) {
   if (length(hermite_estimators) == 1) {
     return(hermite_estimators[[1]])
   }
-  hermite_estimator_combined <- base::Reduce(combine_pair,hermite_estimators)
+  if (hermite_estimators[[1]]$standardize_obs==FALSE){
+   hermite_estimator_combined <- base::Reduce(combine_pair,hermite_estimators)
+  } else {
+   hermite_estimator_combined <- combine_standardized_helper(hermite_estimators)
+  }
   return(hermite_estimator_combined)
 }
 

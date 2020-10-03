@@ -28,7 +28,7 @@ standardized, the combined estimator will be exactly equivalent to
 constructing a single estimator on the data set formed by combining the
 data sets used to update the respective hermite_estimator inputs.
 If the input Hermite estimators are standardized however, then the
-equivalence will be approximate.
+equivalence will be approximate but still accurate in most cases.
 }
 \examples{
 hermite_est_1 <- hermite_estimator(N = 10, standardize = FALSE)

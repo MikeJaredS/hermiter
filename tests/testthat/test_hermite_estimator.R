@@ -298,6 +298,42 @@ test_that("hermite_estimators combine consistently", {
   hermite_comb <-
     combine_hermite(list(hermite_est_1, hermite_est_2, hermite_est_3))
   expect_equal(hermite_est, hermite_comb, tolerance = 1e-07)
+  hermite_est <-
+    hermite_estimator(N = 10, standardize = TRUE) %>% 
+    update_batch(test_observations)
+  hermite_est_1 <-
+    hermite_estimator(N = 10, standardize = TRUE) %>% 
+    update_batch(test_observations[1:10])
+  hermite_est_2 <-
+    hermite_estimator(N = 10, standardize = TRUE) %>% 
+    update_batch(test_observations[11:20])
+  hermite_est_3 <-
+    hermite_estimator(N = 10, standardize = TRUE) %>% 
+    update_batch(test_observations[21:30])
+  hermite_comb <-
+    combine_hermite(list(hermite_est_1, hermite_est_2, hermite_est_3))
+  expect_equal(hermite_est$running_mean, hermite_comb$running_mean, 
+               tolerance = 1e-06)
+  expect_equal(hermite_est$running_variance, hermite_comb$running_variance, 
+               tolerance = 1e-06)
+  target_coeffs <-
+    c(
+      0.507692830456503,
+      0.0321243433159265,
+      0.0890037870794549,
+      -0.0701338033329833,
+      -0.0779386178176305,
+      0.0851268944086588,
+      -0.00850373459838627,
+      -0.0885734911174612,
+      0.0729495282288348,
+      0.0615199678827195,
+      -0.117430497748064
+    )
+  expect_equal(hermite_comb$coeff_vec, target_coeffs, 
+               tolerance = 1e-06)
+  expect_equal(hermite_comb$coeff_vec, hermite_est$coeff_vec, 
+               tolerance = 5e-02)
 })
 
 test_that("probability density estimation works as expected", {
@@ -655,4 +691,31 @@ test_that("quantile estimation works as expected", {
                                               sqrt(hermite_est$running_variance)
     )
   expect_equal(cum_prob_check, 0.75, tolerance = 0.001)
+})
+
+test_that("convenience and utility functions work as expected", {
+  hermite_function_vals <- as.vector(hermite_function_N(N=6,x=c(2)))
+  target_values <-
+    c(
+      0.101653788306418,
+      0.287520332179079,
+      0.503160581313389,
+      0.586898420428556,
+      0.39424986030507,
+      -0.0262468952793101,
+      -0.390206540413716
+    )
+  expect_equal(hermite_function_vals,target_values,tolerance=1e-6)
+  target_integral <- stats::integrate(f=function(t)
+    {hermite_function_N(N=6,t)[7,]}, lower=-Inf, upper=5)$value
+  hermite_int_lower_val <- hermite_int_lower(N=6,x=5)[7]
+  expect_equal(target_integral,hermite_int_lower_val,tolerance=1e-4)
+  target_integral <- stats::integrate(f=function(t){
+    hermite_function_N(N=6,t)[7,]}, lower=2, upper=Inf)$value
+  hermite_int_upper_val <- hermite_int_upper(N=6,x=2)[7]
+  expect_equal(target_integral,hermite_int_upper_val,tolerance=1e-4)
+  target_integral <- stats::integrate(function(x){x*exp(-x^2)}, 
+                                      lower=-Inf,upper=Inf)$value
+  quad_val <- gauss_hermite_quad_100(function(x){x})
+  expect_equal(target_integral,quad_val,tolerance=1e-5)
 })
