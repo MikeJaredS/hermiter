@@ -32,7 +32,7 @@ hermite_estimator <-
       stop("N must be numeric.")
     }
     if (N < 0 | N > 100) {
-      stop("N must be >= 0 and N < 100.")
+      stop("N must be >= 0 and N <= 100.")
     }
     if (!(standardize == TRUE | standardize == FALSE)) {
       stop("standardize can only take on values TRUE or FALSE.")
@@ -474,38 +474,6 @@ dens.hermite_estimator <- function(this, x, clipped = FALSE) {
   return(as.vector(pdf_val))
 }
 
-#' Estimates the cumulative probability for quantile estimation
-#'
-#' This helper method uses a modified distribution function estimator which
-#' differs from the cum_prob.hermite_estimator.
-#'
-#' The modified distribution function estimator appears more accurate for
-#' quantile estimation as validated empirically.
-#'
-#' This method is intended for internal use by the hermite_estimator class.
-#'
-#' @param this A hermite_estimator object.
-#' @param x A numeric vector.
-#' @return A numeric vector of cumulative probability values.
-#' @export
-cum_prob_quantile_helper <- function(this, x) {
-  UseMethod("cum_prob_quantile_helper", this)
-}
-
-#' @export
-cum_prob_quantile_helper.hermite_estimator <- function(this, x) {
-  if (!is.numeric(x)) {
-    stop("x must be numeric.")
-  }
-  h_k <-
-    hermite_function(this$N_param, x, this$normalization_hermite_vec)
-  integrals_hermite <-
-    hermite_integral_val_quantile_adap(this$N_param, x, h_k)
-  cdf_val <-
-    1 - as.vector(as.vector(this$coeff_vec) %*% integrals_hermite)
-  return(cdf_val)
-}
-
 #' Estimates the quantile at a single probability value
 #'
 #' This helper method is intended for internal use by the hermite_estimator
@@ -528,23 +496,77 @@ quantile_helper.hermite_estimator <- function(this, p) {
   if (p < 0 | p > 1) {
     return(NA)
   }
+  h_k <-
+    hermite_function(this$N_param, x=0, this$normalization_hermite_vec)
+  p_lower <- this$coeff_vec %*% hermite_integral_val(this$N_param,x=0,h_k)
+  p_upper <- 1-as.numeric(this$coeff_vec %*% 
+                      hermite_integral_val_quantile_adap(this$N_param,x=0,h_k))
+  if (is.na(p_lower) | is.na(p_upper)){
+    return(NA)
+  }
+  if (p_upper < p_lower){
+    x_lower <- tryCatch({
+      stats::uniroot(
+        f = function(x) {
+          this$coeff_vec %*% hermite_int_lower(this$N_param,x) - p_upper
+        },
+        interval = c(-100, 100)
+      )$root
+    },
+    error = function(e) {NA})
+    x_upper <- tryCatch({
+      stats::uniroot(
+        f = function(x) {
+          1-as.numeric(this$coeff_vec %*% 
+                         hermite_int_upper(this$N_param,x)) - p_lower
+        },
+        interval = c(-100, 100)
+      )$root
+    },
+    error = function(e) {NA})
+  } else if (p_upper > p_lower) {
+    x_lower <- -1e-6
+    x_upper <- 1e-6
+  } else if (p_upper == p_lower){
+    x_lower <- 0
+    x_upper <- 0
+  }
+  if (is.na(x_lower) | is.na(x_upper)){
+    return(NA)
+  }
   est <- tryCatch({
     stats::uniroot(
       f = function(x) {
-        cum_prob_quantile_helper(this, x) - p
+        lower_idx <- which(x < x_lower)
+        upper_idx <- which(x > x_upper)
+        ambig_idx <- which(x >= x_lower & x <= x_upper)
+        res <- rep(NA,length(x))
+        if (length(lower_idx)>0){
+          res[lower_idx] <- crossprod(hermite_int_lower(this$N_param, 
+                                        x[lower_idx]), this$coeff_vec) - p
+        }
+        if (length(upper_idx)>0){
+          res[upper_idx] <- 1 - 
+            crossprod(hermite_int_upper(this$N_param, 
+                                        x[upper_idx]), this$coeff_vec) - p
+        }
+        if (length(ambig_idx)>0){
+          if (p_upper < p_lower){
+            res[ambig_idx] <- (p_upper + (x[ambig_idx]-x_lower) * 
+                           as.numeric((p_lower-p_upper)/(x_upper-x_lower))) - p
+          }
+          else if (p_upper > p_lower){
+            res[ambig_idx] <- (p_lower + (x[ambig_idx]-x_lower) * 
+                                 (p_upper-p_lower)/(x_upper-x_lower)) - p
+          } else if (p_upper == p_lower){
+            res[ambig_idx] <- p_upper
+          }
+        }
+        return(res)
       },
       interval = c(-100, 100)
     )$root
-  },
-  warning = function(w) {
-    
-  },
-  error = function(e) {
-    NA
-  },
-  finally = {
-    
-  })
+  }, error = function(e) {NA})
   if (is.na(this$exp_weight)) {
     est <-
       est * sqrt(this$running_variance / (this$num_obs - 1)) + this$running_mean
@@ -555,6 +577,12 @@ quantile_helper.hermite_estimator <- function(this, p) {
 }
 
 #' Estimates the quantiles at a vector of probability values
+#' 
+#' This method utilizes the estimator (13) in paper Stephanou, Michael, 
+#' Varughese, Melvin and Iain Macdonald. "Sequential quantiles via Hermite 
+#' series density estimation." Electronic Journal of Statistics 11.1 (2017): 
+#' 570-607 <doi:10.1214/17-EJS1245>, with some modifications to improve the 
+#' stability of numerical root finding. 
 #'
 #' @param this A hermite_estimator object.
 #' @param p A numeric vector. A vector of probability values.
