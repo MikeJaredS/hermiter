@@ -16,7 +16,11 @@ A numeric vector. The vector of quantile values associated with the
 probabilities p.
 }
 \description{
-Estimates the quantiles at a vector of probability values
+This method utilizes the estimator (13) in paper Stephanou, Michael, 
+Varughese, Melvin and Iain Macdonald. "Sequential quantiles via Hermite 
+series density estimation." Electronic Journal of Statistics 11.1 (2017): 
+570-607 <doi:10.1214/17-EJS1245>, with some modifications to improve the 
+stability of numerical root finding.
 }
 \examples{
 hermite_est <- hermite_estimator(N = 10, standardize = TRUE)
