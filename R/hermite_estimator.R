@@ -1,4 +1,4 @@
-#' A class to sequentially estimate pdfs, cdfs and quantile functions
+#' A class to sequentially estimate univariate pdfs, cdfs and quantile functions
 #'
 #' This method constructs an S3 object with associated methods for univariate
 #' nonparametric estimation of pdfs, cdfs and quantiles.
@@ -12,7 +12,7 @@
 #'
 #' @author Michael Stephanou <michael.stephanou@gmail.com>
 #'
-#' @param N An integer between 0 and 100. The Hermite series based estimator
+#' @param N An integer between 0 and 75. The Hermite series based estimator
 #' is truncated at N+1 terms.
 #' @param standardize A boolean value. Determines whether the observations are
 #' standardized, a transformation which often improves performance.
@@ -31,8 +31,8 @@ hermite_estimator <-
     if (!is.numeric(N)) {
       stop("N must be numeric.")
     }
-    if (N < 0 | N > 100) {
-      stop("N must be >= 0 and N <= 100.")
+    if (N < 0 | N > 75) {
+      stop("N must be >= 0 and N <= 75.")
     }
     if (!(standardize == TRUE | standardize == FALSE)) {
       stop("standardize can only take on values TRUE or FALSE.")
@@ -56,11 +56,18 @@ hermite_estimator <-
         exp_weight = exp_weight_lambda,
         normalization_hermite_vec = c()
       )
-    this$normalization_hermite_vec <-
-      hermite_normalization(this$N_param)
-    class(this) <- append(class(this), "hermite_estimator")
+    # this$normalization_hermite_vec <-
+    #   hermite_normalization(this$N_param)
+    this$normalization_hermite_vec <- h_norm_serialized[1:(this$N_param+1)]
+    # class(this) <- append(class(this), "hermite_estimator")
+    class(this) <- "hermite_estimator"
     return(this)
   }
+
+#' @export
+get_coefficients <- function(this) {
+  UseMethod("get_coefficients", this)
+}
 
 #' Returns Hermite series expansion coefficients
 #'
@@ -71,16 +78,10 @@ hermite_estimator <-
 #' hermite_est_1 <- hermite_estimator(N = 10, standardize = FALSE)
 #' hermite_est_1 <- update_batch(hermite_est_1, rnorm(30))
 #' coefficient_vec <- get_coefficients(hermite_est_1)
-get_coefficients <- function(this) {
-  UseMethod("get_coefficients", this)
-}
-
-#' @export
 get_coefficients.hermite_estimator <-
   function(this) {
     return(this$coeff_vec)
 }
-
 
 #' Internal method to consistently combine the number of observations, means and 
 #' variances of two Hermite estimators
@@ -118,29 +119,17 @@ combine_standardized_helper <- function(hermite_estimators) {
   N <- hermite_estimators[[1]]$N_param
   hermite_estimator_combined <- base::Reduce(f=combine_moments_and_count, 
                                              x = hermite_estimators)
-  integrand <- function(t,hermite_est_current, hermite_estimator_combined,
-                        current_k){
-    normalization_hermite <- hermite_est_current$normalization_hermite_vec
-    t <- sqrt(2) * t
-    original_sd <- sqrt(hermite_est_current$running_variance / 
-                          (hermite_est_current$num_obs-1))
-    original_mean <- hermite_est_current$running_mean
-    new_sd <- sqrt(hermite_estimator_combined$running_variance / 
-                     (hermite_estimator_combined$num_obs-1))
-    new_mean <- hermite_estimator_combined$running_mean
-    herm_mod <- hermite_polynomial(hermite_est_current$N_param, t) *
-      normalization_hermite
-    sqrt(2) * hermite_function(current_k,((t*original_sd +original_mean) - 
-                                            new_mean)/new_sd, 
-              normalization_hermite[1:current_k])[current_k, ] * 
-              as.vector(crossprod(herm_mod, hermite_est_current$coeff_vec))
-  }
   hermite_estimator_combined$coeff_vec <-
     sapply(1:(N+1),FUN=function(k){sum(sapply(hermite_estimators, 
           FUN=function(x){(x$num_obs / hermite_estimator_combined$num_obs) *
-      gauss_hermite_quad_100(function(t){integrand(t, x, 
+      gauss_hermite_quad_100(function(t){integrand_coeff_univar(t, x, 
                                        hermite_estimator_combined, k)})}))})
   return(hermite_estimator_combined)
+}
+
+#' @export
+combine_pair <- function(this, hermite_estimator_other) {
+  UseMethod("combine_pair", this)
 }
 
 #' Combines two Hermite estimators
@@ -169,11 +158,6 @@ combine_standardized_helper <- function(hermite_estimators) {
 #' hermite_est_2 <- hermite_estimator(N = 10, standardize = FALSE)
 #' hermite_est_2 <- update_batch(hermite_est_2, rnorm(30))
 #' hermite_combined <- combine_pair(hermite_est_1, hermite_est_2)
-combine_pair <- function(this, hermite_estimator_other) {
-  UseMethod("combine_pair", this)
-}
-
-#' @export
 combine_pair.hermite_estimator <-
   function(this, hermite_estimator_other) {
     if (!is(hermite_estimator_other, "hermite_estimator")) {
@@ -204,6 +188,11 @@ combine_pair.hermite_estimator <-
     return(hermite_estimator_combined)
   }
 
+#' @export
+combine_hermite <- function(hermite_estimators) {
+  UseMethod("combine_hermite", hermite_estimators)
+}
+
 #' Combines a list of Hermite estimators
 #'
 #' This method allows a list of Hermite based estimators of class
@@ -227,11 +216,6 @@ combine_pair.hermite_estimator <-
 #' hermite_est_2 <- hermite_estimator(N = 10, standardize = FALSE)
 #' hermite_est_2 <- update_batch(hermite_est_2, rnorm(30))
 #' hermite_combined <- combine_hermite(list(hermite_est_1, hermite_est_2))
-combine_hermite <- function(hermite_estimators) {
-  UseMethod("combine_hermite", hermite_estimators)
-}
-
-#' @export
 combine_hermite.list <- function(hermite_estimators) {
   if (length(hermite_estimators) == 1) {
     return(hermite_estimators[[1]])
@@ -242,6 +226,11 @@ combine_hermite.list <- function(hermite_estimators) {
    hermite_estimator_combined <- combine_standardized_helper(hermite_estimators)
   }
   return(hermite_estimator_combined)
+}
+
+#' @export
+update_sequential <- function(this, x) {
+  UseMethod("update_sequential", this)
 }
 
 #' Updates the Hermite series based estimator sequentially
@@ -257,11 +246,6 @@ combine_hermite.list <- function(hermite_estimators) {
 #' @examples
 #' hermite_estimator <- hermite_estimator(N = 10, standardize = TRUE)
 #' hermite_estimator <- update_sequential(hermite_estimator, x = 2)
-update_sequential <- function(this, x) {
-  UseMethod("update_sequential", this)
-}
-
-#' @export
 update_sequential.hermite_estimator <- function(this, x) {
   if (!is.numeric(x)) {
     stop("x must be numeric.")
@@ -311,6 +295,11 @@ update_sequential.hermite_estimator <- function(this, x) {
   return(this)
 }
 
+#' @export
+update_batch <- function(this, x) {
+  UseMethod("update_batch", this)
+}
+
 #' Updates the Hermite series based estimator with a batch of data
 #'
 #' This method can be applied in one-pass batch estimation settings. This
@@ -324,11 +313,6 @@ update_sequential.hermite_estimator <- function(this, x) {
 #' @examples
 #' hermite_estimator <- hermite_estimator(N = 10, standardize = TRUE)
 #' hermite_estimator <- update_batch(hermite_estimator, x = c(1, 2))
-update_batch <- function(this, x) {
-  UseMethod("update_batch", this)
-}
-
-#' @export
 update_batch.hermite_estimator <- function(this, x) {
   if (!is.numeric(x)) {
     stop("x must be numeric.")
@@ -336,23 +320,16 @@ update_batch.hermite_estimator <- function(this, x) {
   if (!is.na(this$exp_weight)) {
     stop("The Hermite estimator cannot be exponentially weighted.")
   }
-  this$num_obs <- this$num_obs + length(x)
+  this$num_obs <- length(x)
   if (this$standardize_obs == TRUE) {
-    this$running_mean <-
-      (this$running_mean * (this$num_obs - length(x)) + length(x) * mean(x)) / 
-      this$num_obs
-    this$running_variance <-
-      (
-        this$running_variance * (this$num_obs - length(x)) 
-        + length(x) * stats::var(x) * (length(x) - 1)
-      ) / this$num_obs
+    this$running_mean <- mean(x)
+    this$running_variance <- stats::var(x) * (length(x) - 1)
     x <-
       (x - this$running_mean) / sqrt(this$running_variance / (this$num_obs - 1))
   }
   h_k <-
     hermite_function(this$N_param, x, this$normalization_hermite_vec)
-  this$coeff_vec <-
-    (this$coeff_vec * (this$num_obs - length(x)) + rowSums(h_k)) / this$num_obs
+  this$coeff_vec <- rowSums(h_k) / this$num_obs
   return(this)
 }
 
@@ -382,50 +359,12 @@ standardize_value.hermite_estimator <- function(this, x) {
   return((x - this$running_mean) / running_std)
 }
 
-#' Estimates the cumulative probability for a vector of x values
-#'
-#' This method calculates the cumulative probability values at a vector of
-#' x values using the hermite_estimator object (this).
-#'
-#' The object must be updated with observations prior to the use of this method.
-#'
-#' @param this A hermite_estimator object.
-#' @param x A numeric vector. Values at which to estimate the cumulative
-#' probability
-#' @param clipped A boolean value. This value determines whether cumulative
-#' probabilities are clipped to lie within the range [0,1].
-#' @return A numeric vector of cumulative probability values.
 #' @export
-#' @examples
-#' hermite_est <- hermite_estimator(N = 10, standardize = TRUE)
-#' hermite_est <- update_batch(hermite_est, rnorm(30))
-#' cdf_est <- cum_prob(hermite_est, c(0, 0.5, 1))
-cum_prob <- function(this, x, clipped) {
-  UseMethod("cum_prob", this)
+dens <- function(this, x, clipped) {
+  UseMethod("dens", this)
 }
 
-#' @export
-cum_prob.hermite_estimator <- function(this, x, clipped = FALSE) {
-  if (!is.numeric(x)) {
-    stop("x must be numeric.")
-  }
-  if (this$num_obs < 2) {
-    return(NA)
-  }
-  if (this$standardize_obs == TRUE) {
-    x <- standardize_value(this, x)
-  }
-  h_k <-
-    hermite_function(this$N_param, x, this$normalization_hermite_vec)
-  integrals_hermite <- hermite_integral_val(this$N_param, x, h_k)
-  cdf_val <- crossprod(integrals_hermite, this$coeff_vec)
-  if (clipped == TRUE) {
-    cdf_val <- pmin(pmax(cdf_val, 1e-08), 1)
-  }
-  return(as.vector(cdf_val))
-}
-
-#' Estimates the probability density for a vector of x values
+#' #' Estimates the probability density for a vector of x values
 #'
 #' This method calculates the probability density values at a vector of
 #' x values using the hermite_estimator object (this).
@@ -443,17 +382,12 @@ cum_prob.hermite_estimator <- function(this, x, clipped = FALSE) {
 #' hermite_est <- hermite_estimator(N = 10, standardize = TRUE)
 #' hermite_est <- update_batch(hermite_est, rnorm(30))
 #' pdf_est <- dens(hermite_est, c(0, 0.5, 1))
-dens <- function(this, x, clipped) {
-  UseMethod("dens", this)
-}
-
-#' @export
 dens.hermite_estimator <- function(this, x, clipped = FALSE) {
   if (!is.numeric(x)) {
     stop("x must be numeric.")
   }
   if (this$num_obs < 2) {
-    return(NA)
+    return(rep(NA, length(x)))
   }
   factor <- 1
   if (this$standardize_obs == TRUE) {
@@ -474,21 +408,57 @@ dens.hermite_estimator <- function(this, x, clipped = FALSE) {
   return(as.vector(pdf_val))
 }
 
-#' Estimates the quantile at a single probability value
+#' @export
+cum_prob <- function(this, x, clipped) {
+  UseMethod("cum_prob", this)
+}
+
+#' Estimates the cumulative probability for a vector of x values
 #'
-#' This helper method is intended for internal use by the hermite_estimator
-#' class.
+#' This method calculates the cumulative probability values at a vector of
+#' x values using the hermite_estimator object (this).
+#'
+#' The object must be updated with observations prior to the use of this method.
 #'
 #' @param this A hermite_estimator object.
-#' @param p A numeric value. The probability at which to calculate the
-#' associated quantile.
-#' @return A numeric value. The value of the quantile associated with p.
+#' @param x A numeric vector. Values at which to estimate the cumulative
+#' probability
+#' @param clipped A boolean value. This value determines whether cumulative
+#' probabilities are clipped to lie within the range [0,1].
+#' @return A numeric vector of cumulative probability values.
 #' @export
+#' @examples
+#' hermite_est <- hermite_estimator(N = 10, standardize = TRUE)
+#' hermite_est <- update_batch(hermite_est, rnorm(30))
+#' cdf_est <- cum_prob(hermite_est, c(0, 0.5, 1))
+cum_prob.hermite_estimator <- function(this, x, clipped = FALSE) {
+  if (!is.numeric(x)) {
+    stop("x must be numeric.")
+  }
+  if (this$num_obs < 2) {
+    return(rep(NA, length(x)))
+  }
+  if (this$standardize_obs == TRUE) {
+    x <- standardize_value(this, x)
+  }
+  h_k <-
+    hermite_function(this$N_param, x, this$normalization_hermite_vec)
+  integrals_hermite <- hermite_integral_val(this$N_param, x, h_k)
+  cdf_val <- crossprod(integrals_hermite, this$coeff_vec)
+  if (clipped == TRUE) {
+    cdf_val <- pmin(pmax(cdf_val, 1e-08), 1)
+  }
+  return(as.vector(cdf_val))
+}
+
+# Estimates the quantile at a single probability value
+#
+# This helper method is intended for internal use by the hermite_estimator
+# class.
 quantile_helper <- function(this, p) {
   UseMethod("quantile_helper", this)
 }
 
-#' @export
 quantile_helper.hermite_estimator <- function(this, p) {
   if (!is.numeric(p)) {
     stop("p must be numeric.")
@@ -576,6 +546,11 @@ quantile_helper.hermite_estimator <- function(this, p) {
   return(est)
 }
 
+#' @export
+quant <- function(this, p) {
+  UseMethod("quant", this)
+}
+
 #' Estimates the quantiles at a vector of probability values
 #' 
 #' This method utilizes the estimator (13) in paper Stephanou, Michael, 
@@ -593,11 +568,6 @@ quantile_helper.hermite_estimator <- function(this, p) {
 #' hermite_est <- hermite_estimator(N = 10, standardize = TRUE)
 #' hermite_est <- update_batch(hermite_est, rnorm(30))
 #' quant_est <- quant(hermite_est, c(0.25, 0.5, 0.75))
-quant <- function(this, p) {
-  UseMethod("quant", this)
-}
-
-#' @export
 quant.hermite_estimator <- function(this, p) {
   if (!is.numeric(p)) {
     stop("p must be numeric.")
@@ -609,7 +579,7 @@ quant.hermite_estimator <- function(this, p) {
     stop("At least one quantile must be specified.")
   }
   if (this$num_obs < 2) {
-    return(NA)
+    return(rep(NA, length(p)))
   }
   result <- rep(0, length(p))
   for (idx in seq_along(p)) {

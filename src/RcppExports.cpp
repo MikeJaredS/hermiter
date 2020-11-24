@@ -67,6 +67,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// hermite_int_full_domain
+NumericMatrix hermite_int_full_domain(int N);
+RcppExport SEXP _hermiter_hermite_int_full_domain(SEXP NSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type N(NSEXP);
+    rcpp_result_gen = Rcpp::wrap(hermite_int_full_domain(N));
+    return rcpp_result_gen;
+END_RCPP
+}
 // standardizeInputs
 NumericVector standardizeInputs(double x, double n_obs, double current_mean, double current_var);
 RcppExport SEXP _hermiter_standardizeInputs(SEXP xSEXP, SEXP n_obsSEXP, SEXP current_meanSEXP, SEXP current_varSEXP) {
@@ -103,6 +114,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_hermiter_hermite_function", (DL_FUNC) &_hermiter_hermite_function, 3},
     {"_hermiter_hermite_integral_val", (DL_FUNC) &_hermiter_hermite_integral_val, 3},
     {"_hermiter_hermite_integral_val_quantile_adap", (DL_FUNC) &_hermiter_hermite_integral_val_quantile_adap, 3},
+    {"_hermiter_hermite_int_full_domain", (DL_FUNC) &_hermiter_hermite_int_full_domain, 1},
     {"_hermiter_standardizeInputs", (DL_FUNC) &_hermiter_standardizeInputs, 4},
     {"_hermiter_standardizeInputsEW", (DL_FUNC) &_hermiter_standardizeInputsEW, 5},
     {NULL, NULL, 0}

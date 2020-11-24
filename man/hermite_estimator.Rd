@@ -2,12 +2,12 @@
 % Please edit documentation in R/hermite_estimator.R
 \name{hermite_estimator}
 \alias{hermite_estimator}
-\title{A class to sequentially estimate pdfs, cdfs and quantile functions}
+\title{A class to sequentially estimate univariate pdfs, cdfs and quantile functions}
 \usage{
 hermite_estimator(N = 10, standardize = FALSE, exp_weight_lambda = NA)
 }
 \arguments{
-\item{N}{An integer between 0 and 100. The Hermite series based estimator
+\item{N}{An integer between 0 and 75. The Hermite series based estimator
 is truncated at N+1 terms.}
 
 \item{standardize}{A boolean value. Determines whether the observations are

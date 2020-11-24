@@ -74,7 +74,10 @@ test_that("batch updates of hermite_estimator work as expected", {
   expect_equal(target_coeff_vec_standardized,
                get_coefficients(hermite_est),
                tolerance = 1e-07)
-  
+  expect_equal(mean(test_observations), 
+               hermite_est$running_mean,tolerance = 1e-06)
+  expect_equal(sd(test_observations),sqrt(hermite_est$running_variance / 
+                                  (hermite_est$num_obs-1)),tolerance = 1e-06)
   hermite_est <- hermite_estimator(N = 10, standardize = FALSE)
   hermite_est <- hermite_est %>% update_batch(test_observations)
   expect_equal(target_coeff_vec_unstandardized,
@@ -316,6 +319,7 @@ test_that("hermite_estimators combine consistently", {
                tolerance = 1e-06)
   expect_equal(hermite_est$running_variance, hermite_comb$running_variance, 
                tolerance = 1e-06)
+  expect_equal(hermite_comb$num_obs,30, tolerance = 1e-06)
   target_coeffs <-
     c(
       0.507692830456503,
@@ -480,7 +484,9 @@ test_that("probability density estimation works as expected", {
   expect_equal(pdf_vals, target_pdf_vals_standardized, tolerance = 1e-07)
   hermite_est <-
     hermite_estimator(N = 10)
-  expect_equal(hermite_est %>% dens(x),NA)
+  pdf_vals <- hermite_est %>% dens(x)
+  expect_equal(length(pdf_vals), length(x))
+  expect_true(all(is.na(pdf_vals)))
 })
 
 test_that("cumulative distribution function estimation works as expected",
@@ -633,8 +639,6 @@ test_that("quantile estimation works as expected", {
   expect_equal(quantiles_est,
                c(-1.31098405,  0.04148433,  0.90887067),
                tolerance = 1e-07)
-  expect_equal(hermite_estimator(N = 10, standardize = TRUE) %>%
-                 quant(c(0.25, 0.5, 0.75)), NA)
   hermite_est <- hermite_estimator(N = 10, standardize = TRUE)
   for (idx in seq_along(test_observations)) {
     hermite_est <-
@@ -655,6 +659,12 @@ test_that("quantile estimation works as expected", {
   quantiles_est <- hermite_est %>% quant(c(0.25, 0.5, 0.75))
   expect_equal(quantiles_est, c(-0.05505446,  0.36010728,  1.43740885), 
                tolerance = 1e-06)
+  hermite_est <-
+    hermite_estimator(N = 10,
+                      standardize = TRUE,
+                      exp_weight_lambda = 0.1)
+  quantiles_est <- hermite_est %>% quant(c(0.25, 0.5, 0.75))
+  
 })
 
 test_that("convenience and utility functions work as expected", {
@@ -678,6 +688,10 @@ test_that("convenience and utility functions work as expected", {
     hermite_function_N(N=6,t)[7,]}, lower=2, upper=Inf)$value
   hermite_int_upper_val <- hermite_int_upper(N=6,x=2)[7]
   expect_equal(target_integral,hermite_int_upper_val,tolerance=1e-4)
+  target_integral <- stats::integrate(f=function(t){
+    hermite_function_N(N=6,t)[7,]}, lower=-Inf, upper=Inf)$value
+  hermite_int_full <- hermite_int_full_domain(N=6)[7]
+  expect_equal(target_integral,hermite_int_full,tolerance=1e-4)
   target_integral <- stats::integrate(function(x){x*exp(-x^2)}, 
                                       lower=-Inf,upper=Inf)$value
   quad_val <- gauss_hermite_quad_100(function(x){x})

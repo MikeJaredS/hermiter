@@ -2,7 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{hermite_integral_val_quantile_adap}
 \alias{hermite_integral_val_quantile_adap}
-\title{Outputs a definite integral of the orthonormal Hermite functions}
+\title{Outputs upper integral of the orthonormal Hermite functions}
 \usage{
 hermite_integral_val_quantile_adap(N, x, hermite_function_mat)
 }
