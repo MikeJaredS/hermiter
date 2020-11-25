@@ -57,7 +57,8 @@ gauss_hermite_quad_100 <- function(f){
 }
 
 integrand_coeff_univar <- function(t,hermite_est_current, 
-                                   hermite_estimator_combined, current_k, dimension = NA){
+                                   hermite_estimator_combined, current_k, 
+                                   dimension = NA){
   normalization_hermite <- hermite_est_current$normalization_hermite_vec
   t <- sqrt(2) * t
   herm_mod <- hermite_polynomial(hermite_est_current$N_param, t) *
@@ -92,6 +93,6 @@ integrand_coeff_univar <- function(t,hermite_est_current,
   }
   return(sqrt(2) * hermite_function(current_k,((t*original_sd +original_mean) - 
                                                  new_mean)/new_sd, 
-                                    normalization_hermite[1:current_k])[current_k, ] * 
+                             normalization_hermite[1:current_k])[current_k, ] * 
            as.vector(crossprod(herm_mod, original_coeff_vec)))
 }

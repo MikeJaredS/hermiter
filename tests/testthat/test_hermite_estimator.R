@@ -1,10 +1,10 @@
-context("hermite_estimator")
+context("hermite_estimator_univar")
 library(hermiter)
 library(magrittr)
 
 test_that("hermite_estimator constructor returns correct class", {
   hermite_est <- hermite_estimator(N = 10, standardize = TRUE)
-  expect_is(hermite_est, "hermite_estimator")
+  expect_is(hermite_est, "hermite_estimator_univar")
 })
 
 test_that("batch updates of hermite_estimator work as expected", {
@@ -72,7 +72,7 @@ test_that("batch updates of hermite_estimator work as expected", {
   hermite_est <- hermite_estimator(N = 10, standardize = TRUE)
   hermite_est <- hermite_est %>% update_batch(test_observations)
   expect_equal(target_coeff_vec_standardized,
-               get_coefficients(hermite_est),
+               hermite_est$coeff_vec,
                tolerance = 1e-07)
   expect_equal(mean(test_observations), 
                hermite_est$running_mean,tolerance = 1e-06)
@@ -81,7 +81,7 @@ test_that("batch updates of hermite_estimator work as expected", {
   hermite_est <- hermite_estimator(N = 10, standardize = FALSE)
   hermite_est <- hermite_est %>% update_batch(test_observations)
   expect_equal(target_coeff_vec_unstandardized,
-               get_coefficients(hermite_est),
+               hermite_est$coeff_vec,
                tolerance = 1e-07)
 })
 
@@ -152,7 +152,7 @@ test_that("sequential updates of hermite_estimator work as expected", {
       hermite_est %>% update_sequential(test_observations[idx])
   }
   expect_equal(target_coeff_vec_standardized,
-               get_coefficients(hermite_est),
+               hermite_est$coeff_vec,
                tolerance = 1e-07)
   
   hermite_est <- hermite_estimator(N = 10, standardize = FALSE)
@@ -161,7 +161,7 @@ test_that("sequential updates of hermite_estimator work as expected", {
       hermite_est %>% update_sequential(test_observations[idx])
   }
   expect_equal(target_coeff_vec_unstandardized,
-               get_coefficients(hermite_est),
+               hermite_est$coeff_vec,
                tolerance = 1e-07)
 })
 
@@ -237,7 +237,7 @@ test_that("sequential updates of exponentially weighted hermite_estimator
                 hermite_est %>% update_sequential(test_observations[idx])
             }
             expect_equal(target_coeff_vec_standardized,
-                         get_coefficients(hermite_est),
+                         hermite_est$coeff_vec,
                          tolerance = 1e-07)
             
             hermite_est <-
@@ -249,7 +249,7 @@ test_that("sequential updates of exponentially weighted hermite_estimator
                 hermite_est %>% update_sequential(test_observations[idx])
             }
             expect_equal(target_coeff_vec_unstandardized,
-                         get_coefficients(hermite_est),
+                         hermite_est$coeff_vec,
                          tolerance = 1e-07)
           })
 

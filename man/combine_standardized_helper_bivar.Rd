@@ -2,8 +2,8 @@
 % Please edit documentation in R/hermite_estimator_bivar.R
 \name{combine_standardized_helper_bivar}
 \alias{combine_standardized_helper_bivar}
-\title{Internal method to combine a list of standardized bivariate Hermite estimators with 
-improved accuracy}
+\title{Internal method to combine a list of standardized bivariate Hermite 
+estimators with improved accuracy}
 \usage{
 combine_standardized_helper_bivar(hermite_estimators)
 }
@@ -14,6 +14,6 @@ combine_standardized_helper_bivar(hermite_estimators)
 An object of class hermite_estimator_bivar.
 }
 \description{
-Internal method to combine a list of standardized bivariate Hermite estimators with 
-improved accuracy
+Internal method to combine a list of standardized bivariate Hermite 
+estimators with improved accuracy
 }
