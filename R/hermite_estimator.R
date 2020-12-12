@@ -183,8 +183,8 @@ update_batch <- function(this, x) {
   UseMethod("update_batch", this)
 }
 
-#' An internal method to calculate running standard deviation from the scaled
-#' running variance.
+# An internal method to calculate running standard deviation from the scaled
+# running variance.
 calculate_running_std <- function(this)
 {
   UseMethod("calculate_running_std",this)
