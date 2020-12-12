@@ -8,7 +8,7 @@
 #' function and quantile function. It is well suited to streaming data (both
 #' stationary and non-stationary) and to efficient estimation in the context of
 #' massive or distributed data sets. Indeed, estimators constructed on different
-#' subsets of a distributed data set can be consistently combined.
+#' subsets of a distributed data set can be consistently merged.
 #'
 #' @author Michael Stephanou <michael.stephanou@gmail.com>
 #'
@@ -56,18 +56,15 @@ hermite_estimator_univar <-
         exp_weight = exp_weight_lambda,
         normalization_hermite_vec = c()
       )
-    # this$normalization_hermite_vec <-
-    #   hermite_normalization(this$N_param)
     this$normalization_hermite_vec <- h_norm_serialized[1:(this$N_param+1)]
-    # class(this) <- append(class(this), "hermite_estimator_univar")
-    class(this) <- "hermite_estimator_univar"
+    class(this) <- c("hermite_estimator_univar", "list")
     return(this)
   }
 
-#' Internal method to consistently combine the number of observations, means and 
+#' Internal method to consistently merge the number of observations, means and 
 #' variances of two Hermite estimators
 #' 
-#' The algorithm to combine the variances consistently comes from
+#' The algorithm to merge the variances consistently comes from
 #' Schubert, Erich, and Michael Gertz. "Numerically stable parallel computation 
 #' of (co-) variance." Proceedings of the 30th International Conference on 
 #' Scientific and Statistical Database Management. 2018.
@@ -75,49 +72,49 @@ hermite_estimator_univar <-
 #' @param hermite_estimator1 A hermite_estimator_univar object.
 #' @param hermite_estimator2 A hermite_estimator_univar object.
 #' @return An object of class hermite_estimator_univar.
-combine_moments_and_count_univar <- function(hermite_estimator1, 
+merge_moments_and_count_univar <- function(hermite_estimator1, 
                                              hermite_estimator2){
   num_obs_1 <- hermite_estimator1$num_obs
   num_obs_2 <- hermite_estimator2$num_obs
-  hermite_combined <- hermite_estimator_univar(hermite_estimator1$N_param, 
+  hermite_merged <- hermite_estimator_univar(hermite_estimator1$N_param, 
                                         hermite_estimator1$standardize_obs)
-  hermite_combined$num_obs <- num_obs_1 + num_obs_2
-  hermite_combined$running_mean <- (num_obs_1*hermite_estimator1$running_mean +
+  hermite_merged$num_obs <- num_obs_1 + num_obs_2
+  hermite_merged$running_mean <- (num_obs_1*hermite_estimator1$running_mean +
                 num_obs_2*hermite_estimator2$running_mean)/(num_obs_1+num_obs_2)
-  hermite_combined$running_variance <- (hermite_estimator1$running_variance +
+  hermite_merged$running_variance <- (hermite_estimator1$running_variance +
       hermite_estimator2$running_variance) + ((num_obs_1 * num_obs_2) / 
      (num_obs_1 + num_obs_2)) *(hermite_estimator1$running_mean 
                                 - hermite_estimator2$running_mean)^2
-  return(hermite_combined)
+  return(hermite_merged)
 }
 
-#' Internal method to combine a list of standardized Hermite estimators with 
-#' improved accuracy
+#' Internal method to merge a list of standardized Hermite estimators
 #'
 #'
 #' @param hermite_estimators A list of hermite_estimator_univar objects.
 #' @return An object of class hermite_estimator_univar.
-combine_standardized_helper_univar <- function(hermite_estimators) {
+merge_standardized_helper_univar <- function(hermite_estimators) {
   N <- hermite_estimators[[1]]$N_param
-  hermite_estimator_combined <- base::Reduce(f=combine_moments_and_count_univar, 
+  hermite_estimator_merged <- base::Reduce(f=merge_moments_and_count_univar, 
                                              x = hermite_estimators)
-  hermite_estimator_combined$coeff_vec <-
-    sapply(1:(N+1),FUN=function(k){sum(sapply(hermite_estimators, 
-          FUN=function(x){(x$num_obs / hermite_estimator_combined$num_obs) *
+  hermite_estimator_merged$coeff_vec <-
+    vapply(1:(N+1),FUN=function(k){sum(vapply(hermite_estimators, 
+          FUN=function(x){(x$num_obs / hermite_estimator_merged$num_obs) *
       gauss_hermite_quad_100(function(t){integrand_coeff_univar(t, x, 
-                                       hermite_estimator_combined, k)})}))})
-  return(hermite_estimator_combined)
+                           hermite_estimator_merged, k)})},
+      FUN.VALUE=numeric(1)))}, FUN.VALUE=numeric(1))
+  return(hermite_estimator_merged)
 }
 
-#' Combines two Hermite estimators
+#' Merges two Hermite estimators
 #'
 #' This method allows a pair of Hermite based estimators of class
-#' hermite_estimator_univar to be consistently combined.
+#' hermite_estimator_univar to be consistently merged.
 #'
 #' Note that the N and standardize arguments must be the same for the two
-#' estimators in order to combine them. In addition, note that exponentially
-#' weighted estimators cannot be combined. If the Hermite estimators are not
-#' standardized, the combined estimator will be exactly equivalent to
+#' estimators in order to merge them. In addition, note that exponentially
+#' weighted estimators cannot be merged. If the Hermite estimators are not
+#' standardized, the merged estimator will be exactly equivalent to
 #' constructing a single estimator on the data set formed by combining the
 #' data sets used to update the respective hermite_estimator_univar inputs.
 #' If the input Hermite estimators are standardized however, then the
@@ -134,47 +131,47 @@ combine_standardized_helper_univar <- function(hermite_estimators) {
 #' hermite_est_1 <- update_batch(hermite_est_1, rnorm(30))
 #' hermite_est_2 <- hermite_estimator_univar(N = 10, standardize = FALSE)
 #' hermite_est_2 <- update_batch(hermite_est_2, rnorm(30))
-#' hermite_combined <- combine_pair(hermite_est_1, hermite_est_2)
-combine_pair.hermite_estimator_univar <-
+#' hermite_merged <- merge_pair(hermite_est_1, hermite_est_2)
+merge_pair.hermite_estimator_univar <-
   function(this, hermite_estimator_other) {
     if (!is(hermite_estimator_other, "hermite_estimator_univar")) {
-      stop("combine_pair can only be applied to hermite_estimator_univar 
-           objects.")
+      stop("merge_pair.hermite_estimator_univar can only be applied to 
+           hermite_estimator_univar objects.")
     }
     if (this$N_param != hermite_estimator_other$N_param) {
-      stop("N must be equal to combine estimators.")
+      stop("N must be equal to merge estimators.")
     }
     if (this$standardize_obs != hermite_estimator_other$standardize_obs) {
-      stop("Standardization setting must be the same to combine estimators.")
+      stop("Standardization setting must be the same to merge estimators.")
     }
     if (!is.na(this$exp_weight) |
         !is.na(hermite_estimator_other$exp_weight)) {
-      stop("Cannot combine exponentially weighted estimators.")
+      stop("Cannot merge exponentially weighted estimators.")
     }
     if (this$standardize_obs == FALSE) {
-      hermite_estimator_combined <- combine_moments_and_count_univar(this, 
+      hermite_estimator_merged <- merge_moments_and_count_univar(this, 
                                                       hermite_estimator_other)
-      hermite_estimator_combined$coeff_vec <-
+      hermite_estimator_merged$coeff_vec <-
         (
           this$coeff_vec * this$num_obs + hermite_estimator_other$coeff_vec 
           * hermite_estimator_other$num_obs
         ) / (this$num_obs + hermite_estimator_other$num_obs)
     } else {
-      hermite_estimator_combined <- 
-        combine_standardized_helper_univar(list(this,hermite_estimator_other))
+      hermite_estimator_merged <- 
+        merge_standardized_helper_univar(list(this,hermite_estimator_other))
     }
-    return(hermite_estimator_combined)
+    return(hermite_estimator_merged)
   }
 
-#' Combines a list of Hermite estimators
+#' Merges a list of Hermite estimators
 #'
 #' This method allows a list of Hermite based estimators of class
-#' hermite_estimator_univar to be consistently combined.
+#' hermite_estimator_univar to be consistently merged.
 #'
 #' Note that the N and standardize arguments must be the same for all estimators
-#' in order to combine them. In addition, note that exponentially weighted
-#' estimators cannot be combined. If the Hermite estimators are not
-#' standardized, the combined estimator will be exactly equivalent to
+#' in order to merge them. In addition, note that exponentially weighted
+#' estimators cannot be merged. If the Hermite estimators are not
+#' standardized, the merged estimator will be exactly equivalent to
 #' constructing a single estimator on the data set formed by combining the
 #' data sets used to update the respective hermite_estimator_univar inputs.
 #' If the input Hermite estimators are standardized however, then the
@@ -188,18 +185,18 @@ combine_pair.hermite_estimator_univar <-
 #' hermite_est_1 <- update_batch(hermite_est_1, rnorm(30))
 #' hermite_est_2 <- hermite_estimator_univar(N = 10, standardize = FALSE)
 #' hermite_est_2 <- update_batch(hermite_est_2, rnorm(30))
-#' hermite_combined <- combine_hermite(list(hermite_est_1, hermite_est_2))
-combine_hermite_univar <- function(hermite_estimators) {
+#' hermite_merged <- merge_hermite(list(hermite_est_1, hermite_est_2))
+merge_hermite_univar <- function(hermite_estimators) {
   if (length(hermite_estimators) == 1) {
     return(hermite_estimators[[1]])
   }
   if (hermite_estimators[[1]]$standardize_obs==FALSE){
-   hermite_estimator_combined <- base::Reduce(combine_pair,hermite_estimators)
+   hermite_estimator_merged <- base::Reduce(merge_pair,hermite_estimators)
   } else {
-   hermite_estimator_combined <- 
-                        combine_standardized_helper_univar(hermite_estimators)
+   hermite_estimator_merged <- 
+     merge_standardized_helper_univar(hermite_estimators)
   }
-  return(hermite_estimator_combined)
+  return(hermite_estimator_merged)
 }
 
 #' Updates the Hermite series based estimator sequentially
@@ -395,17 +392,11 @@ cum_prob.hermite_estimator_univar <- function(this, x, clipped = FALSE) {
 # This helper method is intended for internal use by the 
 # hermite_estimator_univar class.
 quantile_helper <- function(this, p) {
-  if (!is.numeric(p)) {
-    stop("p must be numeric.")
-  }
-  if (p < 0 | p > 1) {
-    return(NA)
-  }
   h_k <-
     hermite_function(this$N_param, x=0, this$normalization_hermite_vec)
   p_lower <- this$coeff_vec %*% hermite_integral_val(this$N_param,x=0,h_k)
   p_upper <- 1-as.numeric(this$coeff_vec %*% 
-                      hermite_integral_val_quantile_adap(this$N_param,x=0,h_k))
+                      hermite_integral_val_upper(this$N_param,x=0,h_k))
   if (is.na(p_lower) | is.na(p_upper)){
     return(NA)
   }
@@ -505,20 +496,20 @@ quant.hermite_estimator_univar <- function(this, p) {
   if (this$standardize_obs != TRUE) {
     stop("Quantile estimation requires standardization to be true.")
   }
-  if (length(p) < 1) {
-    stop("At least one quantile must be specified.")
-  }
   if (this$num_obs < 2) {
     return(rep(NA, length(p)))
   }
   result <- rep(0, length(p))
   for (idx in seq_along(p)) {
+    if (p[idx] < 0 | p[idx] > 1) {
+      result[idx] <- NA
+    }
     result[idx] <- quantile_helper(this, p[idx])
   }
   return(result)
 }
 
-spearmans.hermite_estimator_univar <- function(this) {
+spearmans.hermite_estimator_univar <- function(this, clipped) {
   stop("Spearman's correlation estimation is not defined for the univariate 
        Hermite estimator")
 }

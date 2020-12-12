@@ -42,7 +42,7 @@ hermite_int_lower <- function(N,x){
 hermite_int_upper <- function(N,x){
   normalization_hermite <- hermite_normalization(N)
   hermite_function_matrix <- hermite_function(N,x,normalization_hermite)
-  return(hermite_integral_val_quantile_adap(N,x,hermite_function_matrix))
+  return(hermite_integral_val_upper(N,x,hermite_function_matrix))
 }
 
 #' Calculates \eqn{\int_{-\infty}^{\infty} f(x) e^{-x^2} dx} using 
@@ -57,7 +57,7 @@ gauss_hermite_quad_100 <- function(f){
 }
 
 integrand_coeff_univar <- function(t,hermite_est_current, 
-                                   hermite_estimator_combined, current_k, 
+                                   hermite_estimator_merged, current_k, 
                                    dimension = NA){
   normalization_hermite <- hermite_est_current$normalization_hermite_vec
   t <- sqrt(2) * t
@@ -68,26 +68,26 @@ integrand_coeff_univar <- function(t,hermite_est_current,
     original_sd <- sqrt(hermite_est_current$running_variance / 
                           (hermite_est_current$num_obs-1))
     original_mean <- hermite_est_current$running_mean
-    new_sd <- sqrt(hermite_estimator_combined$running_variance / 
-                     (hermite_estimator_combined$num_obs-1))
-    new_mean <- hermite_estimator_combined$running_mean
+    new_sd <- sqrt(hermite_estimator_merged$running_variance / 
+                     (hermite_estimator_merged$num_obs-1))
+    new_mean <- hermite_estimator_merged$running_mean
     original_coeff_vec <- hermite_est_current$coeff_vec
   } else {
     if (dimension==1){
       original_sd <- sqrt(hermite_est_current$running_variance_x / 
                             (hermite_est_current$num_obs-1))
       original_mean <- hermite_est_current$running_mean_x
-      new_sd <- sqrt(hermite_estimator_combined$running_variance_x / 
-                       (hermite_estimator_combined$num_obs-1))
-      new_mean <- hermite_estimator_combined$running_mean_x
+      new_sd <- sqrt(hermite_estimator_merged$running_variance_x / 
+                       (hermite_estimator_merged$num_obs-1))
+      new_mean <- hermite_estimator_merged$running_mean_x
       original_coeff_vec <- hermite_est_current$coeff_vec_x
     } else if (dimension==2) {
       original_sd <- sqrt(hermite_est_current$running_variance_y / 
                             (hermite_est_current$num_obs-1))
       original_mean <- hermite_est_current$running_mean_y
-      new_sd <- sqrt(hermite_estimator_combined$running_variance_y / 
-                       (hermite_estimator_combined$num_obs-1))
-      new_mean <- hermite_estimator_combined$running_mean_y
+      new_sd <- sqrt(hermite_estimator_merged$running_variance_y / 
+                       (hermite_estimator_merged$num_obs-1))
+      new_mean <- hermite_estimator_merged$running_mean_y
       original_coeff_vec <- hermite_est_current$coeff_vec_y
     } 
   }

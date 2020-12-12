@@ -1,6 +1,6 @@
 Package: hermiter
 Title: Efficient Sequential and Batch Estimation of Probability Density Functions, Cumulative Distribution Functions and Quantiles
-Version: 1.0.0
+Version: 2.0.0
 Authors@R: c(
   person("Michael","Stephanou",role=c("aut","cre"), email="michael.stephanou@gmail.com"),
   person("Melvin","Varughese",role="ctb"))
@@ -31,7 +31,9 @@ Suggests:
     dplyr,
     data.table,
     ggplot2,
-    DT
+    DT,
+    mvtnorm,
+    patchwork
 VignetteBuilder: knitr
 URL: https://github.com/MikeJaredS/hermiter
 BugReports: https://github.com/MikeJaredS/hermiter/issues

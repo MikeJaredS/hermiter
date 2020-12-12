@@ -31,7 +31,7 @@ estimation of the full probability density function, cumulative distribution
 function and quantile function. It is well suited to streaming data (both
 stationary and non-stationary) and to efficient estimation in the context of
 massive or distributed data sets. Indeed, estimators constructed on different
-subsets of a distributed data set can be consistently combined.
+subsets of a distributed data set can be consistently merged.
 }
 \examples{
 hermite_est <- hermite_estimator_univar(N = 10, standardize = TRUE)

@@ -6,11 +6,11 @@
 #'
 #' The hermite_estimator_bivar class allows the sequential or one-pass batch
 #' estimation of the full bivariate probability density function and cumulative 
-#' distribution function along with the Spearman's rank correlation coefficient. 
-#' It is well suited to streaming data (both stationary and non-stationary) and 
-#' to efficient estimation in the context of massive or distributed data sets. 
-#' Indeed,estimators constructed on different subsets of a distributed data set 
-#' can be consistently combined.
+#' distribution function along with the Spearman's rank correlation 
+#' coefficient. It is well suited to streaming data (both stationary and 
+#' non-stationary) and to efficient estimation in the context of massive or 
+#' distributed data sets. Indeed,estimators constructed on different subsets 
+#' of a distributed data set can be consistently merged.
 #'
 #' @author Michael Stephanou <michael.stephanou@gmail.com>
 #'
@@ -66,15 +66,14 @@ hermite_estimator_bivar <- function(N = 10, standardize=FALSE,
   this$normalization_hermite_vec <- h_norm_serialized[1:(this$N_param+1)]
   this$W <- W_serialized[1:(this$N_param+1),1:(this$N_param+1)]
   this$z <- z_serialized[1:(this$N_param+1)]
-  # class(this) <- append(class(this),"hermite_estimator_bivar")
-  class(this) <- "hermite_estimator_bivar"
+  class(this) <- c("hermite_estimator_bivar", "list")
   return(this)
 }
 
-#' Internal method to consistently combine the number of observations, means and 
+#' Internal method to consistently merge the number of observations, means and 
 #' variances of two bivariate Hermite estimators
 #' 
-#' The algorithm to combine the variances consistently comes from
+#' The algorithm to merge the variances consistently comes from
 #' Schubert, Erich, and Michael Gertz. "Numerically stable parallel computation 
 #' of (co-) variance." Proceedings of the 30th International Conference on 
 #' Scientific and Statistical Database Management. 2018.
@@ -82,94 +81,107 @@ hermite_estimator_bivar <- function(N = 10, standardize=FALSE,
 #' @param hermite_estimator1 A hermite_estimator_bivar object.
 #' @param hermite_estimator2 A hermite_estimator_bivar object.
 #' @return An object of class hermite_estimator_bivar
-combine_moments_and_count_bivar <- function(hermite_estimator1 
+merge_moments_and_count_bivar <- function(hermite_estimator1 
                                             ,hermite_estimator2){
   num_obs_1 <- hermite_estimator1$num_obs
   num_obs_2 <- hermite_estimator2$num_obs
-  hermite_combined <- hermite_estimator_bivar(hermite_estimator1$N_param, 
-                                              hermite_estimator1$standardize_obs)
-  hermite_combined$num_obs <- num_obs_1 + num_obs_2
-  hermite_combined$running_mean_x <- (num_obs_1 * 
+  hermite_merged <- hermite_estimator_bivar(hermite_estimator1$N_param, 
+                                            hermite_estimator1$standardize_obs)
+  hermite_merged$num_obs <- num_obs_1 + num_obs_2
+  hermite_merged$running_mean_x <- (num_obs_1 * 
                                         hermite_estimator1$running_mean_x +
-                                        num_obs_2 * hermite_estimator2$running_mean_x) /(num_obs_1+num_obs_2)
-  hermite_combined$running_variance_x <- (hermite_estimator1$running_variance_x 
-                                          + hermite_estimator2$running_variance_x) + ((num_obs_1 * num_obs_2) / 
-                                                                                        (num_obs_1 + num_obs_2)) *(hermite_estimator1$running_mean_x 
-                                                                                                                   - hermite_estimator2$running_mean_x)^2
+                                        num_obs_2 * 
+                                      hermite_estimator2$running_mean_x) / 
+    (num_obs_1+num_obs_2)
+  hermite_merged$running_variance_x <- (hermite_estimator1$running_variance_x + 
+                                        hermite_estimator2$running_variance_x)+
+    ((num_obs_1 * num_obs_2) /(num_obs_1 + num_obs_2)) * 
+    (hermite_estimator1$running_mean_x - hermite_estimator2$running_mean_x)^2
   
-  hermite_combined$running_mean_y <- (num_obs_1 * 
-                                        hermite_estimator1$running_mean_y + num_obs_2 * 
-                                        hermite_estimator2$running_mean_y)/(num_obs_1+num_obs_2)
-  hermite_combined$running_variance_y <-(hermite_estimator1$running_variance_y +
-                                           hermite_estimator2$running_variance_y) + ((num_obs_1 * num_obs_2) / 
-                                                                                       (num_obs_1 + num_obs_2)) *(hermite_estimator1$running_mean_y 
-                                                                                                                  - hermite_estimator2$running_mean_y)^2
-  return(hermite_combined)
+  hermite_merged$running_mean_y <- (num_obs_1 * 
+                                        hermite_estimator1$running_mean_y + 
+                                      num_obs_2 * 
+                                        hermite_estimator2$running_mean_y) / 
+    (num_obs_1+num_obs_2)
+  hermite_merged$running_variance_y <-(hermite_estimator1$running_variance_y +
+                                      hermite_estimator2$running_variance_y) + 
+    ((num_obs_1 * num_obs_2) /(num_obs_1 + num_obs_2)) * 
+    (hermite_estimator1$running_mean_y - hermite_estimator2$running_mean_y)^2
+  return(hermite_merged)
 }
 
-#' Internal method to combine a list of standardized bivariate Hermite 
-#' estimators with improved accuracy
+#' Internal method to merge a list of standardized bivariate Hermite 
+#' estimators
 #'
 #'
 #' @param hermite_estimators A list of hermite_estimator_bivar objects.
 #' @return An object of class hermite_estimator_bivar.
-combine_standardized_helper_bivar <- function(hermite_estimators) {
+merge_standardized_helper_bivar <- function(hermite_estimators) {
   N <- hermite_estimators[[1]]$N_param
-  hermite_estimator_combined <- base::Reduce(f=combine_moments_and_count_bivar, 
+  hermite_estimator_merged <- base::Reduce(f=merge_moments_and_count_bivar, 
                                              x = hermite_estimators)
-  hermite_estimator_combined$coeff_vec_x <-
-    sapply(1:(N+1),FUN=function(k){sum(sapply(hermite_estimators,
-                                              FUN=function(x){(x$num_obs / hermite_estimator_combined$num_obs) *
-                                                  gauss_hermite_quad_100(function(t){integrand_coeff_univar(t, x,
-                                                                                                            hermite_estimator_combined, k, 1)})}))})
-  
-  hermite_estimator_combined$coeff_vec_y <-
-    sapply(1:(N+1),FUN=function(k){sum(sapply(hermite_estimators,
-                                              FUN=function(x){(x$num_obs / hermite_estimator_combined$num_obs) *
-                                                  gauss_hermite_quad_100(function(t){integrand_coeff_univar(t, x,
-                                                                                                            hermite_estimator_combined, k, 2)})}))})
+  hermite_estimator_merged$coeff_vec_x <-
+    vapply(1:(N+1),FUN=function(k){sum(vapply(hermite_estimators,
+       FUN=function(x){(x$num_obs / hermite_estimator_merged$num_obs) *
+      gauss_hermite_quad_100(function(t){integrand_coeff_univar(t, x, 
+                                       hermite_estimator_merged, k, 1)})}, 
+      FUN.VALUE=numeric(1)))}, FUN.VALUE=numeric(1))
+  hermite_estimator_merged$coeff_vec_y <-
+    vapply(1:(N+1),FUN=function(k){sum(vapply(hermite_estimators,
+       FUN=function(x){(x$num_obs / hermite_estimator_merged$num_obs) *
+      gauss_hermite_quad_100(function(t){integrand_coeff_univar(t, x, 
+                                      hermite_estimator_merged, k, 2)})}, 
+      FUN.VALUE=numeric(1)))}, FUN.VALUE=numeric(1))
   herm_mod <- function(t,N){hermite_polynomial(N, t) *
       hermite_normalization(N)}
-  g_mat <- function(N,t_1,t_2, const_mult){sqrt(2)*const_mult*tcrossprod(hermite_function_N(N,t_1),herm_mod(t_2,N))}
+  g_mat <- function(N,t_1,t_2, const_mult){sqrt(2) * const_mult * 
+      tcrossprod(hermite_function_N(N,t_1),herm_mod(t_2,N))}
   g_mat_scale_shift <- function(N,scale,shift){
     res <- matrix(rep(0,(N+1)*(N+1)), nrow=N+1,ncol=N+1)
     root_x <- root_x_serialized
     weight_w <- weight_w_serialized
     for (idx in seq_along(root_x)) {
-      res <- res + g_mat(N,scale*sqrt(2)*root_x[idx]+shift,sqrt(2)*root_x[idx],weight_w[idx])
+      res <- res + g_mat(N,scale*sqrt(2) * root_x[idx] + shift,sqrt(2) * 
+                           root_x[idx],weight_w[idx])
     }
     return(res)
   }
-  coeff_bivar_combine <- function(hermite_est_current,hermite_estimator_combined){
+  coeff_bivar_merge <- function(hermite_est_current,hermite_estimator_merged){
     N_in <- hermite_est_current$N_param
     prev_mean_x <- hermite_est_current$running_mean_x
     prev_mean_y <- hermite_est_current$running_mean_y
-    prev_sd_x <- sqrt(hermite_est_current$running_variance_x/(hermite_est_current$num_obs-1))
-    prev_sd_y <- sqrt(hermite_est_current$running_variance_y/(hermite_est_current$num_obs-1))
-    new_mean_x <- hermite_estimator_combined$running_mean_x
-    new_mean_y <- hermite_estimator_combined$running_mean_y
-    new_sd_x <- sqrt(hermite_estimator_combined$running_variance_x/(hermite_estimator_combined$num_obs-1))
-    new_sd_y <- sqrt(hermite_estimator_combined$running_variance_y/(hermite_estimator_combined$num_obs-1))
-    res_1 <- g_mat_scale_shift(N_in,prev_sd_x/new_sd_x,(prev_mean_x-new_mean_x) / new_sd_x)
-    res_2 <- g_mat_scale_shift(N_in,prev_sd_y/new_sd_y,(prev_mean_y-new_mean_y)/new_sd_y)
+    prev_sd_x <- sqrt(hermite_est_current$running_variance_x / 
+                        (hermite_est_current$num_obs-1))
+    prev_sd_y <- sqrt(hermite_est_current$running_variance_y / 
+                        (hermite_est_current$num_obs-1))
+    new_mean_x <- hermite_estimator_merged$running_mean_x
+    new_mean_y <- hermite_estimator_merged$running_mean_y
+    new_sd_x <- sqrt(hermite_estimator_merged$running_variance_x / 
+                       (hermite_estimator_merged$num_obs-1))
+    new_sd_y <- sqrt(hermite_estimator_merged$running_variance_y / 
+                       (hermite_estimator_merged$num_obs-1))
+    res_1 <- g_mat_scale_shift(N_in,prev_sd_x/new_sd_x,(prev_mean_x-new_mean_x)/
+                                 new_sd_x)
+    res_2 <- g_mat_scale_shift(N_in,prev_sd_y/new_sd_y,(prev_mean_y-new_mean_y)/
+                                 new_sd_y)
     return(res_1%*%hermite_est_current$coeff_mat_bivar%*%t(res_2))
   }
   coeff_mat_lst <- lapply(hermite_estimators, FUN = function(x){x$num_obs / 
-      hermite_estimator_combined$num_obs * 
-      coeff_bivar_combine(x,hermite_estimator_combined)} )
-  hermite_estimator_combined$coeff_mat_bivar <- Reduce(f = "+",coeff_mat_lst)
-  return(hermite_estimator_combined)
+      hermite_estimator_merged$num_obs * 
+      coeff_bivar_merge(x,hermite_estimator_merged)} )
+  hermite_estimator_merged$coeff_mat_bivar <- Reduce(f = "+",coeff_mat_lst)
+  return(hermite_estimator_merged)
 }
 
-#' Combines two bivariate Hermite estimators
+#' Merges two bivariate Hermite estimators
 #'
 #' This method allows a pair of Hermite based estimators of class
-#' hermite_estimator_bivar to be consistently combined.
+#' hermite_estimator_bivar to be consistently merged.
 #'
 #' Note that the N and standardize arguments must be the same for the two
-#' estimators in order to combine them. In addition, note that exponentially
-#' weighted estimators cannot be combined. If the Hermite estimators are not
-#' standardized, the combined estimator will be exactly equivalent to
+#' estimators in order to merge them. In addition, note that exponentially
+#' weighted estimators cannot be merged. If the Hermite estimators are not
+#' standardized, the merged estimator will be exactly equivalent to
 #' constructing a single estimator on the data set formed by combining the
 #' data sets used to update the respective hermite_estimator_bivar inputs.
 #' If the input Hermite estimators are standardized however, then the
@@ -181,56 +193,56 @@ combine_standardized_helper_bivar <- function(hermite_estimators) {
 #' Hermite series based estimator.
 #' @return An object of class hermite_estimator_bivar.
 #' @export
-combine_pair.hermite_estimator_bivar <-
+merge_pair.hermite_estimator_bivar <-
   function(this, hermite_estimator_other) {
     if (!is(hermite_estimator_other, "hermite_estimator_bivar")) {
-      stop("combine_pair can only be applied to hermite_estimator_bivar 
+      stop("merge_pair can only be applied to hermite_estimator_bivar 
            objects.")
     }
     if (this$N_param != hermite_estimator_other$N_param) {
-      stop("N must be equal to combine estimators.")
+      stop("N must be equal to merge estimators.")
     }
     if (this$standardize_obs != hermite_estimator_other$standardize_obs) {
-      stop("Standardization setting must be the same to combine estimators.")
+      stop("Standardization setting must be the same to merge estimators.")
     }
     if (!is.na(this$exp_weight) |
         !is.na(hermite_estimator_other$exp_weight)) {
-      stop("Cannot combine exponentially weighted estimators.")
+      stop("Cannot merge exponentially weighted estimators.")
     }
     if (this$standardize_obs == FALSE) {
-      hermite_estimator_combined <- combine_moments_and_count_bivar(this, 
+      hermite_estimator_merged <- merge_moments_and_count_bivar(this, 
                                                        hermite_estimator_other)
-      hermite_estimator_combined$coeff_vec_x <-
+      hermite_estimator_merged$coeff_vec_x <-
         (
           this$coeff_vec_x * this$num_obs + hermite_estimator_other$coeff_vec_x 
           * hermite_estimator_other$num_obs
         ) / (this$num_obs + hermite_estimator_other$num_obs)
-      hermite_estimator_combined$coeff_vec_y <-
+      hermite_estimator_merged$coeff_vec_y <-
         (
           this$coeff_vec_y * this$num_obs + hermite_estimator_other$coeff_vec_y 
           * hermite_estimator_other$num_obs
         ) / (this$num_obs + hermite_estimator_other$num_obs)
-      hermite_estimator_combined$coeff_mat_bivar <-
+      hermite_estimator_merged$coeff_mat_bivar <-
         (
           this$coeff_mat_bivar * this$num_obs + 
       hermite_estimator_other$coeff_mat_bivar * hermite_estimator_other$num_obs
         ) / (this$num_obs + hermite_estimator_other$num_obs)
     } else {
-      hermite_estimator_combined <- combine_standardized_helper_bivar(list(this,
+      hermite_estimator_merged <- merge_standardized_helper_bivar(list(this,
                                                     hermite_estimator_other))
     }
-    return(hermite_estimator_combined)
+    return(hermite_estimator_merged)
   }
 
-#' Combines a list of bivariate Hermite estimators
+#' Merges a list of bivariate Hermite estimators
 #'
 #' This method allows a list of Hermite based estimators of class
-#' hermite_estimator_bivar to be consistently combined.
+#' hermite_estimator_bivar to be consistently merged.
 #'
 #' Note that the N and standardize arguments must be the same for all estimators
-#' in order to combine them. In addition, note that exponentially weighted
-#' estimators cannot be combined. If the Hermite estimators are not
-#' standardized, the combined estimator will be exactly equivalent to
+#' in order to merge them. In addition, note that exponentially weighted
+#' estimators cannot be merged. If the Hermite estimators are not
+#' standardized, the merged estimator will be exactly equivalent to
 #' constructing a single estimator on the data set formed by combining the
 #' data sets used to update the respective hermite_estimator_bivar inputs.
 #' If the input Hermite estimators are standardized however, then the
@@ -238,17 +250,17 @@ combine_pair.hermite_estimator_bivar <-
 #'
 #' @param hermite_estimators A list of hermite_estimator_bivar objects.
 #' @return An object of class hermite_estimator_bivar.
-combine_hermite_bivar <- function(hermite_estimators) {
+merge_hermite_bivar <- function(hermite_estimators) {
   if (length(hermite_estimators) == 1) {
     return(hermite_estimators[[1]])
   }
   if (hermite_estimators[[1]]$standardize_obs==FALSE){
-    hermite_estimator_combined <- base::Reduce(combine_pair,hermite_estimators)
+    hermite_estimator_merged <- base::Reduce(merge_pair,hermite_estimators)
   } else {
-    hermite_estimator_combined <- 
-      combine_standardized_helper_bivar(hermite_estimators)
+    hermite_estimator_merged <- 
+      merge_standardized_helper_bivar(hermite_estimators)
   }
-  return(hermite_estimator_combined)
+  return(hermite_estimator_merged)
 }
 
 #' Updates the Hermite series based estimator sequentially
@@ -266,58 +278,53 @@ combine_hermite_bivar <- function(hermite_estimators) {
 #' hermite_estimator <- update_sequential(hermite_estimator, x = c(1,2))
 update_sequential.hermite_estimator_bivar <- function(this, x)
 {
-  y <- x[2]
-  x <- x[1]
+  if (!is.numeric(x)) {
+    stop("x must be numeric.")
+  }
+  if (length(x) != 2){
+    stop("x must be a vector of length 2 (bivariate observation).")
+  }
   this$num_obs <- this$num_obs + 1
   if (this$standardize_obs == TRUE) {
     if (is.na(this$exp_weight)) {
-      processed_vec <-
-        standardizeInputs(x,
-                          this$num_obs,
-                          this$running_mean_x,
-                          this$running_variance_x)
-      this$running_mean_x <- processed_vec[1]
-      this$running_variance_x <- processed_vec[2]
-      x <- processed_vec[3]
-      processed_vec <-
-        standardizeInputs(y,
-                          this$num_obs,
-                          this$running_mean_y,
-                          this$running_variance_y)
-      this$running_mean_y <- processed_vec[1]
-      this$running_variance_y <- processed_vec[2]
-      y <- processed_vec[3]
+      prev_mean <- c(this$running_mean_x,this$running_mean_y)
+      upd_mean <- (prev_mean*(this$num_obs-1) + x)/this$num_obs
+      this$running_mean_x <- upd_mean[1]
+      this$running_mean_y <- upd_mean[2]
       if (this$num_obs < 2) {
         return(this)
       }
+      upd_var <-c(this$running_variance_x,this$running_variance_y) +
+        (x - prev_mean) * (x - upd_mean)
+      this$running_variance_x <- upd_var[1]
+      this$running_variance_y <- upd_var[2]
+      x <- (x - upd_mean)/sqrt(upd_var/(this$num_obs-1))
     } else {
-      processed_vec <-
-        standardizeInputsEW(x,
-                            this$num_obs,
-                            this$exp_weight,
-                            this$running_mean_x,
-                            this$running_variance_x)
-      this$running_mean_x <- processed_vec[1]
-      this$running_variance_x <- processed_vec[2]
-      x <- processed_vec[3]
-      processed_vec <-
-        standardizeInputsEW(y,
-                            this$num_obs,
-                            this$exp_weight,
-                            this$running_mean_y,
-                            this$running_variance_y)
-      this$running_mean_y <- processed_vec[1]
-      this$running_variance_y <- processed_vec[2]
-      y <- processed_vec[3]
+      prev_mean <- c(this$running_mean_x,this$running_mean_y)
+      upd_mean <- prev_mean*(1-this$exp_weight) + x*this$exp_weight
+      this$running_mean_x <- upd_mean[1]
+      this$running_mean_y <- upd_mean[2]
       if (this$num_obs < 2) {
+        this$running_mean_x <- x[1]
+        this$running_mean_y <- x[2]
+        this$running_variance_x <- 1
+        this$running_variance_y <- 1
         return(this)
       }
+      upd_var <- (1 - this$exp_weight) * 
+        c(this$running_variance_x,this$running_variance_y) + 
+        this$exp_weight * (x - upd_mean)^2
+      this$running_variance_x <- upd_var[1]
+      this$running_variance_y <- upd_var[2]
+      x <- (x - upd_mean)/sqrt(upd_var)
     }
   }
   h_x <-
-    as.vector(hermite_function(this$N_param, x, this$normalization_hermite_vec))
+    as.vector(hermite_function(this$N_param, x[1], 
+                               this$normalization_hermite_vec))
   h_y <-
-    as.vector(hermite_function(this$N_param, y, this$normalization_hermite_vec))
+    as.vector(hermite_function(this$N_param, x[2], 
+                               this$normalization_hermite_vec))
   if (is.na(this$exp_weight)) {
     this$coeff_vec_x <-
       (this$coeff_vec_x * (this$num_obs - 1) + h_x) / this$num_obs
@@ -355,11 +362,17 @@ update_sequential.hermite_estimator_bivar <- function(this, x)
 #' hermite_estimator <- update_batch(hermite_estimator, x = matrix(c(1, 2, 3, 4,
 #'  5, 6),nrow=3, ncol=2, byrow = TRUE))
 update_batch.hermite_estimator_bivar <- function(this, x) {
-  if (is.null(nrow(x))){
-    dim(x) <- c(1,2)
-  }
   if (!is.numeric(x)) {
     stop("x must be numeric.")
+  }
+  if (is.null(nrow(x))){
+    if (length(x) != 2){
+      stop("x must be comprised of bivariate observations.")
+    }
+    dim(x) <- c(1,2)
+  }
+  if (ncol(x)!=2 | nrow(x) < 1){
+    stop("x must be comprised at least one bivariate observation.")
   }
   if (!is.na(this$exp_weight)) {
     stop("The Hermite estimator cannot be exponentially weighted.")
@@ -407,31 +420,19 @@ dens_helper <- function(this, x, clipped)
 }
 
 dens_helper.hermite_estimator_bivar <- function(this,x, clipped = FALSE){
-  if (!is.numeric(x)) {
-    stop("x must be numeric.")
-  }
   if (this$num_obs < 2) {
     return(NA)
   }
-  y <- x[2]
-  x <- x[1]
   factor <- 1
   if (this$standardize_obs == TRUE) {
-    # if (is.na(this$exp_weight)) {
-    #   running_std_x <- sqrt(this$running_variance_x / (this$num_obs - 1))
-    #   running_std_y <- sqrt(this$running_variance_y / (this$num_obs - 1))
-    # } else {
-    #   running_std_x <- sqrt(this$running_variance_x)
-    #   running_std_y <- sqrt(this$running_variance_y)
-    # }
     running_std_vec <- calculate_running_std(this)
-    x <- (x - this$running_mean_x) / running_std_vec[1]
-    y <- (y - this$running_mean_y) / running_std_vec[2]
-    factor <- 1 / (running_std_vec[1] * running_std_vec[2])
+    x <- (x - c(this$running_mean_x,this$running_mean_y))/running_std_vec
+    factor <- 1 / (prod(running_std_vec))
   }
-  return(factor * t(hermite_function(this$N_param, x, 
-          this$normalization_hermite_vec)) %*% this$coeff_mat_bivar  %*% 
-           hermite_function(this$N_param, y,this$normalization_hermite_vec))
+  return(factor * t(hermite_function(this$N_param, x[1], 
+                                     this$normalization_hermite_vec)) %*%
+           this$coeff_mat_bivar  %*% 
+           hermite_function(this$N_param, x[2],this$normalization_hermite_vec))
 }
 
 #' Estimates the probability densities for a matrix of 2-d x values
@@ -449,16 +450,25 @@ dens_helper.hermite_estimator_bivar <- function(this,x, clipped = FALSE){
 #' @export
 #' @examples
 #' hermite_est <- hermite_estimator_bivar(N = 10, standardize = TRUE)
-#' hermite_est <- update_batch(hermite_est, matrix(rnorm(30*2), nrow=30, ncol=2, 
-#' byrow = TRUE))
+#' hermite_est <- update_batch(hermite_est, matrix(rnorm(30*2), nrow=30, 
+#' ncol=2, byrow = TRUE))
 #' cdf_est <- dens(hermite_est, matrix(c(0, 0, 1, 1, 2, 2), nrow=3, ncol=2, 
 #' byrow = TRUE))
 dens.hermite_estimator_bivar <- function(this,x, clipped = FALSE){
+  if (!is.numeric(x)) {
+    stop("x must be numeric.")
+  }
   if (is.null(nrow(x))){
+    if (length(x) != 2){
+      stop("vector input for x must be of length 2.")
+    }
     dim(x) <- c(1,2)
   }
+  if (ncol(x)!=2 | nrow(x) < 1){
+    stop("matrix input for x must have 2 columns and at least 1 row.")
+  }
   result <- rep(0,nrow(x))
-  for (idx in 1:nrow(x)) {
+  for (idx in seq_len(nrow(x))) {
     result[idx] <- dens_helper(this,x[idx,])
   }
   if (clipped == TRUE) {
@@ -475,28 +485,16 @@ cum_prob_helper <- function(this, x, clipped = FALSE)
 }
 
 cum_prob_helper.hermite_estimator_bivar <- function(this,x, clipped = FALSE){
-  if (!is.numeric(x)) {
-    stop("x must be numeric.")
-  }
   if (this$num_obs < 2) {
     return(NA)
   }
-  y <- x[2]
-  x <- x[1]
   if (this$standardize_obs == TRUE) {
-    # if (is.na(this$exp_weight)) {
-    #   running_std_x <- sqrt(this$running_variance_x / (this$num_obs - 1))
-    #   running_std_y <- sqrt(this$running_variance_y / (this$num_obs - 1))
-    # } else {
-    #   running_std_x <- sqrt(this$running_variance_x)
-    #   running_std_y <- sqrt(this$running_variance_y)
-    # }
     running_std_vec <- calculate_running_std(this)
-    x <- (x - this$running_mean_x) / running_std_vec[1]
-    y <- (y - this$running_mean_y) / running_std_vec[2]
+    x <- (x - c(this$running_mean_x,this$running_mean_y))/running_std_vec
   }
-  return(t(hermite_int_lower(N = this$N_param,x = x)) %*%
-           this$coeff_mat_bivar  %*% hermite_int_lower(N = this$N_param,x = y))
+  return(t(hermite_int_lower(N = this$N_param,x = x[1])) %*%
+           this$coeff_mat_bivar  %*%
+           hermite_int_lower(N = this$N_param,x = x[2]))
 }
 
 #' Estimates the cumulative probabilities for a matrix of 2-d x values
@@ -514,16 +512,25 @@ cum_prob_helper.hermite_estimator_bivar <- function(this,x, clipped = FALSE){
 #' @export
 #' @examples
 #' hermite_est <- hermite_estimator_bivar(N = 10, standardize = TRUE)
-#' hermite_est <- update_batch(hermite_est, matrix(rnorm(30*2), nrow=30, ncol=2, 
-#' byrow = TRUE))
+#' hermite_est <- update_batch(hermite_est, matrix(rnorm(30*2), nrow=30, 
+#' ncol=2, byrow = TRUE))
 #' cdf_est <- cum_prob(hermite_est, matrix(c(0, 0, 1, 1, 2, 2), nrow=3, ncol=2, 
 #' byrow = TRUE))
 cum_prob.hermite_estimator_bivar <- function(this,x, clipped = FALSE){
+  if (!is.numeric(x)) {
+    stop("x must be numeric.")
+  }
   if (is.null(nrow(x))){
+    if (length(x) != 2){
+      stop("vector input for x must be of length 2.")
+    }
     dim(x) <- c(1,2)
   }
+  if (ncol(x)!=2 | nrow(x) < 1){
+    stop("matrix input for x must have 2 columns and at least 1 row.")
+  }
   result <- rep(0,nrow(x))
-  for (idx in 1:nrow(x)) {
+  for (idx in seq_len(nrow(x))) {
     result[idx] <- cum_prob_helper(this,x[idx,])
   }
   if (clipped == TRUE) {
@@ -540,12 +547,14 @@ cum_prob.hermite_estimator_bivar <- function(this,x, clipped = FALSE){
 #' The object must be updated with observations prior to the use of this method.
 #'
 #' @param this A hermite_estimator_bivar object.
+#' @param clipped A boolean value. Indicates whether to clip Spearman's rank 
+#' correlation estimates to lie between -1 and 1.
 #' @return A numeric value.
 #' @export
 #' @examples
 #' hermite_est <- hermite_estimator_bivar(N = 10, standardize = TRUE)
-#' hermite_est <- update_batch(hermite_est, matrix(rnorm(30*2), nrow=30, ncol=2, 
-#' byrow = TRUE))
+#' hermite_est <- update_batch(hermite_est, matrix(rnorm(30*2), nrow=30, 
+#' ncol=2, byrow = TRUE))
 #' spearmans_est <- spearmans(hermite_est)
 spearmans.hermite_estimator_bivar <- function(this, clipped = FALSE)
 {
@@ -564,7 +573,7 @@ spearmans.hermite_estimator_bivar <- function(this, clipped = FALSE)
   return(as.numeric(result))
 }
 
-quant.hermite_estimator_bivar <- function(this) {
+quant.hermite_estimator_bivar <- function(this, p) {
   stop("Quantile estimation is not defined for the bivariate Hermite 
        estimator")
 }

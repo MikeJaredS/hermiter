@@ -30,11 +30,11 @@ of bivariate pdfs and cdfs along with nonparametric correlations.
 \details{
 The hermite_estimator_bivar class allows the sequential or one-pass batch
 estimation of the full bivariate probability density function and cumulative 
-distribution function along with the Spearman's rank correlation coefficient. 
-It is well suited to streaming data (both stationary and non-stationary) and 
-to efficient estimation in the context of massive or distributed data sets. 
-Indeed,estimators constructed on different subsets of a distributed data set 
-can be consistently combined.
+distribution function along with the Spearman's rank correlation 
+coefficient. It is well suited to streaming data (both stationary and 
+non-stationary) and to efficient estimation in the context of massive or 
+distributed data sets. Indeed,estimators constructed on different subsets 
+of a distributed data set can be consistently merged.
 }
 \examples{
 hermite_est <- hermite_estimator_bivar(N = 10, standardize = TRUE)

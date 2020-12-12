@@ -26,8 +26,8 @@ The object must be updated with observations prior to the use of this method.
 }
 \examples{
 hermite_est <- hermite_estimator_bivar(N = 10, standardize = TRUE)
-hermite_est <- update_batch(hermite_est, matrix(rnorm(30*2), nrow=30, ncol=2, 
-byrow = TRUE))
+hermite_est <- update_batch(hermite_est, matrix(rnorm(30*2), nrow=30, 
+ncol=2, byrow = TRUE))
 cdf_est <- cum_prob(hermite_est, matrix(c(0, 0, 1, 1, 2, 2), nrow=3, ncol=2, 
 byrow = TRUE))
 }
