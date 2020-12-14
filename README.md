@@ -250,7 +250,7 @@ hermite_est_merged <- merge_hermite(list(hermite_est_1,hermite_est_2))
 ```
 
 The ability to combine/merge estimators is particularly useful in applications
-involving grouped data (as we will illustrate below).
+involving grouped data (see package vignette).
 
 # Estimate univariate pdf, cdf and quantile function
 
