@@ -543,6 +543,11 @@ cum_prob.hermite_estimator_bivar <- function(this,x, clipped = FALSE){
 #'
 #' This method calculates the Spearman's rank correlation coefficient value
 #' using the hermite_estimator_bivar object (this).
+#' 
+#' The method utilizes the estimator defined in the paper Stephanou, Michael 
+#' and Varughese, Melvin "Sequential Estimation of Nonparametric Correlation 
+#' using Hermite Series Estimators," ArXiv Preprint (2020), 
+#' https://arxiv.org/abs/2012.06287
 #'
 #' The object must be updated with observations prior to the use of this method.
 #'
