@@ -7,19 +7,27 @@
 update_batch(this, x)
 }
 \arguments{
-\item{this}{A hermite_estimator object.}
+\item{this}{A hermite_estimator_univar or hermite_estimator_bivar object.}
 
-\item{x}{A numeric vector. A vector of observations to be incorporated
-into the estimator.}
+\item{x}{A numeric vector or a numeric matrix. Note that for univariate 
+estimators, x is a numeric vector of observations to be incorporated. For 
+bivariate estimators, x is a numeric matrix with n rows for n observations 
+and 2 columns.}
 }
 \value{
-An object of class hermite_estimator.
+An object of class hermite_estimator_univar or 
+hermite_estimator_bivar.
 }
 \description{
 This method can be applied in one-pass batch estimation settings. This
 method cannot be used with an exponentially weighted estimator.
 }
 \examples{
-hermite_estimator <- hermite_estimator(N = 10, standardize = TRUE)
-hermite_estimator <- update_batch(hermite_estimator, x = c(1, 2))
+hermite_est <- hermite_estimator(N = 10, standardize = TRUE, 
+est_type="univariate")
+hermite_est <- update_batch(hermite_est, x = c(1, 2))
+hermite_est <- hermite_estimator(N = 10, standardize = TRUE, 
+est_type="bivariate")
+hermite_est <- update_batch(hermite_est, x = matrix(c(1,1,2,2,3,3), 
+nrow=3, ncol=2,byrow=TRUE))
 }

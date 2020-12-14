@@ -2,7 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{hermite_integral_val}
 \alias{hermite_integral_val}
-\title{Outputs a definite integral of the orthonormal Hermite functions}
+\title{Outputs lower integral of the orthonormal Hermite functions}
 \usage{
 hermite_integral_val(N, x, hermite_function_mat)
 }

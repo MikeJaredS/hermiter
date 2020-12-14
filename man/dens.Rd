@@ -2,15 +2,15 @@
 % Please edit documentation in R/hermite_estimator.R
 \name{dens}
 \alias{dens}
-\title{Estimates the probability density for a vector of x values}
+\title{Estimates the probability density at one or more x values}
 \usage{
 dens(this, x, clipped)
 }
 \arguments{
-\item{this}{A hermite_estimator object.}
+\item{this}{A hermite_estimator_univar or hermite_estimator_bivar object.}
 
-\item{x}{A numeric vector. Values at which to estimate the probability
-density.}
+\item{x}{A numeric vector (univariate) or a numeric matrix (bivariate) of
+values at which to calculate the probability density.}
 
 \item{clipped}{A boolean value. This value determines whether
 probability densities are clipped to be bigger than zero.}
@@ -20,13 +20,22 @@ A numeric vector of probability density values.
 }
 \description{
 This method calculates the probability density values at a vector of
-x values using the hermite_estimator object (this).
+x values in the univariate case. In the bivariate case, the method calculates
+the probability density values for a matrix of x values, each row of which 
+represents a 2-d point.
 }
 \details{
 The object must be updated with observations prior to the use of the method.
 }
 \examples{
-hermite_est <- hermite_estimator(N = 10, standardize = TRUE)
+hermite_est <- hermite_estimator(N = 10, standardize = TRUE, 
+est_type="univariate")
 hermite_est <- update_batch(hermite_est, rnorm(30))
 pdf_est <- dens(hermite_est, c(0, 0.5, 1))
+hermite_est <- hermite_estimator(N = 10, standardize = TRUE, 
+est_type="bivariate")
+hermite_est <- update_batch(hermite_est, x = matrix(rnorm(60), 
+nrow=30, ncol=2,byrow=TRUE))
+pdf_est <- dens(hermite_est, matrix(c(0,0,0.5,0.5,1,1),nrow=3,
+ncol=2,byrow=TRUE))
 }

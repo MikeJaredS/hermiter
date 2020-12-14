@@ -7,18 +7,24 @@
 update_sequential(this, x)
 }
 \arguments{
-\item{this}{A hermite_estimator object.}
+\item{this}{A hermite_estimator_univar or hermite_estimator_bivar object.}
 
-\item{x}{A numeric value. An observation to be incorporated into the
-estimator.}
+\item{x}{A numeric value or vector. An observation to be incorporated into 
+the estimator. Note that for univariate estimators, x is a numeric value 
+whereas for bivariate estimators, x is a numeric vector of length 2.}
 }
 \value{
-An object of class hermite_estimator.
+An object of class hermite_estimator_univar or 
+hermite_estimator_bivar.
 }
 \description{
 This method can be applied in sequential estimation settings.
 }
 \examples{
-hermite_estimator <- hermite_estimator(N = 10, standardize = TRUE)
-hermite_estimator <- update_sequential(hermite_estimator, x = 2)
+hermite_est <- hermite_estimator(N = 10, standardize = TRUE, 
+est_type="univariate")
+hermite_est <- update_sequential(hermite_est, x = 2)
+hermite_est <- hermite_estimator(N = 10, standardize = TRUE, 
+est_type="bivariate")
+hermite_est <- update_sequential(hermite_est, x = c(1,2))
 }

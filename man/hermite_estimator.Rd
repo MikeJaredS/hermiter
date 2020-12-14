@@ -2,12 +2,19 @@
 % Please edit documentation in R/hermite_estimator.R
 \name{hermite_estimator}
 \alias{hermite_estimator}
-\title{A class to sequentially estimate pdfs, cdfs and quantile functions}
+\title{A class to sequentially estimate univariate and bivariate pdfs and cdfs along
+with quantile functions in the univariate setting and nonparametric 
+correlations in the bivariate setting.}
 \usage{
-hermite_estimator(N = 10, standardize = FALSE, exp_weight_lambda = NA)
+hermite_estimator(
+  N = 10,
+  standardize = FALSE,
+  exp_weight_lambda = NA,
+  est_type = "univariate"
+)
 }
 \arguments{
-\item{N}{An integer between 0 and 100. The Hermite series based estimator
+\item{N}{An integer between 0 and 75. The Hermite series based estimator
 is truncated at N+1 terms.}
 
 \item{standardize}{A boolean value. Determines whether the observations are
@@ -16,25 +23,26 @@ standardized, a transformation which often improves performance.}
 \item{exp_weight_lambda}{A numerical value between 0 and 1. This parameter
 controls the exponential weighting of the Hermite series based estimator.
 If this parameter is NA, no exponential weighting is applied.}
+
+\item{est_type}{A string value. Options are "univariate" or "bivariate".}
 }
 \value{
-An S3 object of class hermite_estimator, with methods for
-density function, distribution function and quantile function estimation.
+An S3 object of class hermite_estimator_univar or 
+hermite_estimator_bivar.
 }
 \description{
-This method constructs an S3 object with associated methods for univariate
-nonparametric estimation of pdfs, cdfs and quantiles.
-}
-\details{
-The hermite_estimator class allows the sequential or one-pass batch
-estimation of the full probability density function, cumulative distribution
-function and quantile function. It is well suited to streaming data (both
-stationary and non-stationary) and to efficient estimation in the context of
-massive or distributed data sets. Indeed, estimators constructed on different
-subsets of a distributed data set can be consistently combined.
+The hermite_estimator class provides a unified interface to the univariate 
+and bivariate Hermite series based estimators, leveraging generic methods and
+multiple dispatch. Methods are included for the sequential or one-pass batch 
+estimation of the full probability density function and cumulative 
+distribution function in the univariate and bivariate settings. Sequential 
+or one-pass batch estimation methods are also provided for the full quantile 
+function in the univariate setting and the Spearman's rank correlation 
+estimator in the bivariate setting.
 }
 \examples{
-hermite_est <- hermite_estimator(N = 10, standardize = TRUE)
+hermite_est <- hermite_estimator(N = 10, standardize = TRUE,
+est_type="univariate")
 }
 \author{
 Michael Stephanou <michael.stephanou@gmail.com>

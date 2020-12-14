@@ -1,6 +1,9 @@
 ---
 title: "hermiter"
-output: rmarkdown::html_vignette
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+    number_sections: true
 vignette: >
   %\VignetteIndexEntry{hermiter}
   %\VignetteEngine{knitr::rmarkdown}
@@ -9,6 +12,8 @@ vignette: >
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
+  fig.width=6, 
+  fig.height=4,
   collapse = TRUE,
   comment = "#>"
 )
@@ -17,26 +22,31 @@ set.seed(10)
 
 # What does hermiter do?
 
-`hermiter` facilitates the estimation of the full probability density function,
-cumulative distribution function and quantile function using Hermite series 
-based estimators. The package is applicable to streaming, batch and grouped 
-data. The core methods of the package are written in C++ for speed.
+`hermiter` facilitates the estimation of the probability density function 
+and cumulative distribution function in univariate and bivariate settings using 
+Hermite series based estimators. In addition, `hermiter` allows the 
+estimation of the quantile function in the univariate case and the Spearman's 
+rank correlation coefficient in the bivariate case. The package is applicable to
+streaming, batch and grouped data. The core methods of the package are written 
+in C++ for speed.
 
 These estimators are particularly useful in the sequential setting (both 
 stationary and non-stationary data streams). In addition, they are useful in 
 efficient, one-pass batch estimation which is particularly relevant in the 
 context of large data sets. Finally, the Hermite series based estimators are 
 applicable in decentralized (distributed) settings in that estimators formed on 
-subsets of the data can be consistently combined. The Hermite series based 
+subsets of the data can be consistently merged. The Hermite series based 
 estimators have the distinct advantage of being able to estimate the full 
-density function, distribution function and quantile function in an online 
-manner.The theoretical and empirical properties of these estimators have been 
-studied in-depth in the articles below. The investigations demonstrate that
+density function, distribution function and quantile function (univariate 
+setting) along with the Spearman's rank correlation (bivariate setting) in an 
+online manner. The theoretical and empirical properties of these estimators have 
+been studied in-depth in the articles below. The investigations demonstrate that
 the Hermite series based estimators are particularly effective in distribution
-function and quantile estimation.
+function, quantile function and nonparametric correlation estimation.
 
 * [Stephanou, Michael, Varughese, Melvin and Macdonald, Iain. "Sequential quantiles via Hermite series density estimation." Electronic Journal of Statistics 11.1 (2017): 570-607.](https://projecteuclid.org/euclid.ejs/1488531636) 
 * [Stephanou, Michael and Varughese, Melvin. "On the properties of hermite series based distribution function estimators." Metrika (2020).](https://link.springer.com/article/10.1007/s00184-020-00785-z)
+* [Stephanou, Michael and Varughese, Melvin. "Sequential Estimation of Nonparametric Correlation using Hermite Series Estimators." arXiv Preprint (2020).](https://arxiv.org/abs/2012.06287)
 
 # Load Packages
 
@@ -55,6 +65,8 @@ library(ggplot2)
 library(dplyr)
 library(data.table)
 library(DT)
+library(mvtnorm)
+library(patchwork)
 ```
 
 # Construct Estimator
@@ -63,12 +75,24 @@ A hermite_estimator S3 object is constructed as below. The argument, N, adjusts
 the number of terms in the Hermite series based estimator and controls the 
 trade-off between bias and variance. A lower N value implies a higher bias but 
 lower variance and vice versa for higher values of N. The argument, standardize,
-controls whether or not to standardize the batch of observations before applying
-the estimator. Standardization usually yields better results and is recommended 
+controls whether or not to standardize observations before applying the 
+estimator. Standardization usually yields better results and is recommended 
 for most estimation settings. 
 
+A univariate estimator is constructed as follows (note that the default 
+estimator type is univariate, so this argument does not need to be explicitly 
+set):
+
 ```{r}
-hermite_est <- hermite_estimator(N=10, standardize=TRUE)
+hermite_est <- hermite_estimator(N=10, standardize=TRUE, 
+                                 est_type = "univariate")
+```
+
+Similarly for constructing a bivariate estimator:
+
+```{r}
+hermite_est <- hermite_estimator(N=10, standardize=TRUE, 
+                                 est_type = "bivariate")
 ```
 
 # Batch Estimator Updating
@@ -78,9 +102,20 @@ batch of observations as below.
 
 ## Standard syntax
 
+For univariate observations:
+
 ```{r}
 observations <- rlogis(n=1000)
 hermite_est <- hermite_estimator(N=10, standardize=TRUE)
+hermite_est <- update_batch(hermite_est,observations)
+```
+
+For bivariate observations:
+
+```{r}
+observations <- matrix(data = rnorm(2000),nrow = 1000, ncol=2)
+hermite_est <- hermite_estimator(N=10, standardize=TRUE, 
+                                 est_type = "bivariate")
 hermite_est <- update_batch(hermite_est,observations)
 ```
 
@@ -95,48 +130,127 @@ hermite_est <- hermite_estimator(N=10, standardize=TRUE)
 hermite_est <- hermite_est %>% update_batch(observations)
 ```
 
+```{r}
+observations <- matrix(data = rnorm(2000),nrow = 1000, ncol=2)
+hermite_est <- hermite_estimator(N=10, standardize=TRUE, 
+                                 est_type = "bivariate")
+hermite_est <- hermite_est %>% update_batch(observations)
+```
+
 # Sequential Estimator Updating
 
 In the sequential setting, observations are revealed one at a time. A 
 hermite_estimator object can be updated sequentially with a single new 
 observation by utilizing the update_sequential method. Note that when updating 
-the Hermite series based estimator sequentially, a running mean and running 
-standard deviation is maintained in order to standardize the observations in an 
-online manner. 
+the Hermite series based estimator sequentially, observations are also 
+standardized sequentially if the standardize argument is set to true in the 
+constructor.
 
 ## Standard syntax
+
+For univariate observations:
 
 ```{r}
 observations <- rlogis(n=1000)
 hermite_est <- hermite_estimator(N=10, standardize=TRUE)
-for (idx in c(1:length(observations))) {
+for (idx in seq_along(observations)) {
   hermite_est <- update_sequential(hermite_est,observations[idx])
+}
+```
+
+For bivariate observations:
+
+```{r}
+observations <- matrix(data = rnorm(2000),nrow = 1000, ncol=2)
+hermite_est <- hermite_estimator(N=10, standardize=TRUE, 
+                                 est_type = "bivariate")
+for (idx in seq_len(nrow(observations))) {
+  hermite_est <- update_sequential(hermite_est,observations[idx,])
 }
 ```
 
 ## Piped syntax
 
+For univariate observations:
+
 ```{r}
 observations <- rlogis(n=1000)
 hermite_est <- hermite_estimator(N=10, standardize=TRUE)
-for (idx in c(1:length(observations))) {
+for (idx in seq_along(observations)) {
   hermite_est <- hermite_est %>% update_sequential(observations[idx])
 }
 ```
 
-# Estimate pdf, cdf and quantile function
+For bivariate observations:
+
+```{r}
+observations <- matrix(data = rnorm(2000),nrow = 1000, ncol=2)
+hermite_est <- hermite_estimator(N=10, standardize=TRUE, 
+                                 est_type = "bivariate")
+for (idx in seq_len(nrow(observations))) {
+  hermite_est <- hermite_est %>% update_sequential(observations[idx,])
+}
+```
+
+# Merging Hermite Estimators
+
+Hermite series based estimators can be consistently combined/merged in both
+the univariate and bivariate settings. In particular, when standardize = FALSE,
+the results obtained from combining/merging distinct hermite_estimators updated 
+on subsets of a data set are exactly equal to those obtained by constructing a 
+single hermite_estimator and updating on the full data set (corresponding to the 
+concatenation of the aforementioned subsets). This holds true for the pdf, cdf 
+and quantile results in the univariate case and the pdf, cdf
+and Spearman's correlation results in the bivariate case. When standardize = 
+TRUE, the equivalence is no longer exact, but is accurate enough to be 
+practically useful. Combining/merging hermite_estimators is illustrated below.
+
+For the univariate case:
+
+```{r}
+observations_1 <- rlogis(n=1000)
+observations_2 <- rlogis(n=1000)
+hermite_est_1 <- hermite_estimator(N=10, standardize=TRUE) %>% 
+  update_batch(observations_1)
+hermite_est_2 <- hermite_estimator(N=10, standardize=TRUE) %>% 
+  update_batch(observations_2)
+hermite_est_merged <- merge_hermite(list(hermite_est_1,hermite_est_2))
+```
+
+For the bivariate case:
+
+```{r}
+observations_1 <- matrix(data = rnorm(2000),nrow = 1000, ncol=2)
+observations_2 <- matrix(data = rnorm(2000),nrow = 1000, ncol=2)
+hermite_est_1 <- hermite_estimator(N=10, standardize=TRUE, 
+                                 est_type = "bivariate") %>% 
+  update_batch(observations_1)
+hermite_est_2 <- hermite_estimator(N=10, standardize=TRUE, 
+                                 est_type = "bivariate") %>% 
+  update_batch(observations_2)
+hermite_est_merged <- merge_hermite(list(hermite_est_1,hermite_est_2))
+```
+
+The ability to combine/merge estimators is particularly useful in applications
+involving grouped data (as we will illustrate below).
+
+# Estimate univariate pdf, cdf and quantile function
 
 The central advantage of Hermite series based estimators is that they can be 
 updated in a sequential/one-pass manner as above and subsequently probability 
 densities and cumulative probabilities at arbitrary x values can be obtained, 
 along with arbitrary quantiles. The hermite_estimator object only maintains a 
 small and fixed number of coefficients and thus uses minimal memory. The syntax 
-to calculate probability densities, cumulative probabilities and quantiles is 
-presented below.
+to calculate probability densities, cumulative probabilities and quantiles in 
+the univariate setting is presented below.
 
 ## Standard syntax
 
 ```{r}
+observations <- rlogis(n=2000)
+hermite_est <- hermite_estimator(N=10, standardize=TRUE)
+hermite_est <- update_batch(hermite_est, observations)
+
 x <- seq(-15,15,0.1)
 pdf_est <- dens(hermite_est,x)
 cdf_est <- cum_prob(hermite_est,x)
@@ -148,6 +262,10 @@ quantile_est <- quant(hermite_est,p)
 ## Piped syntax
 
 ```{r}
+observations <- rlogis(n=2000)
+hermite_est <- hermite_estimator(N=10, standardize=TRUE)
+hermite_est <- hermite_est %>% update_batch(observations)
+
 x <- seq(-15,15,0.1)
 pdf_est <- hermite_est %>% dens(x)
 cdf_est <- hermite_est %>% cum_prob(x)
@@ -155,8 +273,6 @@ cdf_est <- hermite_est %>% cum_prob(x)
 p <- seq(0.05,0.95,0.05)
 quantile_est <- hermite_est %>% quant(p)
 ```
-
-## Visualizing the results
 
 ```{r}
 actual_pdf <- dlogis(x)
@@ -166,6 +282,8 @@ df_pdf_cdf <- data.frame(x,pdf_est,cdf_est,actual_pdf,actual_cdf)
 actual_quantiles <- qlogis(p)
 df_quant <- data.frame(p,quantile_est,actual_quantiles)
 ```
+
+## Comparing Estimated versus Actual
 
 ```{r}
 ggplot(df_pdf_cdf,aes(x=x)) + geom_line(aes(y=pdf_est, colour="Estimated")) +
@@ -191,7 +309,121 @@ ggplot(df_quant,aes(x=actual_quantiles)) + geom_point(aes(y=quantile_est),
   ylab("Estimated Quantiles")
 ```
 
-# Applying to grouped data (batch setting)
+# Estimate bivariate pdf, cdf and Spearman's correlation
+
+The aforementioned suitability of Hermite series based estimators in sequential 
+and one-pass batch estimation settings extends to the bivariate case. 
+Probability densities and cumulative probabilities can be obtained at arbitrary 
+points. The syntax to calculate probability densities, 
+cumulative probabilities and the Spearman's correlation coefficient in the 
+bivariate setting is presented below.
+
+## Standard syntax
+
+```{r}
+# Prepare bivariate normal data
+sig_x <- 1
+sig_y <- 1
+num_obs <- 4000
+rho <- 0.5
+observations_mat <- mvtnorm::rmvnorm(n=num_obs,mean=rep(0,2),sigma = matrix(c(sig_x^2,rho*sig_x*sig_y,rho*sig_x*sig_y,sig_y^2), 
+                                                      nrow=2,ncol=2, 
+                                                      byrow = TRUE))
+
+hermite_est <- hermite_estimator(N = 20, standardize = TRUE, 
+                                 est_type = "bivariate") 
+hermite_est <-  update_batch(hermite_est,observations_mat)
+
+vals <- seq(-5,5,by=0.25)
+x_grid <- as.matrix(expand.grid(X=vals, Y=vals))
+pdf_est <- dens(hermite_est,x_grid)
+cdf_est <- cum_prob(hermite_est,x_grid)
+```
+
+## Piped syntax
+
+```{r}
+sig_x <- 1
+sig_y <- 1
+num_obs <- 4000
+rho <- 0.5
+observations_mat <- mvtnorm::rmvnorm(n=num_obs,mean=rep(0,2),sigma = matrix(c(sig_x^2,rho*sig_x*sig_y,rho*sig_x*sig_y,sig_y^2), nrow=2, ncol=2, 
+                                                                byrow = TRUE))
+
+hermite_est <- hermite_estimator(N = 20, standardize = TRUE, 
+                                 est_type = "bivariate") 
+hermite_est <-  hermite_est %>% update_batch(observations_mat)
+
+vals <- seq(-5,5,by=0.25)
+x_grid <- as.matrix(expand.grid(X=vals, Y=vals))
+pdf_est <- hermite_est %>% dens(x_grid, clipped = TRUE)
+cdf_est <- hermite_est %>% cum_prob(x_grid, clipped = TRUE)
+
+spear_est <- hermite_est %>% spearmans()
+```
+
+```{r}
+actual_pdf <-mvtnorm::dmvnorm(x_grid,mean=rep(0,2),sigma = matrix(c(sig_x^2,rho*sig_x*sig_y,rho*sig_x*sig_y,sig_y^2), nrow=2,ncol=2, 
+                                                                byrow = TRUE))
+
+actual_cdf <- rep(NA,nrow(x_grid))
+for (row_idx in seq_len(nrow(x_grid))) {
+  actual_cdf[row_idx] <-  mvtnorm::pmvnorm(lower = c(-Inf,-Inf),upper=as.numeric(x_grid[row_idx,]),mean=rep(0,2),sigma = matrix(c(sig_x^2,rho*sig_x*sig_y,rho*sig_x*sig_y,sig_y^2), nrow=2,ncol=2, 
+                                                                                                                                byrow = TRUE))
+}
+
+actual_spearmans <- cor(observations_mat,method = "spearman")[1,2]
+
+df_pdf_cdf <- data.frame(x_grid,pdf_est,cdf_est,actual_pdf,actual_cdf)
+```
+
+## Comparing Estimated versus Actual
+
+```{r}
+p1 <- ggplot(df_pdf_cdf) + geom_tile(aes(X, Y, fill= actual_pdf)) +
+  scale_fill_gradient2(low="blue", mid="cyan", high="purple",
+                       midpoint=.1,    
+                       breaks=seq(0,.2,by=.05), 
+                       limits=c(0,.2))  
+
+p2 <- ggplot(df_pdf_cdf) + geom_tile(aes(X, Y, fill= pdf_est)) +
+  scale_fill_gradient2(low="blue", mid="cyan", high="purple",
+                       midpoint=.1,
+                       breaks=seq(0,.2,by=.05), 
+                       limits=c(0,.2))
+
+p1+ ggtitle("Actual PDF")+ theme(legend.title = element_blank()) + p2 +
+  ggtitle("Estimated PDF") +theme(legend.title = element_blank()) +
+  plot_layout(guides = 'collect')
+```
+
+```{r}
+p1 <- ggplot(df_pdf_cdf) + geom_tile(aes(X, Y, fill= actual_cdf)) +
+  scale_fill_gradient2(low="blue", mid="cyan", high="purple", 
+                       midpoint=0.5,    
+                       breaks=seq(0,1,by=.2), 
+                       limits=c(0,1)) 
+
+p2 <- ggplot(df_pdf_cdf) + geom_tile(aes(X, Y, fill= cdf_est)) +
+  scale_fill_gradient2(low="blue", mid="cyan", high="purple",
+                       midpoint=0.5,
+                       breaks=seq(0,1,by=.2), #breaks in the scale bar
+                       limits=c(0,1))
+
+p1+ ggtitle("Actual CDF") + theme(legend.title = element_blank()) + p2 +
+  ggtitle("Estimated CDF") + theme(legend.title = element_blank())+
+  plot_layout(guides = 'collect')
+```
+
+Spearman's correlation coefficient results:
+
+|             | Spearman's Correlation |
+| ----------- | ----------- |
+| Actual      | `r round(actual_spearmans,3)`       |
+| Estimated   | `r round(spear_est,3)`        |
+
+
+# Applying to univariate grouped data (batch setting)
 
 A useful application of the hermite_estimator class is to obtain pdf, cdf and 
 quantile function estimates on groups of data as illustrated in the example 
@@ -206,7 +438,7 @@ We first present the example using the `data.table` package.
 ```{r}
 # Prepare Test Data
 test_data <- data.frame()
-for (i in c(1:5)) {
+for (i in seq_len(5)) {
   exponential_data <- rexp(n=1000)
   logistic_data <- rlogis(n=1000)
   logn_data <- rlnorm(n=1000)
@@ -228,28 +460,19 @@ estimates <- test_data[,.(herm_est = list(hermite_estimator(N=10,
 estimates
 ```
 
-Hermite series based estimators can also be consistently combined. In 
-particular, when standardize = FALSE, the pdf, cdf and quantile value results 
-obtained from combining distinct hermite_estimators updated on subsets of a data
-set are exactly equal to those obtained by constructing a single 
-hermite_estimator and updating on the full data set (corresponding to the 
-concatenation of the aforementioned subsets). When standardize = TRUE, the 
-equivalence is no longer exact, but is accurate enough to be practically useful.
-Combining hermite_estimators is illustrated below.
-
 ```{r}
-# Group observations by distribution and combine Hermite estimators
-combined_estimates <- estimates[,.(herm_comb = list(combine_hermite(herm_est))),
+# Group observations by distribution and merge Hermite estimators
+merged_estimates <- estimates[,.(herm_comb = list(merge_hermite(herm_est))),
                                 by=.(dist_name)]
-combined_estimates
+merged_estimates
 ```
 
 ```{r}
 # Estimate probability densities, cumulative probabilities and quantiles
-dens_vals <- combined_estimates[,.(dens_est = list(dens(herm_comb[[1]],
+dens_vals <- merged_estimates[,.(dens_est = list(dens(herm_comb[[1]],
                                             c(0.5,1,1.5,2)))),by=.(dist_name)]
-cum_prob_vals <- combined_estimates[,.(cum_prob_est = list(cum_prob(herm_comb[[1]],c(0.5,1,1.5,2)))),by=.(dist_name)]
-quantile_vals <- combined_estimates[,.(quantile_est = list(quant(herm_comb[[1]],c(0.25,0.5,0.75)))),by=.(dist_name)]
+cum_prob_vals <- merged_estimates[,.(cum_prob_est = list(cum_prob(herm_comb[[1]],c(0.5,1,1.5,2)))),by=.(dist_name)]
+quantile_vals <- merged_estimates[,.(quantile_est = list(quant(herm_comb[[1]],c(0.25,0.5,0.75)))),by=.(dist_name)]
 ```
 
 ## Using dplyr
@@ -260,7 +483,7 @@ the `data.table` package below.
 ```{r}
 # Prepare Test Data
 test_data <- data.frame()
-for (i in c(1:5)) {
+for (i in seq_len(5)) {
   exponential_data <- rexp(n=1000)
   logistic_data <- rlogis(n=1000)
   logn_data <- rlnorm(n=1000)
@@ -281,19 +504,19 @@ estimates
 
 
 ```{r}
-# Group observations by distribution and combine Hermite estimators
-combined_estimates <- estimates %>% group_by(dist_name) %>% summarise(herm_comb
-                                              = list(combine_hermite(herm_est)))
-combined_estimates
+# Group observations by distribution and merge Hermite estimators
+merged_estimates <- estimates %>% group_by(dist_name) %>% summarise(herm_comb
+                                              = list(merge_hermite(herm_est)))
+merged_estimates
 ```
 
 ```{r}
 # Estimate probability densities, cumulative probabilities and quantiles
-dens_vals <- combined_estimates %>%
+dens_vals <- merged_estimates %>%
   rowwise() %>% mutate(dens_est = list(dens(herm_comb,c(0.5,1,1.5,2))))
-cum_prob_vals <- combined_estimates %>%
+cum_prob_vals <- merged_estimates %>%
   rowwise() %>% mutate(cum_prob_est = list(cum_prob(herm_comb,c(0.5,1,1.5,2))))
-quantile_vals <- combined_estimates %>%
+quantile_vals <- merged_estimates %>%
   rowwise() %>% mutate(quantile_est = list(quant(herm_comb,c(0.25,0.5,0.75))))
 ```
 
@@ -321,6 +544,8 @@ datatable(mean_abs_error_summary) %>% formatRound(columns =c("mean_abs_error_den
 ```
 
 # Applying to stationary data (sequential setting)
+
+## Univariate Example
 
 Another useful application of the hermite_estimator class is to obtain pdf, cdf 
 and quantile function estimates on streaming data. The speed of estimation 
@@ -401,11 +626,13 @@ shinyApp(ui = ui, server = server)
 
 # Applying to non-stationary data (sequential setting)
 
+## Univariate Example
+
 The hermite_estimator is also applicable to non-stationary data streams.
 A weighted form of the Hermite series based estimator can be applied to handle 
 this case. The estimator will adapt to the new distribution and 
 "forget" the old distribution as illustrated in the example below. In this 
-example, the  distribution from which the observations are drawn switches from
+univariate example, the  distribution from which the observations are drawn switches from
 a Chi-square distribution to a logistic distribution and finally to a normal 
 distribution. In order to use the exponentially weighted form of the 
 hermite_estimator, the exp_weight_lambda argument must be set to a non-NA value.
@@ -439,7 +666,7 @@ actual_quantiles_norm <- qnorm(p)
 
 ```{r}
 # Construct Hermite Estimator 
-h_est <- hermite_estimator(N=20,standardize = T,exp_weight_lambda = 0.005)
+h_est <- hermite_estimator(N=20,standardize = TRUE,exp_weight_lambda = 0.005)
 ```
 
 ```{r}
@@ -448,7 +675,7 @@ h_est <- hermite_estimator(N=20,standardize = T,exp_weight_lambda = 0.005)
 count <- 1
 res <- data.frame()
 res_q <- data.frame()
-for (idx in c(1:length(test))) {
+for (idx in seq_along(test)) {
   h_est <- h_est %>% update_sequential(test[idx])
   if (idx %% 100 == 0){
     if (floor(idx/num_obs)==0){
@@ -467,8 +694,8 @@ for (idx in c(1:length(test))) {
       actual_quantile_vals <- actual_quantiles_norm
     }
     idx_vals <- rep(count,length(x))
-    cdf_est_vals <- h_est %>% cum_prob(x, clipped=T)
-    pdf_est_vals <- h_est %>% dens(x, clipped=T)
+    cdf_est_vals <- h_est %>% cum_prob(x, clipped=TRUE)
+    pdf_est_vals <- h_est %>% dens(x, clipped=TRUE)
     quantile_est_vals <- h_est %>% quant(p)
     res <- rbind(res,data.frame(idx_vals,x,cdf_est_vals,actual_cdf_vals,
                                 pdf_est_vals,actual_pdf_vals))
@@ -522,6 +749,96 @@ anim_save("quant.gif",p)
 ```
 
 ![](quant.gif)
+
+## Bivariate Example
+
+We illustrate tracking a non-stationary bivariate data stream with another 
+sample Shiny application. The bivariate Hermite estimator leverages an exponential
+weighting scheme as described in the univariate case and does not need to maintain 
+a sliding window. We include a stub for reading streaming data that generates 
+micro-batches of bivariate normal i.i.d. random data with a chosen Spearman's 
+correlation coefficient (as this is easily linked to the standard correlation 
+matrix). This stub can again be readily swapped out for a method reading 
+micro-batches from a Kafka topic or similar.
+
+The Shiny sample code below can be pasted into a single app.R file and run 
+directly.
+
+```{r eval=FALSE}
+# Not Run. Copy and paste into app.R and run.
+library(shiny)
+library(hermiter)
+library(ggplot2)
+library(magrittr)
+
+ui <- fluidPage(
+  titlePanel("Bivariate Streaming Statistics Analysis Example"),
+  sidebarLayout(
+    sidebarPanel(
+      sliderInput("spearmans", "True Spearman's Correlation:",
+                  min = -0.9, max = 0.9,
+                  value = 0, step = 0.1)
+    ),
+    mainPanel(
+      plotOutput("plot"),
+      textOutput("spearman_text")
+    )
+  )
+)
+
+server <- function(input, output) {
+  values <- reactiveValues(hermite_est = 
+                             hermite_estimator(N = 10, standardize = TRUE,
+                                               exp_weight_lambda = 0.01,
+                                               est_type="bivariate"))
+  # Note that the stub below could be replaced with code that reads streaming 
+  # data from various sources, Kafka etc.  
+  read_stream_stub_micro_batch <- reactive({
+    invalidateLater(1000)
+    sig_x <- 1
+    sig_y <- 1
+    num_obs <- 100
+    rho <- 2 *sin(pi/6 * input$spearmans)
+    observations_mat <- mvtnorm::rmvnorm(n=num_obs,mean=rep(0,2),sigma = matrix(c(sig_x^2,rho*sig_x*sig_y,rho*sig_x*sig_y,sig_y^2), nrow=2,ncol=2, 
+                                                                byrow = TRUE))
+    return(observations_mat)
+  })
+  updated_spear_calc <- reactive({
+    micro_batch <- read_stream_stub_micro_batch()
+    for (idx in seq_len(nrow(micro_batch))) {
+      values[["hermite_est"]] <- isolate(values[["hermite_est"]]) %>%
+        update_sequential(micro_batch[idx,])
+    }
+    spear_est <- isolate(values[["hermite_est"]]) %>%
+      spearmans(clipped = TRUE)
+    return(spear_est)
+  })
+  output$plot <- renderPlot({
+    vals <- seq(-5,5,by=0.25)
+    x_grid <- as.matrix(expand.grid(X=vals, Y=vals))
+    rho <- 2 *sin(pi/6 * input$spearmans)
+    actual_pdf <-mvtnorm::dmvnorm(x_grid,mean=rep(0,2),sigma = matrix(c(sig_x^2,rho*sig_x*sig_y,rho*sig_x*sig_y,sig_y^2), nrow=2,ncol=2, 
+                                                                byrow = TRUE))
+    df_pdf <- data.frame(x_grid,actual_pdf)
+    p1 <- ggplot(df_pdf) + geom_tile(aes(X, Y, fill= actual_pdf)) +
+      scale_fill_gradient2(low="blue", mid="cyan", high="purple",
+                           midpoint=.2,    
+                           breaks=seq(0,.4,by=.1), 
+                           limits=c(0,.4)) +ggtitle(paste("True Bivariate 
+                    Normal Density with matched Spearman's correlation")) +
+       theme(legend.title = element_blank()) 
+    p1
+  }
+  )
+  output$spearman_text <- renderText({ 
+    return(paste("Spearman's Correlation Estimate from Hermite Estimator:", 
+                 round(updated_spear_calc(), 1)))
+  })
+}
+shinyApp(ui = ui, server = server)
+```
+
+![](shiny_stream_example2.gif)
 
 # Citing this package
 

@@ -1,10 +1,45 @@
-# hermiter v1.0.0
+# hermiter v2.0.0
 
-## INITIAL RELEASE
+This is a major update to include bivariate estimators.
+
+## Breaking changes
+
+* `get_coefficients` has been removed as it is redundant.
+* `combine_hermite` has been renamed to `merge_hermite` for clarity.
+* `combine_pair` has been renamed to `merge_pair` for clarity.
+* `hermite_integral_val_quantile_adap` has been renamed to 
+`hermite_integral_val_upper` for clarity.
+
+## New features
+
+* Bivariate Hermite estimators have been added with methods for estimating 
+bivariate probability density functions and cumulative distribution functions 
+along with Spearman's rank correlation coefficients.
+* The bivariate estimators include methods to batch update or sequentially 
+update.
+* Methods are also provided to consistently merge bivariate hermite_estimators.
+* Convenience methods have been added for calculating normalized Hermite 
+functions, along with upper, lower and full domain integrals of the 
+normalized Hermite functions. 
+
+## Documentation improvements
+
+* The vignette `hermiter`, namely `vignette("hermiter")` has been extended to 
+included examples pertaining to the bivariate Hermite series based estimators.
+
+## Minor improvements and bug fixes
+  
+* The method for merging univariate Hermite series based estimators has been
+improved, yielding greater accuracy when the hermite_estimators are 
+standardized.
+* The method for estimating quantiles with the univariate Hermite series based
+estimator has been improved and is now consistent with the estimator in the
+literature.
+* Added further error trapping and other minor enhancements.
 
 ## Test environments
-* local R installation, Windows 10, R 4.0.2
-* Ubuntu 16.04 (on travis-ci and r-hub), R 4.0.2
+* local R installation, Windows 10, R 4.0.3
+* Ubuntu 16.04 (on travis-ci and r-hub), R 4.0.3
 * Debian Linux (r-hub)
 * Fedora Linux (r-hub)
 * win-builder (devel and release)
@@ -12,24 +47,11 @@
 ## R CMD check results
 There were no ERRORs or WARNINGs. 
 
-There were 2 NOTES:
-
-New submission
+There was 1 NOTE:
 
 Possibly mis-spelled words in DESCRIPTION:
-  Iain (16:55)
-  Macdonald (16:60)
-  Metrika (17:123)
-  Stephanou (16:13, 17:3)
-  Varughese (16:33, 17:26)
+  arXiv (20:303)
+  Preprint (20:309)
 
-Explanation: The above are not mis-spelled words but are in fact proper nouns.
-This note does not appear in the local R installation checks or the r-hub checks
-on Debian.
-
-* checking for future file timestamps ... NOTE
-  unable to verify current time
-  
-Explanation: It appears the worldclockapi service is down. This note is 
-only present in the local R installation and Ubuntu 16.04 checks. It is not 
-present in win-builder and certain r-hub checks (Debian Linux and Fedora Linux).
+Explanation: The above are not mis-spelled words but refer to a preprint on
+https://arxiv.org/.
