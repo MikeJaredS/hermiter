@@ -3,10 +3,10 @@
 ## Breaking changes
 
 * `get_coefficients` has been removed as it is redundant.
-* `combine_hermite` has been renamed to `merge_hermite`.
-* `combine_pair` has been renamed to `merge_pair`.
+* `combine_hermite` has been renamed to `merge_hermite` for clarity.
+* `combine_pair` has been renamed to `merge_pair` for clarity.
 * `hermite_integral_val_quantile_adap` has been renamed to 
-`hermite_integral_val_upper`.
+`hermite_integral_val_upper` for clarity.
 
 ## New features
 
@@ -30,6 +30,10 @@ included examples pertaining to the bivariate Hermite series based estimators.
 * The method for merging univariate Hermite series based estimators has been
 improved, yielding greater accuracy when the hermite_estimators are 
 standardized.
+* The method for estimating quantiles with the univariate Hermite series based
+estimator has been improved and is now consistent with the estimator in the
+literature.
+* Added further error trapping and other minor enhancements.
 
 # hermiter v1.0.0
 

@@ -29,7 +29,7 @@ function and quantile estimation.
 
 * [Stephanou, Michael, Varughese, Melvin and Macdonald, Iain. "Sequential quantiles via Hermite series density estimation." Electronic Journal of Statistics 11.1 (2017): 570-607.](https://projecteuclid.org/euclid.ejs/1488531636) 
 * [Stephanou, Michael and Varughese, Melvin. "On the properties of hermite series based distribution function estimators." Metrika (2020).](https://link.springer.com/article/10.1007/s00184-020-00785-z)
-* [Stephanou, Michael and Varughese, Melvin. "Sequential Estimation of Nonparametric Correlation using Hermite Series Estimators." ArXiv Preprint (2020).](https://arxiv.org/abs/2012.06287)
+* [Stephanou, Michael and Varughese, Melvin. "Sequential Estimation of Nonparametric Correlation using Hermite Series Estimators." arXiv Preprint (2020).](https://arxiv.org/abs/2012.06287)
 
 ## Features
 
@@ -54,12 +54,14 @@ restrictions since observations are not directly stored in the estimator object)
 * fast batch estimation of bivariate pdf, cdf and Spearman's correlation 
 coefficient
 * consistent merging of estimates
-* fast sequential estimation of pdf, cdf and Spearman's correlation coefficient
-on streaming data
+* fast sequential estimation of bivariate pdf, cdf and Spearman's correlation 
+coefficient on streaming data
 * adaptive sequential estimation on non-stationary bivariate streams via 
 exponential weighting
 * provides online, O(1) time complexity estimates of bivariate probability 
 densities and cumulative probabilities at arbitrary points, x
+* provides online, O(1) time complexity estimates of the Spearman's rank 
+correlation coefficient
 * uses small and constant memory for the estimator
 
 ## Installation

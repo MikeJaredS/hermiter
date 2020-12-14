@@ -1,5 +1,5 @@
 Package: hermiter
-Title: Efficient Sequential and Batch Estimation of Probability Density Functions, Cumulative Distribution Functions and Quantiles
+Title: Efficient Sequential and Batch Estimation of Univariate and Bivariate Probability Density Functions and Cumulative Distribution Functions along with Quantiles (Univariate) and Spearman's Correlation (Bivariate)
 Version: 2.0.0
 Authors@R: c(
   person("Michael","Stephanou",role=c("aut","cre"), email="michael.stephanou@gmail.com"),
@@ -7,13 +7,14 @@ Authors@R: c(
 Author: Michael Stephanou [aut, cre],
   Melvin Varughese [ctb]
 Maintainer: Michael Stephanou <michael.stephanou@gmail.com>
-Description: Facilitates estimation of the full probability density function, 
-  cumulative distribution function and quantile function using Hermite series 
-  based estimators. These estimators are particularly useful in the sequential 
-  setting (both stationary and non-stationary) and one-pass batch estimation 
-  setting for large data sets. 
-  Based on: Stephanou, Michael, Varughese, Melvin and Iain Macdonald. "Sequential quantiles via Hermite series density estimation." Electronic Journal of Statistics 11.1 (2017): 570-607 <doi:10.1214/17-EJS1245> and 
-  Stephanou, Michael and Varughese, Melvin. "On the properties of Hermite series based distribution function estimators." Metrika (2020) <doi:10.1007/s00184-020-00785-z>.
+Description: Facilitates estimation of full univariate and bivariate 
+  probability density functions and cumulative distribution functions along with
+  full quantile functions (univariate) and Spearman's rank correlation 
+  (bivariate) using Hermite series based estimators. These estimators are 
+  particularly useful in the sequential setting (both stationary and 
+  non-stationary) and one-pass batch estimation setting for large data sets. 
+  Based on: Stephanou, Michael, Varughese, Melvin and Macdonald, Iain. "Sequential quantiles via Hermite series density estimation." Electronic Journal of Statistics 11.1 (2017): 570-607 <doi:10.1214/17-EJS1245>, 
+  Stephanou, Michael and Varughese, Melvin. "On the properties of Hermite series based distribution function estimators." Metrika (2020) <doi:10.1007/s00184-020-00785-z> and Stephanou, Michael and Varughese, Melvin. "Sequential Estimation of Nonparametric Correlation using Hermite Series Estimators." arXiv Preprint (2020) <arXiv:2012.06287>.
 License: MIT + file LICENSE
 Depends: R (>= 3.5.0)
 Imports: 
