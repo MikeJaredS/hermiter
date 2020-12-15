@@ -1,4 +1,4 @@
-# hermiter v2.0.0
+# hermiter v2.0.1
 
 ## Breaking changes
 

@@ -19,8 +19,6 @@ test_that("error trapping for hermite_estimator_bivar work as expected", {
   expect_error(hermite_estimator_bivar(N = 10, exp_weight_lambda = 1.5))
   expect_error(hermite_estimator_bivar(N = 10, exp_weight_lambda = "a"))
   hermite_est <- hermite_estimator_bivar(N = 10, standardize = TRUE)
-  # expect_true(is.na(cum_prob(hermite_est, x=2)))
-  # expect_true(is.na(quant(hermite_est, p=0.5)))
   expect_error(update_sequential(hermite_est, "a"))
   expect_error(update_sequential(hermite_est, c(1,2,3)))
   expect_error(update_batch(hermite_est, c("a","b")))

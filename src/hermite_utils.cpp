@@ -23,12 +23,20 @@ NumericMatrix hermite_polynomial(int N, NumericVector x) {
   NumericMatrix hermite(N + 1, x_size);
   for(int i = 0; i < x_size; ++i) {
     hermite(0,i) = 1;
+  }
+  if (N==0){
+    return hermite;
+  }
+  for(int i = 0; i < x_size; ++i) {
     hermite(1,i) = 2 * x[i];
+  }
+  if (N==1){
+    return hermite;
   }
   for(int j = 0; j < x_size; ++j) {
     for(int i = 2; i <= N; ++i) {
-      hermite(i,j) = 2 * x[j] * hermite(i - 1,j) - 2 
-      * (i - 1) * hermite(i - 2,j);
+      hermite(i,j) = 2 * x[j] * hermite(i - 1,j) - 2 * 
+       (((double)i) - 1) * hermite(i - 2,j);
     }
   }
   return hermite;
@@ -51,7 +59,7 @@ NumericVector hermite_normalization(int N) {
   double sqrt_pi = sqrt(M_PI);
   for(int i = 0; i <= N; ++i) {
     double fact = boost::math::factorial<double>((double)i);
-    out(i) = 1/sqrt(pow(2,i) * fact * sqrt_pi); 
+    out(i) = 1/sqrt(pow((double)2,(double)i) * fact * sqrt_pi); 
   }
   return out;
 }
@@ -77,16 +85,23 @@ NumericMatrix hermite_function(int N, NumericVector x,
   NumericMatrix hermite(N + 1, x_size);
   NumericMatrix out(N + 1, x_size);
   for(int i = 0; i < x_size; ++i) {
-    double exp_val = exp(-1 * x[i] * x[i] / 2);
     hermite(0,i) = 1;
+    out(0,i) = hermite(0,i) * normalization[0] * exp(-1 * x[i] * x[i] / 2);
+  }
+  if (N==0){
+    return out;
+  }
+  for(int i = 0; i < x_size; ++i) {
     hermite(1,i) = 2 * x[i];
-    out(0,i) = hermite(0,i) * normalization[0] * exp_val;
-    out(1,i) = hermite(1,i) * normalization[1] * exp_val;
+    out(1,i) = hermite(1,i) * normalization[1] * exp(-1 * x[i] * x[i] / 2);
+  }
+  if (N==1){
+    return out;
   }
   for(int j = 0; j < x_size; ++j) {
     for(int i = 2; i <= N; ++i) {
-      hermite(i,j) = 2 * x[j] * hermite(i - 1,j) - 2 
-      * (i - 1) * hermite(i - 2,j);
+      hermite(i,j) = 2 * x[j] * hermite(i - 1,j) - 2 *
+       (((double)i) - 1) * hermite(i - 2,j);
       out(i,j) = hermite(i,j) * normalization[i] * exp(-1 * x[j] * x[j] / 2);
     }
   }
@@ -112,22 +127,22 @@ NumericMatrix hermite_integral_val(int N, NumericVector x,
   int x_size = x.size();
   NumericMatrix out(N + 1, x_size);
   for(int i = 0; i < x_size; ++i) {
-    out(0,i) = pow(M_PI,0.25)/sqrt(2) 
-    * boost::math::erfc<double>((double) -1 * (1 / sqrt(2)) * x[i]); 
+    out(0,i) = pow(M_PI,0.25)/sqrt((double) 2) *
+     boost::math::erfc<double>((double) -1 * (1 / sqrt((double)2)) * x[i]); 
   }
   if (N == 0){
     return out;
   }
   for(int i = 0; i < x_size; ++i) {
-    out(1,i) = -1 * sqrt(2)/pow(M_PI,0.25) *exp(-1 * x[i] * x[i] / 2); 
+    out(1,i) = -1 * sqrt((double) 2)/pow(M_PI,0.25) *exp(-1 * x[i] * x[i] / 2); 
   }
   if (N == 1){
     return out;
   }
   for(int i = 2; i <= N; ++i) {
     for(int j = 0; j < x_size; ++j) {
-      out(i,j) = -1 * sqrt(2/((double)i)) * hermite_function_mat(i - 1,j) 
-      + sqrt((((double)i) - 1)/((double)i)) * out(i - 2,j);
+      out(i,j) = -1 * sqrt(2/((double)i)) * hermite_function_mat(i - 1,j) + 
+       sqrt((((double)i) - 1)/((double)i)) * out(i - 2,j);
     }
   }
   return out;
@@ -152,22 +167,22 @@ NumericMatrix hermite_integral_val_upper(int N,
   int x_size = x.size();
   NumericMatrix out(N + 1, x_size);
   for(int i = 0; i < x_size; ++i) {
-    out(0,i) = pow(M_PI,0.25)/sqrt(2) 
-    * boost::math::erfc<double>((double) (1 / sqrt(2)) * x[i]); 
+    out(0,i) = pow(M_PI,0.25)/sqrt((double) 2) *
+     boost::math::erfc<double>((double) (1 / sqrt((double) 2)) * x[i]); 
   }
   if (N == 0){
     return out;
   }
   for(int i = 0; i < x_size; ++i) {
-    out(1,i) = sqrt(2)/pow(M_PI,0.25) *exp(-1 * x[i] * x[i] / 2); 
+    out(1,i) = sqrt((double) 2)/pow(M_PI,0.25) *exp(-1 * x[i] * x[i] / 2); 
   }
   if (N == 1){
     return out;
   }
   for(int i = 2; i <= N; ++i) {
     for(int j = 0; j < x_size; ++j) {
-      out(i,j) = sqrt(2 / ((double)i)) * hermite_function_mat(i-1,j) 
-      + sqrt((((double)i)-1)/((double)i)) * out(i-2,j);
+      out(i,j) = sqrt(((double)2) / ((double)i)) * hermite_function_mat(i-1,j)+ 
+       sqrt((((double)i)-1)/((double)i)) * out(i-2,j);
     }
   }
   return out;
@@ -186,7 +201,7 @@ NumericMatrix hermite_integral_val_upper(int N,
 // [[Rcpp::export]]
 NumericMatrix hermite_int_full_domain(int N) {
   NumericMatrix out(N + 1, 1);
-  out(0,0) = pow(M_PI,0.25)*sqrt(2); 
+  out(0,0) = pow(M_PI,0.25)*sqrt((double) 2); 
   if (N == 0){
     return out;
   }

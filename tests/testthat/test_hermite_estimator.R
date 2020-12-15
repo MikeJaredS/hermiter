@@ -809,6 +809,44 @@ test_that("quantile estimation works as expected", {
 })
 
 test_that("convenience and utility functions work as expected", {
+  hermite_poly_vals <- as.vector(hermite_polynomial(N=0,x=c(2)))
+  target_values <-
+    c(
+      1
+    )
+  expect_equal(hermite_poly_vals,target_values,tolerance=1e-6)
+  hermite_poly_vals <- as.vector(hermite_polynomial(N=1,x=c(2)))
+  target_values <-
+    c(
+      1,
+      4
+    )
+  expect_equal(hermite_poly_vals,target_values,tolerance=1e-6)
+  hermite_poly_vals <- as.vector(hermite_polynomial(N=6,x=c(2)))
+  target_values <-
+    c(
+      1,
+      4,
+      14,
+      40,
+      76,
+      -16,
+      -824
+    )
+  expect_equal(hermite_poly_vals,target_values,tolerance=1e-6)
+  hermite_function_vals <- as.vector(hermite_function_N(N=0,x=c(2)))
+  target_values <-
+    c(
+      0.101653788306418
+    )
+  expect_equal(hermite_function_vals,target_values,tolerance=1e-6)
+  hermite_function_vals <- as.vector(hermite_function_N(N=1,x=c(2)))
+  target_values <-
+    c(
+      0.101653788306418,
+      0.287520332179079
+    )
+  expect_equal(hermite_function_vals,target_values,tolerance=1e-6)
   hermite_function_vals <- as.vector(hermite_function_N(N=6,x=c(2)))
   target_values <-
     c(

@@ -1,6 +1,12 @@
+# hermiter v2.0.1
+
+Fixed minor issues in c++ source code causing the build to fail on Solaris. 
+Updated the test environments to include Solaris as listed below. Added 
+appropriate test cases. This is a re-submission.
+
 # hermiter v2.0.0
 
-This is a major update to include bivariate estimators.
+This is a major update to include bivariate estimators.  
 
 ## Breaking changes
 
@@ -42,6 +48,8 @@ literature.
 * Ubuntu 16.04 (on travis-ci and r-hub), R 4.0.3
 * Debian Linux (r-hub)
 * Fedora Linux (r-hub)
+* Oracle Solaris 10, x86, 32 bit, R-release (r-hub)
+* macOS 10.13.6 High Sierra, R-release, CRAN's setup (r-hub)
 * win-builder (devel and release)
 
 ## R CMD check results
