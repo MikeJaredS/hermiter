@@ -51,7 +51,7 @@ literature.
 * Debian Linux, R-devel, GCC ASAN/UBSAN (r-hub)
 * Fedora Linux (r-hub)
 * Oracle Solaris 10, x86, 32 bit, R-release (r-hub)
-* macOS 10.13.6 High Sierra, R-release, CRAN's setup (r-hub)
+* macOS 10.13.6 High Sierra, R-release, brew (r-hub)
 * win-builder (devel and release)
 
 ## R CMD check results
@@ -59,7 +59,7 @@ There were no ERRORs or WARNINGs.
 
 There was 1 NOTE:
 
-Days since last update: 1
+Days since last update: 2
 
 Explanation: Fixed minor issues in c++ source code causing the build to fail on 
 Solaris along with ASAN/valgrind issues as brought to the package maintainer's 
