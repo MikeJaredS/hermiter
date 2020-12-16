@@ -98,7 +98,7 @@ hermite_int_upper <- function(N,x){
 #' Outputs integral of the orthonormal Hermite functions on the full domain
 #' 
 #' The method calculates \eqn{\int_{-\infty}^{\infty} h_k(t) dt} 
-#' for \eqn{k=0,\dots,N} and the vector of values x.
+#' for \eqn{k=0,\dots,N}.
 #' 
 #' @param N An integer number.
 #' @return A numeric matrix with N+1 rows and 1 columns.

@@ -191,7 +191,7 @@ NumericMatrix hermite_integral_val_upper(int N,
 //' Outputs integral of the orthonormal Hermite functions on the full domain
 //' 
 //' The method calculates \eqn{\int_{-\infty}^{\infty} h_k(t) dt} 
-//' for \eqn{k=0,\dots,N} and the vector of values x.
+//' for \eqn{k=0,\dots,N}.
 //' 
 //' @author Michael Stephanou <michael.stephanou@gmail.com>
 //'

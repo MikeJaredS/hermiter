@@ -14,7 +14,7 @@ A numeric matrix with N+1 rows and 1 columns.
 }
 \description{
 The method calculates \eqn{\int_{-\infty}^{\infty} h_k(t) dt} 
-for \eqn{k=0,\dots,N} and the vector of values x.
+for \eqn{k=0,\dots,N}.
 }
 \author{
 Michael Stephanou <michael.stephanou@gmail.com>

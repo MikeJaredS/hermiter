@@ -2,7 +2,7 @@
 
 Fixed minor issues in c++ source code causing the build to fail on Solaris 
 along with ASAN/valgrind issues. Updated the test environments as listed below. 
-Added appropriate test cases. This is a re-submission.
+Added further test cases. This is a re-submission.
 
 # hermiter v2.0.0
 
@@ -51,6 +51,7 @@ literature.
 * Debian Linux, R-devel, GCC ASAN/UBSAN (r-hub)
 * Fedora Linux (r-hub)
 * Oracle Solaris 10, x86, 32 bit, R-release (r-hub)
+* Oracle Solaris 10, x86, 32 bit, R-release, Oracle Developer Studio 12.6 (r-hub)
 * macOS 10.13.6 High Sierra, R-release, brew (r-hub)
 * win-builder (devel and release)
 
@@ -63,5 +64,5 @@ Days since last update: 2
 
 Explanation: Fixed minor issues in c++ source code causing the build to fail on 
 Solaris along with ASAN/valgrind issues as brought to the package maintainer's 
-attention by Prof Ripley.
+attention by Prof B. Ripley. This is a re-submission.
 
