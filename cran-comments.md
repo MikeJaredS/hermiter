@@ -1,8 +1,8 @@
 # hermiter v2.0.1
 
-Fixed minor issues in c++ source code causing the build to fail on Solaris. 
-Updated the test environments to include Solaris as listed below. Added 
-appropriate test cases. This is a re-submission.
+Fixed minor issues in c++ source code causing the build to fail on Solaris 
+along with ASAN/valgrind issues. Updated the test environments as listed below. 
+Added appropriate test cases. This is a re-submission.
 
 # hermiter v2.0.0
 
@@ -45,8 +45,10 @@ literature.
 
 ## Test environments
 * local R installation, Windows 10, R 4.0.3
+* local Linux Mint 20 installation, R 4.0.3 with valgrind
 * Ubuntu 16.04 (on travis-ci and r-hub), R 4.0.3
 * Debian Linux (r-hub)
+* Debian Linux, R-devel, GCC ASAN/UBSAN (r-hub)
 * Fedora Linux (r-hub)
 * Oracle Solaris 10, x86, 32 bit, R-release (r-hub)
 * macOS 10.13.6 High Sierra, R-release, CRAN's setup (r-hub)
@@ -60,5 +62,6 @@ There was 1 NOTE:
 Days since last update: 1
 
 Explanation: Fixed minor issues in c++ source code causing the build to fail on 
-Solaris as brought to the package maintainer's attention by Prof Ripley.
+Solaris along with ASAN/valgrind issues as brought to the package maintainer's 
+attention by Prof Ripley.
 
