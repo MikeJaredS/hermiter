@@ -57,9 +57,8 @@ There were no ERRORs or WARNINGs.
 
 There was 1 NOTE:
 
-Possibly mis-spelled words in DESCRIPTION:
-  arXiv (20:303)
-  Preprint (20:309)
+Days since last update: 1
 
-Explanation: The above are not mis-spelled words but refer to a preprint on
-https://arxiv.org/.
+Explanation: Fixed minor issues in c++ source code causing the build to fail on 
+Solaris as brought to the package maintainer's attention by Prof Ripley.
+

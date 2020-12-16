@@ -1,3 +1,26 @@
+#' Convenience function to output physicist Hermite polynomials
+#'  
+#'  
+#' The method calculates the physicist version of Hermite polynomials, 
+#' \eqn{H_k(x)} from \eqn{k=0,\dots,N} for the vector of values, x.
+#' 
+#' @param N An integer number.
+#' @param x A numeric vector.
+#' @return A numeric matrix with N+1 rows and length(x) columns.
+#' @export
+hermite_polynomial_N <- function(N,x){
+  if (N < 0) {
+    stop("N must be >= 0.")
+  }
+  if (!is.numeric(x)) {
+    stop("x must be numeric.")
+  }
+  if (length(x)<1) {
+    stop("x must contain at least one value.")
+  }
+  return(hermite_polynomial(N,x))
+}
+
 #' Convenience function to output orthonormal Hermite functions
 #'  
 #'  
@@ -9,6 +32,15 @@
 #' @return A numeric matrix with N+1 rows and length(x) columns.
 #' @export
 hermite_function_N <- function(N,x){
+  if (N < 0) {
+    stop("N must be >= 0.")
+  }
+  if (!is.numeric(x)) {
+    stop("x must be numeric.")
+  }
+  if (length(x)<1) {
+    stop("x must contain at least one value.")
+  }
   normalization_hermite <- hermite_normalization(N)
   return(hermite_function(N,x,normalization_hermite))
 }
@@ -24,6 +56,15 @@ hermite_function_N <- function(N,x){
 #' @return A numeric matrix with N+1 rows and length(x) columns.
 #' @export
 hermite_int_lower <- function(N,x){
+  if (N < 0) {
+    stop("N must be >= 0.")
+  }
+  if (!is.numeric(x)) {
+    stop("x must be numeric.")
+  }
+  if (length(x)<1) {
+    stop("x must contain at least one value.")
+  }
   normalization_hermite <- hermite_normalization(N)
   hermite_function_matrix <- hermite_function(N,x,normalization_hermite)
   return(hermite_integral_val(N,x,hermite_function_matrix))
@@ -40,9 +81,33 @@ hermite_int_lower <- function(N,x){
 #' @return A numeric matrix with N+1 rows and length(x) columns.
 #' @export
 hermite_int_upper <- function(N,x){
+  if (N < 0) {
+    stop("N must be >= 0.")
+  }
+  if (!is.numeric(x)) {
+    stop("x must be numeric.")
+  }
+  if (length(x)<1) {
+    stop("x must contain at least one value.")
+  }
   normalization_hermite <- hermite_normalization(N)
   hermite_function_matrix <- hermite_function(N,x,normalization_hermite)
   return(hermite_integral_val_upper(N,x,hermite_function_matrix))
+}
+
+#' Outputs integral of the orthonormal Hermite functions on the full domain
+#' 
+#' The method calculates \eqn{\int_{-\infty}^{\infty} h_k(t) dt} 
+#' for \eqn{k=0,\dots,N} and the vector of values x.
+#' 
+#' @param N An integer number.
+#' @return A numeric matrix with N+1 rows and 1 columns.
+#' @export
+hermite_int_full <- function(N){
+  if (N < 0) {
+    stop("N must be >= 0.")
+  }
+  return(hermite_int_full_domain(N))
 }
 
 #' Calculates \eqn{\int_{-\infty}^{\infty} f(x) e^{-x^2} dx} using 

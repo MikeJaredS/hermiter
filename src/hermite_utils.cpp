@@ -35,7 +35,7 @@ NumericMatrix hermite_polynomial(int N, NumericVector x) {
   }
   for(int j = 0; j < x_size; ++j) {
     for(int i = 2; i <= N; ++i) {
-      hermite(i,j) = 2 * x[j] * hermite(i - 1,j) - 2 * 
+      hermite(i,j) = 2 * x[j] * hermite(i - 1,j) - 2 *
        (((double)i) - 1) * hermite(i - 2,j);
     }
   }

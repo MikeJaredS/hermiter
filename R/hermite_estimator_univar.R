@@ -281,6 +281,9 @@ update_batch.hermite_estimator_univar <- function(this, x) {
   if (!is.na(this$exp_weight)) {
     stop("The Hermite estimator cannot be exponentially weighted.")
   }
+  if (length(x) < 1) {
+    stop("x must contain at least one value.")
+  }
   this$num_obs <- length(x)
   if (this$standardize_obs == TRUE) {
     this$running_mean <- mean(x)
@@ -325,16 +328,14 @@ dens.hermite_estimator_univar <- function(this, x, clipped = FALSE) {
   if (!is.numeric(x)) {
     stop("x must be numeric.")
   }
+  if (length(x) < 1) {
+    stop("x must contain at least one value.")
+  }
   if (this$num_obs < 2) {
     return(rep(NA, length(x)))
   }
   factor <- 1
   if (this$standardize_obs == TRUE) {
-    # if (is.na(this$exp_weight)) {
-    #   running_std <- sqrt(this$running_variance / (this$num_obs - 1))
-    # } else {
-    #   running_std <- sqrt(this$running_variance)
-    # }
     running_std <- calculate_running_std(this)
     x <- (x - this$running_mean) / running_std
     factor <- 1 / running_std
@@ -369,6 +370,9 @@ dens.hermite_estimator_univar <- function(this, x, clipped = FALSE) {
 cum_prob.hermite_estimator_univar <- function(this, x, clipped = FALSE) {
   if (!is.numeric(x)) {
     stop("x must be numeric.")
+  }
+  if (length(x) < 1) {
+    stop("x must contain at least one value.")
   }
   if (this$num_obs < 2) {
     return(rep(NA, length(x)))
@@ -492,6 +496,9 @@ quantile_helper <- function(this, p) {
 quant.hermite_estimator_univar <- function(this, p) {
   if (!is.numeric(p)) {
     stop("p must be numeric.")
+  }
+  if (length(p) < 1) {
+    stop("p must contain at least one value.")
   }
   if (this$standardize_obs != TRUE) {
     stop("Quantile estimation requires standardization to be true.")

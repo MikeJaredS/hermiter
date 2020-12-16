@@ -809,20 +809,20 @@ test_that("quantile estimation works as expected", {
 })
 
 test_that("convenience and utility functions work as expected", {
-  hermite_poly_vals <- as.vector(hermite_polynomial(N=0,x=c(2)))
+  hermite_poly_vals <- as.vector(hermite_polynomial_N(N=0,x=c(2)))
   target_values <-
     c(
       1
     )
   expect_equal(hermite_poly_vals,target_values,tolerance=1e-6)
-  hermite_poly_vals <- as.vector(hermite_polynomial(N=1,x=c(2)))
+  hermite_poly_vals <- as.vector(hermite_polynomial_N(N=1,x=c(2)))
   target_values <-
     c(
       1,
       4
     )
   expect_equal(hermite_poly_vals,target_values,tolerance=1e-6)
-  hermite_poly_vals <- as.vector(hermite_polynomial(N=6,x=c(2)))
+  hermite_poly_vals <- as.vector(hermite_polynomial_N(N=6,x=c(2)))
   target_values <-
     c(
       1,
@@ -869,7 +869,7 @@ test_that("convenience and utility functions work as expected", {
   expect_equal(target_integral,hermite_int_upper_val,tolerance=1e-4)
   target_integral <- stats::integrate(f=function(t){
     hermite_function_N(N=6,t)[7,]}, lower=-Inf, upper=Inf)$value
-  hermite_int_full <- hermite_int_full_domain(N=6)[7]
+  hermite_int_full <- hermite_int_full(N=6)[7]
   expect_equal(target_integral,hermite_int_full,tolerance=1e-4)
   target_integral <- stats::integrate(function(x){x*exp(-x^2)}, 
                                       lower=-Inf,upper=Inf)$value
