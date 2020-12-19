@@ -5,12 +5,15 @@
 \title{Convenience function to output a definite integral of the orthonormal 
 Hermite functions}
 \usage{
-hermite_int_upper(N, x)
+hermite_int_upper(N, x, hermite_function_matrix = NULL)
 }
 \arguments{
 \item{N}{An integer number.}
 
 \item{x}{A numeric vector.}
+
+\item{hermite_function_matrix}{A numeric matrix. A matrix of Hermite 
+function values.}
 }
 \value{
 A numeric matrix with N+1 rows and length(x) columns.
