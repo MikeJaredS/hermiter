@@ -255,7 +255,8 @@ update_sequential.hermite_estimator_univar <- function(this, x) {
     }
   }
   h_k <-
-    as.vector(hermite_function(this$N_param, x, this$normalization_hermite_vec))
+    as.vector(hermite_function_N(this$N_param, x, 
+                                 this$normalization_hermite_vec))
   if (is.na(this$exp_weight)) {
     this$coeff_vec <-
       (this$coeff_vec * (this$num_obs - 1) + h_k) / this$num_obs
@@ -297,7 +298,7 @@ update_batch.hermite_estimator_univar <- function(this, x) {
       (x - this$running_mean) / sqrt(this$running_variance / (this$num_obs - 1))
   }
   h_k <-
-    hermite_function(this$N_param, x, this$normalization_hermite_vec)
+    hermite_function_N(this$N_param, x, this$normalization_hermite_vec)
   this$coeff_vec <- rowSums(h_k) / this$num_obs
   return(this)
 }
@@ -346,7 +347,7 @@ dens.hermite_estimator_univar <- function(this, x, clipped = FALSE) {
     factor <- 1 / running_std
   }
   h_k <-
-    hermite_function(this$N_param, x, this$normalization_hermite_vec)
+    hermite_function_N(this$N_param, x, this$normalization_hermite_vec)
   pdf_val <- crossprod(h_k, this$coeff_vec) * factor
   if (clipped == TRUE) {
     pdf_val <- pmax(pdf_val, 1e-08)
@@ -387,8 +388,8 @@ cum_prob.hermite_estimator_univar <- function(this, x, clipped = FALSE) {
     x <- (x - this$running_mean) / running_std
   }
   h_k <-
-    hermite_function(this$N_param, x, this$normalization_hermite_vec)
-  integrals_hermite <- hermite_integral_val(this$N_param, x, h_k)
+    hermite_function_N(this$N_param, x, this$normalization_hermite_vec)
+  integrals_hermite <- hermite_int_lower(this$N_param, x, h_k)
   cdf_val <- crossprod(integrals_hermite, this$coeff_vec)
   if (clipped == TRUE) {
     cdf_val <- pmin(pmax(cdf_val, 1e-08), 1)
@@ -402,10 +403,10 @@ cum_prob.hermite_estimator_univar <- function(this, x, clipped = FALSE) {
 # hermite_estimator_univar class.
 quantile_helper <- function(this, p) {
   h_k <-
-    hermite_function(this$N_param, x=0, this$normalization_hermite_vec)
-  p_lower <- this$coeff_vec %*% hermite_integral_val(this$N_param,x=0,h_k)
+    hermite_function_N(this$N_param, x=0, this$normalization_hermite_vec)
+  p_lower <- this$coeff_vec %*% hermite_int_lower(this$N_param,x=0,h_k)
   p_upper <- 1-as.numeric(this$coeff_vec %*% 
-                      hermite_integral_val_upper(this$N_param,x=0,h_k))
+                      hermite_int_upper(this$N_param,x=0,h_k))
   if (is.na(p_lower) | is.na(p_upper)){
     return(NA)
   }

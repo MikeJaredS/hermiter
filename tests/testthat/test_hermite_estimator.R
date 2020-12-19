@@ -458,9 +458,6 @@ test_that("hermite_estimators merge consistently", {
                tolerance = 1e-06)
   expect_equal(hermite_merged$coeff_vec, hermite_est$coeff_vec, 
                tolerance = 5e-02)
-  hermite_est <-
-    hermite_estimator(N = 20, standardize = FALSE) %>% 
-    update_batch(test_observations)
   hermite_est_1 <-
     hermite_estimator(N = 10, standardize = FALSE) %>% 
     update_batch(test_observations[1:10])

@@ -29,9 +29,11 @@ hermite_polynomial_N <- function(N,x){
 #' 
 #' @param N An integer number.
 #' @param x A numeric vector.
+#' @param normalization_hermite A numeric vector. A vector of normalization 
+#' values necessary in the calculation of the Hermite functions.
 #' @return A numeric matrix with N+1 rows and length(x) columns.
 #' @export
-hermite_function_N <- function(N,x){
+hermite_function_N <- function(N,x, normalization_hermite=NULL){
   if (N < 0) {
     stop("N must be >= 0.")
   }
@@ -41,7 +43,13 @@ hermite_function_N <- function(N,x){
   if (length(x)<1) {
     stop("x must contain at least one value.")
   }
-  normalization_hermite <- hermite_normalization(N)
+  if (is.null(normalization_hermite)){
+    normalization_hermite <- hermite_normalization(N)
+  } else {
+    if (length(normalization_hermite) != (N+1)){
+      stop("Normalization vector must be of length N+1.")
+    }
+  }
   return(hermite_function(N,x,normalization_hermite))
 }
 
@@ -53,9 +61,11 @@ hermite_function_N <- function(N,x){
 #' 
 #' @param N An integer number.
 #' @param x A numeric vector.
+#' @param hermite_function_matrix A numeric matrix. A matrix of Hermite 
+#' function values. 
 #' @return A numeric matrix with N+1 rows and length(x) columns.
 #' @export
-hermite_int_lower <- function(N,x){
+hermite_int_lower <- function(N,x,hermite_function_matrix=NULL){
   if (N < 0) {
     stop("N must be >= 0.")
   }
@@ -65,8 +75,14 @@ hermite_int_lower <- function(N,x){
   if (length(x)<1) {
     stop("x must contain at least one value.")
   }
-  normalization_hermite <- hermite_normalization(N)
-  hermite_function_matrix <- hermite_function(N,x,normalization_hermite)
+  if (is.null(hermite_function_matrix)){
+    normalization_hermite <- hermite_normalization(N)
+    hermite_function_matrix <- hermite_function_N(N,x,normalization_hermite)
+  } else {
+    if (nrow(hermite_function_matrix) != (N+1)){
+      stop("Hermite function matrix must have N+1 rows.")
+    }
+  }
   return(hermite_integral_val(N,x,hermite_function_matrix))
 }
 
@@ -78,9 +94,11 @@ hermite_int_lower <- function(N,x){
 #' 
 #' @param N An integer number.
 #' @param x A numeric vector.
+#' @param hermite_function_matrix A numeric matrix. A matrix of Hermite 
+#' function values. 
 #' @return A numeric matrix with N+1 rows and length(x) columns.
 #' @export
-hermite_int_upper <- function(N,x){
+hermite_int_upper <- function(N,x, hermite_function_matrix=NULL){
   if (N < 0) {
     stop("N must be >= 0.")
   }
@@ -90,8 +108,14 @@ hermite_int_upper <- function(N,x){
   if (length(x)<1) {
     stop("x must contain at least one value.")
   }
-  normalization_hermite <- hermite_normalization(N)
-  hermite_function_matrix <- hermite_function(N,x,normalization_hermite)
+  if (is.null(hermite_function_matrix)){
+    normalization_hermite <- hermite_normalization(N)
+    hermite_function_matrix <- hermite_function_N(N,x,normalization_hermite)
+  } else {
+    if (nrow(hermite_function_matrix) != (N+1)){
+      stop("Hermite function matrix must have N+1 rows.")
+    }
+  }
   return(hermite_integral_val_upper(N,x,hermite_function_matrix))
 }
 
@@ -156,8 +180,8 @@ integrand_coeff_univar <- function(t,hermite_est_current,
       original_coeff_vec <- hermite_est_current$coeff_vec_y
     } 
   }
-  return(sqrt(2) * hermite_function(current_k,((t*original_sd +original_mean) - 
-                                                 new_mean)/new_sd, 
+  return(sqrt(2) * hermite_function_N(current_k-1,((t*original_sd + 
+                                            original_mean) -  new_mean)/new_sd, 
                              normalization_hermite[1:current_k])[current_k, ] * 
            as.vector(crossprod(herm_mod, original_coeff_vec)))
 }

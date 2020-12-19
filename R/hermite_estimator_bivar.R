@@ -325,10 +325,10 @@ update_sequential.hermite_estimator_bivar <- function(this, x)
     }
   }
   h_x <-
-    as.vector(hermite_function(this$N_param, x[1], 
+    as.vector(hermite_function_N(this$N_param, x[1], 
                                this$normalization_hermite_vec))
   h_y <-
-    as.vector(hermite_function(this$N_param, x[2], 
+    as.vector(hermite_function_N(this$N_param, x[2], 
                                this$normalization_hermite_vec))
   if (is.na(this$exp_weight)) {
     this$coeff_vec_x <-
@@ -396,9 +396,9 @@ update_batch.hermite_estimator_bivar <- function(this, x) {
                                              (this$num_obs - 1))
   }
   h_x <-
-    hermite_function(this$N_param, x[,1], this$normalization_hermite_vec)
+    hermite_function_N(this$N_param, x[,1], this$normalization_hermite_vec)
   h_y <-
-    hermite_function(this$N_param, x[,2], this$normalization_hermite_vec)
+    hermite_function_N(this$N_param, x[,2], this$normalization_hermite_vec)
   this$coeff_vec_x <- rowSums(h_x) / this$num_obs
   this$coeff_vec_y <- rowSums(h_y) / this$num_obs
   this$coeff_mat_bivar <- tcrossprod(h_x,h_y) / this$num_obs
@@ -434,10 +434,11 @@ dens_helper.hermite_estimator_bivar <- function(this,x, clipped = FALSE){
     x <- (x - c(this$running_mean_x,this$running_mean_y))/running_std_vec
     factor <- 1 / (prod(running_std_vec))
   }
-  return(factor * t(hermite_function(this$N_param, x[1], 
+  return(factor * t(hermite_function_N(this$N_param, x[1], 
                                      this$normalization_hermite_vec)) %*%
-           this$coeff_mat_bivar  %*% 
-           hermite_function(this$N_param, x[2],this$normalization_hermite_vec))
+           this$coeff_mat_bivar %*%
+           hermite_function_N(this$N_param, x[2], 
+                              this$normalization_hermite_vec))
 }
 
 #' Estimates the probability densities for a matrix of 2-d x values
@@ -497,8 +498,8 @@ cum_prob_helper.hermite_estimator_bivar <- function(this,x, clipped = FALSE){
     running_std_vec <- calculate_running_std(this)
     x <- (x - c(this$running_mean_x,this$running_mean_y))/running_std_vec
   }
-  return(t(hermite_int_lower(N = this$N_param,x = x[1])) %*%
-           this$coeff_mat_bivar  %*%
+  return(t(hermite_int_lower(N = this$N_param,x = x[1])) %*% 
+           this$coeff_mat_bivar %*% 
            hermite_int_lower(N = this$N_param,x = x[2]))
 }
 

@@ -716,9 +716,6 @@ test_that("bivariate hermite estimators merge consistently", {
                tolerance = 1e-06)
   expect_equal(sum(hermite_merged$coeff_mat_bivar), 0.3444092,
                tolerance = 1e-04)
-  hermite_est <-
-    hermite_estimator(N = 20, standardize = FALSE, est_type = "bivariate") %>% 
-    update_batch(test_observations_mat)
   hermite_est_1 <-
     hermite_estimator(N = 10, standardize = FALSE, est_type = "bivariate") %>% 
     update_batch(test_observations_mat[1:10,])
