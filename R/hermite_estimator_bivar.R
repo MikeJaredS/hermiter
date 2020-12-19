@@ -117,6 +117,11 @@ merge_moments_and_count_bivar <- function(hermite_estimator1
 #' @param hermite_estimators A list of hermite_estimator_bivar objects.
 #' @return An object of class hermite_estimator_bivar.
 merge_standardized_helper_bivar <- function(hermite_estimators) {
+  all_N <- lapply(hermite_estimators, FUN =
+                    function(x){return(x$N_param)})
+  if (length(unique(all_N)) >1) {
+    stop("List must contain Hermite estimators with a consistent N")
+  }
   N <- hermite_estimators[[1]]$N_param
   hermite_estimator_merged <- base::Reduce(f=merge_moments_and_count_bivar, 
                                              x = hermite_estimators)
