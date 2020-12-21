@@ -1,3 +1,8 @@
+# hermiter v2.0.2
+
+Fixed ASAN issues picked up with clang. Updated the test environments as 
+listed below. This is a re-submission.
+
 # hermiter v2.0.1
 
 Fixed minor issues in c++ source code causing the build to fail on Solaris 
@@ -46,6 +51,7 @@ literature.
 ## Test environments
 * local R installation, Windows 10, R 4.0.3
 * local Linux Mint 20 installation, R 4.0.3 with valgrind
+* Docker, rocker/r-devel-ubsan-clang image 
 * Ubuntu 16.04 (on travis-ci and r-hub), R 4.0.3
 * Debian Linux (r-hub)
 * Debian Linux, R-devel, GCC ASAN/UBSAN (r-hub)
@@ -62,7 +68,5 @@ There was 1 NOTE:
 
 Days since last update: 2
 
-Explanation: Fixed minor issues in c++ source code causing the build to fail on 
-Solaris along with ASAN/valgrind issues as brought to the package maintainer's 
-attention by Prof B. Ripley. This is a re-submission.
+Explanation: Fixed ASAN issues picked up with clang. This is a re-submission.
 
