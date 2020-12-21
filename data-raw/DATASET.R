@@ -2,8 +2,8 @@
 # h_l(v)dvdu}
 W_matrix <- function(num_r,num_s, hermite_norm){
   integrand <- function(x,r,s, hermite_norm){
-    hermite_vec <- hermite_function(max(r,s),x,hermite_norm)
-    hermite_integral_vec <- hermite_integral_val(s,x,hermite_vec)
+    hermite_vec <- hermite_function_N(max(r,s),x,hermite_norm)
+    hermite_integral_vec <- hermite_int_lower(s,x,hermite_vec)
     result <- hermite_integral_vec[s+1,]*hermite_vec[r+1,]
     return(result)
   }
@@ -12,7 +12,7 @@ W_matrix <- function(num_r,num_s, hermite_norm){
   for (r in c(0:num_r)) {
     for (s in c(0:num_s)) {
       result[r+1,s+1] <- stats::integrate(function(t){integrand(t,r,s, 
-                                                                hermite_norm)},
+                                                hermite_norm[1:(max(r,s)+1)])},
                                           lower=-Inf,upper=Inf)$value
     }
   }
@@ -21,17 +21,22 @@ W_matrix <- function(num_r,num_s, hermite_norm){
 
 # Vector \eqn{z_{k} = \int_{-\infty}^{\infty} h_k(u)du}
 z_vector <- function(num_r, hermite_norm){
-  result <- hermite_int_full_domain(num_r)
+  result <- hermite_int_full(num_r)
   return(result)
 }
 
 
 h_norm_serialized <-
-  hermite_normalization(N=75)
-
+  hermite_normalization_N(N=75)
 W_serialized <- W_matrix(75,75,h_norm_serialized)
 z_serialized <- z_vector(75, h_norm_serialized)
 
+h_k_mat <-
+  hermite_function_N(N=75, x=0, h_norm_serialized)
+h_int_lower_zero_serialized <-  hermite_int_lower(N=75,x=0,
+                                                hermite_function_matrix=h_k_mat)
+h_int_upper_zero_serialized <- hermite_int_upper(N=75,x=0,
+                                                hermite_function_matrix=h_k_mat)
 
 root_x_serialized <-  c(
   -13.4064873381449,
@@ -240,4 +245,6 @@ weight_w_serialized <-
   )
 
 save(h_norm_serialized,W_serialized,z_serialized,
-     root_x_serialized,weight_w_serialized,file = "sysdata.rda")
+     root_x_serialized,weight_w_serialized, 
+     h_int_lower_zero_serialized, 
+     h_int_upper_zero_serialized, file = "sysdata.rda")

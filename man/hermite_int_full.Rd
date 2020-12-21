@@ -2,7 +2,8 @@
 % Please edit documentation in R/utils.R
 \name{hermite_int_full}
 \alias{hermite_int_full}
-\title{Outputs integral of the orthonormal Hermite functions on the full domain}
+\title{Convenience function to output the integral of the orthonormal Hermite 
+functions on the full domain}
 \usage{
 hermite_int_full(N)
 }

@@ -228,30 +228,27 @@ update_sequential.hermite_estimator_univar <- function(this, x) {
   this$num_obs <- this$num_obs + 1
   if (this$standardize_obs == TRUE) {
     if (is.na(this$exp_weight)) {
-      processed_vec <-
-        standardizeInputs(x,
-                          this$num_obs,
-                          this$running_mean,
-                          this$running_variance)
-      this$running_mean <- processed_vec[1]
-      this$running_variance <- processed_vec[2]
-      x <- processed_vec[3]
+      prev_running_mean <- this$running_mean
+      this$running_mean <-  (this$running_mean * (this$num_obs - 1) + x) /
+        this$num_obs
       if (this$num_obs < 2) {
         return(this)
       }
+      this$running_variance <- this$running_variance + (x - prev_running_mean) *
+        (x - this$running_mean)
+      x <- (x - this$running_mean) /  sqrt(this$running_variance /
+                                            (this$num_obs - 1))
     } else {
-      processed_vec <-
-        standardizeInputsEW(x,
-                            this$num_obs,
-                            this$exp_weight,
-                            this$running_mean,
-                            this$running_variance)
-      this$running_mean <- processed_vec[1]
-      this$running_variance <- processed_vec[2]
-      x <- processed_vec[3]
-      if (this$num_obs < 2) {
+      if (this$num_obs < 2){
+        this$running_mean <- x
+        this$running_variance <- 1
         return(this)
       }
+      this$running_mean <-  (1 - this$exp_weight) * this$running_mean +
+        this$exp_weight * x
+      this$running_variance <- (1 - this$exp_weight) * this$running_variance +
+        this$exp_weight * (x - this$running_mean)^2
+      x <- (x - this$running_mean) / sqrt(this$running_variance)
     }
   }
   h_k <-
@@ -389,7 +386,8 @@ cum_prob.hermite_estimator_univar <- function(this, x, clipped = FALSE) {
   }
   h_k <-
     hermite_function_N(this$N_param, x, this$normalization_hermite_vec)
-  integrals_hermite <- hermite_int_lower(this$N_param, x, h_k)
+  integrals_hermite <- hermite_int_lower(this$N_param, x, 
+                                         hermite_function_matrix = h_k)
   cdf_val <- crossprod(integrals_hermite, this$coeff_vec)
   if (clipped == TRUE) {
     cdf_val <- pmin(pmax(cdf_val, 1e-08), 1)
@@ -402,11 +400,10 @@ cum_prob.hermite_estimator_univar <- function(this, x, clipped = FALSE) {
 # This helper method is intended for internal use by the 
 # hermite_estimator_univar class.
 quantile_helper <- function(this, p) {
-  h_k <-
-    hermite_function_N(this$N_param, x=0, this$normalization_hermite_vec)
-  p_lower <- this$coeff_vec %*% hermite_int_lower(this$N_param,x=0,h_k)
-  p_upper <- 1-as.numeric(this$coeff_vec %*% 
-                      hermite_int_upper(this$N_param,x=0,h_k))
+  p_lower <- as.numeric(crossprod(this$coeff_vec, 
+                              h_int_lower_zero_serialized[1:(this$N_param+1)]))
+  p_upper <- 1-as.numeric(crossprod(this$coeff_vec, 
+                              h_int_upper_zero_serialized[1:(this$N_param+1)]))
   if (is.na(p_lower) | is.na(p_upper)){
     return(NA)
   }
@@ -414,7 +411,8 @@ quantile_helper <- function(this, p) {
     x_lower <- tryCatch({
       stats::uniroot(
         f = function(x) {
-          this$coeff_vec %*% hermite_int_lower(this$N_param,x) - p_upper
+          this$coeff_vec %*% hermite_int_lower(this$N_param,x,
+                normalization_hermite=this$normalization_hermite_vec) - p_upper
         },
         interval = c(-100, 100)
       )$root
@@ -424,7 +422,8 @@ quantile_helper <- function(this, p) {
       stats::uniroot(
         f = function(x) {
           1-as.numeric(this$coeff_vec %*% 
-                         hermite_int_upper(this$N_param,x)) - p_lower
+                         hermite_int_upper(this$N_param,x,
+               normalization_hermite=this$normalization_hermite_vec)) - p_lower
         },
         interval = c(-100, 100)
       )$root
@@ -449,12 +448,14 @@ quantile_helper <- function(this, p) {
         res <- rep(NA,length(x))
         if (length(lower_idx)>0){
           res[lower_idx] <- crossprod(hermite_int_lower(this$N_param, 
-                                        x[lower_idx]), this$coeff_vec) - p
+                                        x[lower_idx],
+    normalization_hermite=this$normalization_hermite_vec), this$coeff_vec) - p
         }
         if (length(upper_idx)>0){
           res[upper_idx] <- 1 - 
             crossprod(hermite_int_upper(this$N_param, 
-                                        x[upper_idx]), this$coeff_vec) - p
+                                        x[upper_idx], 
+    normalization_hermite=this$normalization_hermite_vec), this$coeff_vec) - p
         }
         if (length(ambig_idx)>0){
           if (p_upper < p_lower){

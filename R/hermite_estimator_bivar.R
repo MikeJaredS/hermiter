@@ -137,8 +137,8 @@ merge_standardized_helper_bivar <- function(hermite_estimators) {
       gauss_hermite_quad_100(function(t){integrand_coeff_univar(t, x, 
                                       hermite_estimator_merged, k, 2)})}, 
       FUN.VALUE=numeric(1)))}, FUN.VALUE=numeric(1))
-  herm_mod <- function(t,N){hermite_polynomial(N, t) *
-      hermite_normalization(N)}
+  herm_mod <- function(t,N){hermite_polynomial_N(N, t) *
+      hermite_normalization_N(N)}
   g_mat <- function(N,t_1,t_2, const_mult){sqrt(2) * const_mult * 
       tcrossprod(hermite_function_N(N,t_1),herm_mod(t_2,N))}
   g_mat_scale_shift <- function(N,scale,shift){
@@ -498,9 +498,11 @@ cum_prob_helper.hermite_estimator_bivar <- function(this,x, clipped = FALSE){
     running_std_vec <- calculate_running_std(this)
     x <- (x - c(this$running_mean_x,this$running_mean_y))/running_std_vec
   }
-  return(t(hermite_int_lower(N = this$N_param,x = x[1])) %*% 
-           this$coeff_mat_bivar %*% 
-           hermite_int_lower(N = this$N_param,x = x[2]))
+  return(t(hermite_int_lower(N = this$N_param,x = x[1],normalization_hermite=
+                               this$normalization_hermite_vec)) 
+         %*% this$coeff_mat_bivar %*% 
+           hermite_int_lower(N = this$N_param,x = x[2],normalization_hermite=
+                               this$normalization_hermite_vec))
 }
 
 #' Estimates the cumulative probabilities for a matrix of 2-d x values

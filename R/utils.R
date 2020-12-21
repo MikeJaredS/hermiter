@@ -1,3 +1,21 @@
+#' Convenience function to output Hermite normalization factors 
+#' 
+#' The method returns numeric normalization factors that, when multiplied by 
+#' the physicist Hermite polynomials \eqn{H_k(x)}, yield orthonormal 
+#' Hermite functions \eqn{h_k(x)} for \eqn{k=0,\dots,N}.
+#'
+#' @author Michael Stephanou <michael.stephanou@gmail.com>
+#'
+#' @param N An integer number.
+#' @return A numeric vector of length N+1
+#' @export
+hermite_normalization_N <- function(N){
+if (N < 0) {
+  stop("N must be >= 0.")
+}
+return(hermite_normalization(N))
+}
+
 #' Convenience function to output physicist Hermite polynomials
 #'  
 #'  
@@ -63,9 +81,12 @@ hermite_function_N <- function(N,x, normalization_hermite=NULL){
 #' @param x A numeric vector.
 #' @param hermite_function_matrix A numeric matrix. A matrix of Hermite 
 #' function values. 
+#' @param normalization_hermite A numeric vector. A vector of normalization 
+#' values necessary in the calculation of the Hermite functions.
 #' @return A numeric matrix with N+1 rows and length(x) columns.
 #' @export
-hermite_int_lower <- function(N,x,hermite_function_matrix=NULL){
+hermite_int_lower <- function(N,x,hermite_function_matrix=NULL, 
+                              normalization_hermite=NULL){
   if (N < 0) {
     stop("N must be >= 0.")
   }
@@ -76,7 +97,13 @@ hermite_int_lower <- function(N,x,hermite_function_matrix=NULL){
     stop("x must contain at least one value.")
   }
   if (is.null(hermite_function_matrix)){
-    normalization_hermite <- hermite_normalization(N)
+    if (is.null(normalization_hermite)){
+      normalization_hermite <- hermite_normalization(N)
+    } else {
+      if (length(normalization_hermite) != (N+1)){
+        stop("Normalization vector must be of length N+1.")
+      }
+    }
     hermite_function_matrix <- hermite_function_N(N,x,normalization_hermite)
   } else {
     if (nrow(hermite_function_matrix) != (N+1)){
@@ -96,9 +123,12 @@ hermite_int_lower <- function(N,x,hermite_function_matrix=NULL){
 #' @param x A numeric vector.
 #' @param hermite_function_matrix A numeric matrix. A matrix of Hermite 
 #' function values. 
+#' @param normalization_hermite A numeric vector. A vector of normalization 
+#' values necessary in the calculation of the Hermite functions.
 #' @return A numeric matrix with N+1 rows and length(x) columns.
 #' @export
-hermite_int_upper <- function(N,x, hermite_function_matrix=NULL){
+hermite_int_upper <- function(N,x, hermite_function_matrix=NULL, 
+                              normalization_hermite=NULL){
   if (N < 0) {
     stop("N must be >= 0.")
   }
@@ -109,7 +139,13 @@ hermite_int_upper <- function(N,x, hermite_function_matrix=NULL){
     stop("x must contain at least one value.")
   }
   if (is.null(hermite_function_matrix)){
-    normalization_hermite <- hermite_normalization(N)
+    if (is.null(normalization_hermite)){
+      normalization_hermite <- hermite_normalization(N)
+    } else {
+      if (length(normalization_hermite) != (N+1)){
+        stop("Normalization vector must be of length N+1.")
+      }
+    }
     hermite_function_matrix <- hermite_function_N(N,x,normalization_hermite)
   } else {
     if (nrow(hermite_function_matrix) != (N+1)){
@@ -119,7 +155,8 @@ hermite_int_upper <- function(N,x, hermite_function_matrix=NULL){
   return(hermite_integral_val_upper(N,x,hermite_function_matrix))
 }
 
-#' Outputs integral of the orthonormal Hermite functions on the full domain
+#' Convenience function to output the integral of the orthonormal Hermite 
+#' functions on the full domain
 #' 
 #' The method calculates \eqn{\int_{-\infty}^{\infty} h_k(t) dt} 
 #' for \eqn{k=0,\dots,N}.
@@ -150,9 +187,8 @@ integrand_coeff_univar <- function(t,hermite_est_current,
                                    dimension = NA){
   normalization_hermite <- hermite_est_current$normalization_hermite_vec
   t <- sqrt(2) * t
-  herm_mod <- hermite_polynomial(hermite_est_current$N_param, t) *
+  herm_mod <- hermite_polynomial_N(hermite_est_current$N_param, t) *
     normalization_hermite
-  
   if (is.na(dimension)){
     original_sd <- sqrt(hermite_est_current$running_variance / 
                           (hermite_est_current$num_obs-1))
