@@ -517,6 +517,7 @@ quant.hermite_estimator_univar <- function(this, p) {
   for (idx in seq_along(p)) {
     if (p[idx] < 0 | p[idx] > 1) {
       result[idx] <- NA
+      next
     }
     result[idx] <- quantile_helper(this, p[idx])
   }
