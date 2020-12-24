@@ -411,13 +411,13 @@ quantile_helper <- function(this, p, p_lower, p_upper, x_lower,
         if (length(lower_idx)>0){
           res[lower_idx] <- crossprod(hermite_int_lower(this$N_param, 
                                         x[lower_idx],
-    normalization_hermite=this$normalization_hermite_vec), this$coeff_vec) - p
+    normalization_hermite = this$normalization_hermite_vec), this$coeff_vec) - p
         }
         if (length(upper_idx)>0){
           res[upper_idx] <- 1 - 
             crossprod(hermite_int_upper(this$N_param, 
                                         x[upper_idx], 
-    normalization_hermite=this$normalization_hermite_vec), this$coeff_vec) - p
+    normalization_hermite = this$normalization_hermite_vec), this$coeff_vec) - p
         }
         if (length(ambig_idx)>0){
           if (p_upper < p_lower){
@@ -486,8 +486,8 @@ quant.hermite_estimator_univar <- function(this, p) {
     x_lower <- tryCatch({
       stats::uniroot(
         f = function(x) {
-          this$coeff_vec %*% hermite_int_lower(this$N_param,x,
-                normalization_hermite=this$normalization_hermite_vec) - p_upper
+          crossprod(this$coeff_vec,hermite_int_lower(this$N_param,x,
+          normalization_hermite = this$normalization_hermite_vec)) - p_upper
         },
         interval = c(-100, 100)
       )$root
@@ -496,9 +496,9 @@ quant.hermite_estimator_univar <- function(this, p) {
     x_upper <- tryCatch({
       stats::uniroot(
         f = function(x) {
-          1-as.numeric(this$coeff_vec %*% 
+          1-as.numeric(crossprod(this$coeff_vec, 
                          hermite_int_upper(this$N_param,x,
-              normalization_hermite=this$normalization_hermite_vec)) - p_lower
+          normalization_hermite = this$normalization_hermite_vec))) - p_lower
         },
         interval = c(-100, 100)
       )$root
