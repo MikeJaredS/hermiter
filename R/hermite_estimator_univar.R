@@ -399,46 +399,8 @@ cum_prob.hermite_estimator_univar <- function(this, x, clipped = FALSE) {
 #
 # This helper method is intended for internal use by the 
 # hermite_estimator_univar class.
-quantile_helper <- function(this, p) {
-  p_lower <- as.numeric(crossprod(this$coeff_vec, 
-                              h_int_lower_zero_serialized[1:(this$N_param+1)]))
-  p_upper <- 1-as.numeric(crossprod(this$coeff_vec, 
-                              h_int_upper_zero_serialized[1:(this$N_param+1)]))
-  if (is.na(p_lower) | is.na(p_upper)){
-    return(NA)
-  }
-  if (p_upper < p_lower){
-    x_lower <- tryCatch({
-      stats::uniroot(
-        f = function(x) {
-          this$coeff_vec %*% hermite_int_lower(this$N_param,x,
-                normalization_hermite=this$normalization_hermite_vec) - p_upper
-        },
-        interval = c(-100, 100)
-      )$root
-    },
-    error = function(e) {NA})
-    x_upper <- tryCatch({
-      stats::uniroot(
-        f = function(x) {
-          1-as.numeric(this$coeff_vec %*% 
-                         hermite_int_upper(this$N_param,x,
-               normalization_hermite=this$normalization_hermite_vec)) - p_lower
-        },
-        interval = c(-100, 100)
-      )$root
-    },
-    error = function(e) {NA})
-  } else if (p_upper > p_lower) {
-    x_lower <- -1e-6
-    x_upper <- 1e-6
-  } else if (p_upper == p_lower){
-    x_lower <- 0
-    x_upper <- 0
-  }
-  if (is.na(x_lower) | is.na(x_upper)){
-    return(NA)
-  }
+quantile_helper <- function(this, p, p_lower, p_upper, x_lower,
+                            x_upper) {
   est <- tryCatch({
     stats::uniroot(
       f = function(x) {
@@ -513,13 +475,53 @@ quant.hermite_estimator_univar <- function(this, p) {
   if (this$num_obs < 2) {
     return(rep(NA, length(p)))
   }
+  p_lower <- as.numeric(crossprod(this$coeff_vec, 
+                              h_int_lower_zero_serialized[1:(this$N_param+1)]))
+  p_upper <- 1-as.numeric(crossprod(this$coeff_vec, 
+                              h_int_upper_zero_serialized[1:(this$N_param+1)]))
+  if (is.na(p_lower) | is.na(p_upper)){
+    return(rep(NA, length(p)))
+  }
+  if (p_upper < p_lower){
+    x_lower <- tryCatch({
+      stats::uniroot(
+        f = function(x) {
+          this$coeff_vec %*% hermite_int_lower(this$N_param,x,
+                normalization_hermite=this$normalization_hermite_vec) - p_upper
+        },
+        interval = c(-100, 100)
+      )$root
+    },
+    error = function(e) {NA})
+    x_upper <- tryCatch({
+      stats::uniroot(
+        f = function(x) {
+          1-as.numeric(this$coeff_vec %*% 
+                         hermite_int_upper(this$N_param,x,
+              normalization_hermite=this$normalization_hermite_vec)) - p_lower
+        },
+        interval = c(-100, 100)
+      )$root
+    },
+    error = function(e) {NA})
+  } else if (p_upper > p_lower) {
+    x_lower <- -1e-6
+    x_upper <- 1e-6
+  } else if (p_upper == p_lower){
+    x_lower <- 0
+    x_upper <- 0
+  }
+  if (is.na(x_lower) | is.na(x_upper)){
+    return(rep(NA, length(p)))
+  }
   result <- rep(0, length(p))
   for (idx in seq_along(p)) {
     if (p[idx] < 0 | p[idx] > 1) {
       result[idx] <- NA
       next
     }
-    result[idx] <- quantile_helper(this, p[idx])
+    result[idx] <- quantile_helper(this, p[idx], p_lower, p_upper, x_lower,
+                                   x_upper)
   }
   return(result)
 }
