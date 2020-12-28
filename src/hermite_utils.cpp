@@ -58,8 +58,8 @@ NumericVector hermite_normalization(int N) {
   NumericVector out(N + 1);
   double sqrt_pi = sqrt(M_PI);
   for(int i = 0; i <= N; ++i) {
-    double fact = boost::math::factorial<double>((double)i);
-    out(i) = 1/sqrt(pow((double)2,(double)i) * fact * sqrt_pi); 
+    out(i) = 1/sqrt(pow((double)2,(double)i) * 
+      boost::math::factorial<double>((double)i) * sqrt_pi); 
   }
   return out;
 }
@@ -84,16 +84,18 @@ NumericMatrix hermite_function(int N, NumericVector x,
   int x_size = x.size();
   NumericMatrix hermite(N + 1, x_size);
   NumericMatrix out(N + 1, x_size);
+  NumericVector expFac(x_size);
   for(int i = 0; i < x_size; ++i) {
     hermite(0,i) = 1;
-    out(0,i) = hermite(0,i) * normalization[0] * exp(-1 * x[i] * x[i] / 2);
+    expFac(i) = exp(-1 * x[i] * x[i] / 2);
+    out(0,i) = hermite(0,i) * normalization[0] * expFac(i);
   }
   if (N==0){
     return out;
   }
   for(int i = 0; i < x_size; ++i) {
     hermite(1,i) = 2 * x[i];
-    out(1,i) = hermite(1,i) * normalization[1] * exp(-1 * x[i] * x[i] / 2);
+    out(1,i) = hermite(1,i) * normalization[1] * expFac(i);
   }
   if (N==1){
     return out;
@@ -102,7 +104,7 @@ NumericMatrix hermite_function(int N, NumericVector x,
     for(int i = 2; i <= N; ++i) {
       hermite(i,j) = 2 * x[j] * hermite(i - 1,j) - 2 *
        (((double)i) - 1) * hermite(i - 2,j);
-      out(i,j) = hermite(i,j) * normalization[i] * exp(-1 * x[j] * x[j] / 2);
+      out(i,j) = hermite(i,j) * normalization[i] * expFac(j);
     }
   }
   return out;
