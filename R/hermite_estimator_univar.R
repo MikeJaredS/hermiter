@@ -399,43 +399,56 @@ cum_prob.hermite_estimator_univar <- function(this, x, clipped = FALSE) {
 #
 # This helper method is intended for internal use by the 
 # hermite_estimator_univar class.
-quantile_helper <- function(this, p, p_lower, p_upper, x_lower,
+quantile_helper <- function(this, p_vec, p_lower, p_upper, x_lower,
                             x_upper) {
-  est <- tryCatch({
-    stats::uniroot(
-      f = function(x) {
-        lower_idx <- which(x < x_lower)
-        upper_idx <- which(x > x_upper)
-        ambig_idx <- which(x >= x_lower & x <= x_upper)
-        res <- rep(NA,length(x))
-        if (length(lower_idx)>0){
-          res[lower_idx] <- crossprod(hermite_int_lower(this$N_param, 
-                                        x[lower_idx],
-    normalization_hermite = this$normalization_hermite_vec), this$coeff_vec) - p
-        }
-        if (length(upper_idx)>0){
-          res[upper_idx] <- 1 - 
-            crossprod(hermite_int_upper(this$N_param, 
-                                        x[upper_idx], 
-    normalization_hermite = this$normalization_hermite_vec), this$coeff_vec) - p
-        }
-        if (length(ambig_idx)>0){
-          if (p_upper < p_lower){
-            res[ambig_idx] <- (p_upper + (x[ambig_idx]-x_lower) * 
-                           as.numeric((p_lower-p_upper)/(x_upper-x_lower))) - p
-          }
-          else if (p_upper > p_lower){
-            res[ambig_idx] <- (p_lower + (x[ambig_idx]-x_lower) * 
-                                 (p_upper-p_lower)/(x_upper-x_lower)) - p
-          } else if (p_upper == p_lower){
-            res[ambig_idx] <- p_upper
-          }
-        }
-        return(res)
-      },
-      interval = c(-100, 100)
-    )$root
-  }, error = function(e) {NA})
+  f_est = function(x,p) {
+    lower_idx <- which(x < x_lower)
+    upper_idx <- which(x > x_upper)
+    ambig_idx <- which(x >= x_lower & x <= x_upper)
+    res <- rep(NA,length(x))
+    if (length(lower_idx)>0){
+      res[lower_idx] <- crossprod(hermite_int_lower(this$N_param, 
+           x[lower_idx], normalization_hermite = 
+             this$normalization_hermite_vec), this$coeff_vec) - p[lower_idx]
+    }
+    if (length(upper_idx)>0){
+      res[upper_idx] <- 1 - 
+        crossprod(hermite_int_upper(this$N_param, 
+           x[upper_idx], normalization_hermite = 
+             this$normalization_hermite_vec), this$coeff_vec) - p[upper_idx]
+    }
+    if (length(ambig_idx)>0){
+      if (p_upper < p_lower){
+        res[ambig_idx] <- (p_upper + (x[ambig_idx]-x_lower) * 
+            as.numeric((p_lower-p_upper)/(x_upper-x_lower))) - p[ambig_idx]
+      }
+      else if (p_upper > p_lower){
+        res[ambig_idx] <- (p_lower + (x[ambig_idx]-x_lower) * 
+                        (p_upper-p_lower)/(x_upper-x_lower)) - p[ambig_idx]
+      } else if (p_upper == p_lower){
+        res[ambig_idx] <- p_upper - p[ambig_idx]
+      }
+    }
+    return(res)
+  }
+  # Vectorized bisection search:
+  max_steps <- 25
+  x_0 <- rep(-50,length(p_vec))
+  x_1 <- rep(50,length(p_vec))
+  f_0 <- rep(0,length(p_vec)) - p_vec
+  f_1 <- rep(1,length(p_vec)) - p_vec
+  for (step in seq_len(max_steps)) {
+    est  <- (x_0 + x_1)/2
+    f_mid <- f_est(est,p_vec)
+    mask_0 <- sign(f_mid) == sign(f_0)
+    mask_1 <-  sign(f_mid) == sign(f_1)
+    x_0 <- ifelse( mask_0, est, x_0)
+    x_1 <- ifelse( mask_1, est, x_1)
+    f_0 <- ifelse( mask_0, f_mid, f_0 )
+    f_1 <- ifelse( mask_1, f_mid, f_1 )
+    error_max <- max(abs(x_1 - x_0))
+    if (error_max <= 2e-4) {break}
+  }
   if (is.na(this$exp_weight)) {
     est <-
       est * sqrt(this$running_variance / (this$num_obs - 1)) + this$running_mean
@@ -468,6 +481,9 @@ quant.hermite_estimator_univar <- function(this, p) {
   }
   if (length(p) < 1) {
     stop("p must contain at least one value.")
+  }
+  if (any(p>1) | any(p<0)) {
+    stop("p must contain probabilities i.e. p>=0 and p<=1.")
   }
   if (this$standardize_obs != TRUE) {
     stop("Quantile estimation requires standardization to be true.")
@@ -514,15 +530,8 @@ quant.hermite_estimator_univar <- function(this, p) {
   if (is.na(x_lower) | is.na(x_upper)){
     return(rep(NA, length(p)))
   }
-  result <- rep(0, length(p))
-  for (idx in seq_along(p)) {
-    if (p[idx] < 0 | p[idx] > 1) {
-      result[idx] <- NA
-      next
-    }
-    result[idx] <- quantile_helper(this, p[idx], p_lower, p_upper, x_lower,
-                                   x_upper)
-  }
+  result <- quantile_helper(this, p, p_lower, p_upper, x_lower,
+                            x_upper)
   return(result)
 }
 
