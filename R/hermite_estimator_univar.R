@@ -294,9 +294,8 @@ update_batch.hermite_estimator_univar <- function(this, x) {
     x <-
       (x - this$running_mean) / sqrt(this$running_variance / (this$num_obs - 1))
   }
-  h_k <-
-    hermite_function_N(this$N_param, x, this$normalization_hermite_vec)
-  this$coeff_vec <- rowSums(h_k) / this$num_obs
+  this$coeff_vec <- hermite_function_sum_N(this$N_param, x,
+                                 this$normalization_hermite_vec) / this$num_obs
   return(this)
 }
 

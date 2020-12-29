@@ -33,6 +33,7 @@ standardized.
 * The method for estimating quantiles with the univariate Hermite series based
 estimator has been improved and is now consistent with the estimator in the
 literature.
+* Vectorized the univariate quantile estimation method.
 * Added further error trapping and other minor enhancements (also for C++
 routines).
 

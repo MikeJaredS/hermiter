@@ -41,6 +41,19 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// hermite_function_sum
+NumericVector hermite_function_sum(int N, NumericVector x, NumericVector normalization);
+RcppExport SEXP _hermiter_hermite_function_sum(SEXP NSEXP, SEXP xSEXP, SEXP normalizationSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type N(NSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type normalization(normalizationSEXP);
+    rcpp_result_gen = Rcpp::wrap(hermite_function_sum(N, x, normalization));
+    return rcpp_result_gen;
+END_RCPP
+}
 // hermite_integral_val
 NumericMatrix hermite_integral_val(int N, NumericVector x, NumericMatrix hermite_function_mat);
 RcppExport SEXP _hermiter_hermite_integral_val(SEXP NSEXP, SEXP xSEXP, SEXP hermite_function_matSEXP) {
@@ -112,6 +125,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_hermiter_hermite_polynomial", (DL_FUNC) &_hermiter_hermite_polynomial, 2},
     {"_hermiter_hermite_normalization", (DL_FUNC) &_hermiter_hermite_normalization, 1},
     {"_hermiter_hermite_function", (DL_FUNC) &_hermiter_hermite_function, 3},
+    {"_hermiter_hermite_function_sum", (DL_FUNC) &_hermiter_hermite_function_sum, 3},
     {"_hermiter_hermite_integral_val", (DL_FUNC) &_hermiter_hermite_integral_val, 3},
     {"_hermiter_hermite_integral_val_upper", (DL_FUNC) &_hermiter_hermite_integral_val_upper, 3},
     {"_hermiter_hermite_int_full_domain", (DL_FUNC) &_hermiter_hermite_int_full_domain, 1},
