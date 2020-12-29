@@ -36,5 +36,6 @@ Suggests:
     mvtnorm,
     patchwork
 VignetteBuilder: knitr
+ByteCompile: true
 URL: https://github.com/MikeJaredS/hermiter
 BugReports: https://github.com/MikeJaredS/hermiter/issues
