@@ -169,7 +169,7 @@ merge_standardized_helper_bivar <- function(hermite_estimators) {
                                  new_sd_x)
     res_2 <- g_mat_scale_shift(N_in,prev_sd_y/new_sd_y,(prev_mean_y-new_mean_y)/
                                  new_sd_y)
-    return(res_1%*%hermite_est_current$coeff_mat_bivar%*%t(res_2))
+    return(res_1%*%(hermite_est_current$coeff_mat_bivar%*%t(res_2)))
   }
   coeff_mat_lst <- lapply(hermite_estimators, FUN = function(x){x$num_obs / 
       hermite_estimator_merged$num_obs * 
@@ -575,11 +575,12 @@ spearmans.hermite_estimator_bivar <- function(this, clipped = FALSE)
     return(NA)
   }
   W_transpose <- t(this$W)
-  result <- 12*t(this$coeff_vec_x) %*% W_transpose %*%this$coeff_mat_bivar %*% 
-    this$W%*%this$coeff_vec_y +
-    -6 * t(this$coeff_vec_x)%*%W_transpose%*%this$coeff_mat_bivar%*%this$z +
-    -6 *t(this$z)%*% this$coeff_mat_bivar%*%this$W%*%this$coeff_vec_y +
-    3 * t(this$z)%*% this$coeff_mat_bivar%*%this$z
+  result <- 12*(t(this$coeff_vec_x) %*% W_transpose) %*% 
+    this$coeff_mat_bivar %*% (this$W %*% this$coeff_vec_y) +
+    -6 * (t(this$coeff_vec_x) %*% W_transpose) %*% (this$coeff_mat_bivar %*% 
+                                                      this$z) +
+    -6 * (t(this$z)%*% this$coeff_mat_bivar) %*% (this$W %*% this$coeff_vec_y)+
+    3 * t(this$z) %*% (this$coeff_mat_bivar%*%this$z)
   if (clipped == TRUE) {
     result <- pmin(pmax(result, -1), 1)
   }
