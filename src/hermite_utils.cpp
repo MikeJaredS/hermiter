@@ -132,7 +132,23 @@ NumericVector hermite_function_sum(int N, NumericVector x,
   NumericMatrix hermite(N + 1, x_size);
   NumericVector out(N + 1);
   NumericVector expFac(x_size);
-  for(int i = 0; i < x_size; ++i) {
+  int i = 0;
+  int j = 0;
+  for(i = 0; i <= x_size-4; i += 4) {
+    hermite(0,i) = 1;
+    hermite(0,i+1) = 1;
+    hermite(0,i+2) = 1;
+    hermite(0,i+3) = 1;
+    expFac(i) = exp(-1 * x[i] * x[i] / 2);
+    expFac(i+1) = exp(-1 * x[i+1] * x[i+1] / 2);
+    expFac(i+2) = exp(-1 * x[i+2] * x[i+2] / 2);
+    expFac(i+3) = exp(-1 * x[i+3] * x[i+3] / 2);
+    out(0) += (hermite(0,i) * expFac(i) +
+      hermite(0,i+1) * expFac(i+1) +
+      hermite(0,i+2) * expFac(i+2) +
+      hermite(0,i+3) * expFac(i+3)) * normalization[0]; 
+  }
+  for(; i < x_size; ++i) {
     hermite(0,i) = 1;
     expFac(i) = exp(-1 * x[i] * x[i] / 2);
     out(0) += hermite(0,i) * normalization[0] * expFac(i);
@@ -140,18 +156,45 @@ NumericVector hermite_function_sum(int N, NumericVector x,
   if (N==0){
     return out;
   }
-  for(int i = 0; i < x_size; ++i) {
+  for(i = 0; i <= x_size - 4; i += 4) {
+    hermite(1,i) = 2 * x[i];
+    hermite(1,i+1) = 2 * x[i+1];
+    hermite(1,i+2) = 2 * x[i+2];
+    hermite(1,i+3) = 2 * x[i+3];
+    out(1) += (hermite(1,i) * expFac(i) +
+      hermite(1,i+1) * expFac(i+1) +
+      hermite(1,i+2) * expFac(i+2) +
+      hermite(1,i+3) * expFac(i+3)) * normalization[1];
+  }
+  for(; i < x_size; ++i) {
     hermite(1,i) = 2 * x[i];
     out(1) += hermite(1,i) * normalization[1] * expFac(i);
   }
   if (N==1){
     return out;
   }
-  for(int j = 0; j < x_size; ++j) {
-    for(int i = 2; i <= N; ++i) {
-      hermite(i,j) = 2 * x[j] * hermite(i - 1,j) - 2 *
-        (((double)i) - 1) * hermite(i - 2,j);
-      out(i) += hermite(i,j) * normalization[i] * expFac(j);
+  for(j = 0; j <= x_size - 4; j += 4) {
+    for(int k = 2; k <= N; ++k) {
+      hermite(k,j) = 2 * x[j] * hermite(k - 1,j) - 2 *
+        (((double)k) - 1) * hermite(k - 2,j); 
+      hermite(k,j+1) = 2 * x[j+1] * hermite(k - 1,j+1) - 2 *
+        (((double)k) - 1) * hermite(k - 2,j+1);
+      hermite(k,j+2) =  2 * x[j+2] * hermite(k - 1,j+2) - 2 *
+        (((double)k) - 1) * hermite(k - 2,j+2);
+      hermite(k,j+3) =  2 * x[j+3] * hermite(k - 1,j+3) - 2 *
+        (((double)k) - 1) * hermite(k - 2,j+3);
+      out(k) += (hermite(k,j) * expFac(j) +
+        hermite(k,j+1) * expFac(j+1) +
+        hermite(k,j+2) * expFac(j+2) +
+        hermite(k,j+3) * expFac(j+3)) * normalization[k]; 
+      
+    }
+  }
+  for(; j < x_size; ++j) {
+    for(int k = 2; k <= N; ++k) {
+      hermite(k,j) = 2 * x[j] * hermite(k - 1,j) - 2 *
+        (((double)k) - 1) * hermite(k - 2,j);
+      out(k) += hermite(k,j) * normalization[k] * expFac(j);
     }
   }
   return out;

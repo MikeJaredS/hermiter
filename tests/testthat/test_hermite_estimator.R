@@ -873,4 +873,24 @@ test_that("convenience and utility functions work as expected", {
                                       lower=-Inf,upper=Inf)$value
   quad_val <- gauss_hermite_quad_100(function(x){x})
   expect_equal(target_integral,quad_val,tolerance=1e-5)
+  hermite_function_sum_vals <- as.vector(
+    rowSums(hermite_function_N(N=6,x=c(1))))
+  expect_equal(hermite_function_sum_vals,
+                         hermite_function_sum_N(N=6,x=c(1)),tol=1e-7)
+  hermite_function_sum_vals <- as.vector(
+    rowSums(hermite_function_N(N=6,x=c(1,2))))
+  expect_equal(hermite_function_sum_vals,
+               hermite_function_sum_N(N=6,x=c(1,2)),tol=1e-7)
+  hermite_function_sum_vals <- as.vector(
+    rowSums(hermite_function_N(N=6,x=c(1,2,3))))
+  expect_equal(hermite_function_sum_vals,
+               hermite_function_sum_N(N=6,x=c(1,2,3)),tol=1e-7)
+  hermite_function_sum_vals <- as.vector(
+    rowSums(hermite_function_N(N=6,x=c(1,2,3,4))))
+  expect_equal(hermite_function_sum_vals,
+               hermite_function_sum_N(N=6,x=c(1,2,3,4)),tol=1e-7)
+  hermite_function_sum_vals <- as.vector(
+    rowSums(hermite_function_N(N=6,x=seq(-4,4,by=0.5))))
+  expect_equal(hermite_function_sum_vals,
+               hermite_function_sum_N(N=6,x=seq(-4,4,by=0.5)),tol=1e-7)
 })
