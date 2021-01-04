@@ -6,7 +6,7 @@ listed below. This is a re-submission.
 # hermiter v2.0.1
 
 Fixed minor issues in c++ source code causing the build to fail on Solaris 
-along with ASAN/valgrind issues. Updated the test environments as listed below. 
+along with valgrind issues. Updated the test environments as listed below. 
 Added further test cases. This is a re-submission.
 
 # hermiter v2.0.0
@@ -59,6 +59,7 @@ literature.
 * Oracle Solaris 10, x86, 32 bit, R-release (r-hub)
 * Oracle Solaris 10, x86, 32 bit, R-release, Oracle Developer Studio 12.6 (r-hub)
 * macOS 10.13.6 High Sierra, R-release, brew (r-hub)
+* macOS 10.13.6 High Sierra, R-release, CRAN's setup (r-hub)
 * win-builder (devel and release)
 
 ## R CMD check results
