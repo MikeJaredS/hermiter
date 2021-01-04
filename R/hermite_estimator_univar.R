@@ -400,7 +400,7 @@ cum_prob.hermite_estimator_univar <- function(this, x, clipped = FALSE) {
 # hermite_estimator_univar class.
 quantile_helper <- function(this, p_vec, p_lower, p_upper, x_lower,
                             x_upper) {
-  f_est = function(x,p) {
+  f_est <- function(x,p) {
     lower_idx <- which(x < x_lower)
     upper_idx <- which(x > x_upper)
     ambig_idx <- which(x >= x_lower & x <= x_upper)

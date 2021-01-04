@@ -51,7 +51,7 @@ literature.
 ## Test environments
 * local R installation, Windows 10, R 4.0.3
 * local Linux Mint 20 installation, R 4.0.3 with valgrind
-* Docker, rocker/r-devel-ubsan-clang image 
+* rocker/r-devel-ubsan-clang docker image 
 * Ubuntu 16.04 (on travis-ci and r-hub), R 4.0.3
 * Debian Linux (r-hub)
 * Debian Linux, R-devel, GCC ASAN/UBSAN (r-hub)
@@ -62,11 +62,5 @@ literature.
 * win-builder (devel and release)
 
 ## R CMD check results
-There were no ERRORs or WARNINGs. 
-
-There was 1 NOTE:
-
-Days since last update: 2
-
-Explanation: Fixed ASAN issues picked up with clang. This is a re-submission.
+There were no ERRORs, WARNINGs or NOTES.
 
