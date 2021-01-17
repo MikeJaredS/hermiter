@@ -803,7 +803,7 @@ test_that("quantile estimation works as expected", {
                       standardize = TRUE) %>% update_batch(c(1:4))
   quantiles_est <- hermite_est %>% quant(c(0.5))
   expect_equal(quantiles_est,2.5, 
-               tolerance = 1e-05)
+               tolerance = 1e-02)
 })
 
 test_that("convenience and utility functions work as expected", {
