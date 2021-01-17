@@ -2,8 +2,9 @@
 # h_l(v)dvdu}
 W_matrix <- function(num_r,num_s, hermite_norm){
   integrand <- function(x,r,s, hermite_norm){
-    hermite_vec <- hermite_function_N(max(r,s),x,hermite_norm)
-    hermite_integral_vec <- hermite_int_lower(s,x,hermite_vec)
+    hermite_vec <- hermite_function_N(r,x,hermite_norm[1:(r+1)])
+    hermite_integral_vec <- hermite_int_lower(s,x,normalization_hermite =
+                                                hermite_norm[1:(s+1)])
     result <- hermite_integral_vec[s+1,]*hermite_vec[r+1,]
     return(result)
   }
@@ -12,7 +13,7 @@ W_matrix <- function(num_r,num_s, hermite_norm){
   for (r in c(0:num_r)) {
     for (s in c(0:num_s)) {
       result[r+1,s+1] <- stats::integrate(function(t){integrand(t,r,s, 
-                                                hermite_norm[1:(max(r,s)+1)])},
+                              hermite_norm[1:(max(r,s)+1)])},
                                           lower=-Inf,upper=Inf)$value
     }
   }

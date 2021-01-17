@@ -432,6 +432,7 @@ quantile_helper <- function(this, p_vec, p_lower, p_upper, x_lower,
   }
   # Vectorized bisection search:
   max_steps <- 25
+  eps_quant <- 2e-4
   x_0 <- rep(-50,length(p_vec))
   x_1 <- rep(50,length(p_vec))
   f_0 <- rep(0,length(p_vec)) - p_vec
@@ -446,7 +447,7 @@ quantile_helper <- function(this, p_vec, p_lower, p_upper, x_lower,
     f_0 <- ifelse( mask_0, f_mid, f_0 )
     f_1 <- ifelse( mask_1, f_mid, f_1 )
     error_max <- max(abs(x_1 - x_0))
-    if (error_max <= 2e-4) {break}
+    if (error_max <= eps_quant) {break}
   }
   if (is.na(this$exp_weight)) {
     est <-
