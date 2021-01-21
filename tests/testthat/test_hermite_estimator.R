@@ -785,7 +785,7 @@ test_that("quantile estimation works as expected", {
   }
   quantiles_est <- hermite_est %>% quant(c(0.25, 0.5, 0.75))
   expect_equal(quantiles_est,
-               c(-0.6007680,  0.1386156,  1.1462069),
+               c(-0.6007680,  0.1386156,  1.1389581),
                tolerance = 1e-07)
   hermite_est <-
     hermite_estimator(N = 10,
@@ -796,13 +796,13 @@ test_that("quantile estimation works as expected", {
       hermite_est %>% update_sequential(test_observations[idx])
   }
   quantiles_est <- hermite_est %>% quant(c(0.25, 0.5, 0.75))
-  expect_equal(quantiles_est, c(-0.05973411, 0.35580892,  1.43488035), 
+  expect_equal(quantiles_est, c(-0.05973411, 0.35580892,  1.42817804), 
                tolerance = 1e-06)
   hermite_est <-
-    hermite_estimator(N = 30,
+    hermite_estimator(N = 20,
                       standardize = TRUE) %>% update_batch(c(1:4))
   quantiles_est <- hermite_est %>% quant(c(0.5))
-  expect_equal(quantiles_est,2.170796, 
+  expect_equal(quantiles_est,2.48709, 
                tolerance = 1e-02)
 })
 

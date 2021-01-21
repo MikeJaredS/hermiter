@@ -40,11 +40,11 @@ h_int_upper_zero_serialized <- hermite_int_upper(N=75,x=0,
                                                 hermite_function_matrix=h_k_mat)
 
 
-x_lower_serialized <- seq(-50,-5.1,by=0.1)
-x_lower_serialized  <- c(x_lower_serialized,seq(-5,-0.005,by=0.005))
-x_upper_serialized  <- seq(0,5,by=0.005)
-x_upper_serialized  <- c(x_upper_serialized, seq(5.1,50,by=0.1))
-x_full_domain_serialized   <- c(x_lower_serialized,x_upper_serialized)
+x_lower_serialized <- seq(-20,-5.1,by=0.1)
+x_lower_serialized <- c(x_lower_serialized,seq(-5,-0.01,by=0.01))
+x_upper_serialized <- seq(0,5,by=0.01)
+x_upper_serialized <- c(x_upper_serialized, seq(5.1,20,by=0.1))
+x_full_domain_serialized <- c(x_lower_serialized,x_upper_serialized)
 h_int_lower_serialized <- hermite_int_lower(N=75,x_lower_serialized 
                                  ,normalization_hermite = 
                                    h_norm_serialized)
@@ -260,11 +260,9 @@ weight_w_serialized <-
 
 save(h_norm_serialized,W_serialized,z_serialized,
      root_x_serialized,weight_w_serialized, 
-     h_int_lower_zero_serialized, 
+     h_int_lower_zero_serialized,
      h_int_upper_zero_serialized,
      h_int_lower_serialized, 
      h_int_upper_serialized,
-     x_lower_serialized,
-     x_upper_serialized,
      x_full_domain_serialized,
-     file = "sysdata.rda")
+     file = "sysdata.rda",compress=TRUE)
