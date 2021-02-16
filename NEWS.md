@@ -1,3 +1,9 @@
+# hermiter v2.0.3
+
+## Minor improvements and bug fixes
+
+* Minor update to test cases.
+
 # hermiter v2.0.2
 
 ## Breaking changes

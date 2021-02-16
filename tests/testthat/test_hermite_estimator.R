@@ -2,6 +2,10 @@ context("hermite_estimator_univar")
 library(hermiter)
 library(magrittr)
 
+get_eps <- function(){
+  return(1e-3)
+}
+
 test_that("hermite_estimator constructor returns correct class", {
   hermite_est <- hermite_estimator(N = 10, standardize = TRUE)
   expect_is(hermite_est, "hermite_estimator_univar")
@@ -144,16 +148,16 @@ test_that("batch updates of hermite_estimator work as expected", {
   hermite_est <- hermite_est %>% update_batch(test_observations)
   expect_equal(target_coeff_vec_standardized,
                hermite_est$coeff_vec,
-               tolerance = 1e-07)
+               tolerance = get_eps())
   expect_equal(mean(test_observations), 
-               hermite_est$running_mean,tolerance = 1e-06)
+               hermite_est$running_mean,tolerance = get_eps())
   expect_equal(sd(test_observations),sqrt(hermite_est$running_variance / 
-                                  (hermite_est$num_obs-1)),tolerance = 1e-06)
+                                  (hermite_est$num_obs-1)),tolerance = get_eps())
   hermite_est <- hermite_estimator(N = 10, standardize = FALSE)
   hermite_est <- hermite_est %>% update_batch(test_observations)
   expect_equal(target_coeff_vec_unstandardized,
                hermite_est$coeff_vec,
-               tolerance = 1e-07)
+               tolerance = get_eps())
 })
 
 test_that("sequential updates of hermite_estimator work as expected", {
@@ -224,7 +228,7 @@ test_that("sequential updates of hermite_estimator work as expected", {
   }
   expect_equal(target_coeff_vec_standardized,
                hermite_est$coeff_vec,
-               tolerance = 1e-07)
+               tolerance = get_eps())
   
   hermite_est <- hermite_estimator(N = 10, standardize = FALSE)
   for (idx in seq_along(test_observations)) {
@@ -233,7 +237,7 @@ test_that("sequential updates of hermite_estimator work as expected", {
   }
   expect_equal(target_coeff_vec_unstandardized,
                hermite_est$coeff_vec,
-               tolerance = 1e-07)
+               tolerance = get_eps())
 })
 
 test_that("sequential updates of exponentially weighted hermite_estimator 
@@ -309,7 +313,7 @@ test_that("sequential updates of exponentially weighted hermite_estimator
             }
             expect_equal(target_coeff_vec_standardized,
                          hermite_est$coeff_vec,
-                         tolerance = 1e-07)
+                         tolerance = get_eps())
             
             hermite_est <-
               hermite_estimator(N = 10,
@@ -321,7 +325,7 @@ test_that("sequential updates of exponentially weighted hermite_estimator
             }
             expect_equal(target_coeff_vec_unstandardized,
                          hermite_est$coeff_vec,
-                         tolerance = 1e-07)
+                         tolerance = get_eps())
           })
 
 test_that("hermite_estimators merge consistently", {
@@ -371,10 +375,10 @@ test_that("hermite_estimators merge consistently", {
     update_batch(test_observations[21:30])
   hermite_merged <-
     merge_hermite_univar(list(hermite_est_1, hermite_est_2, hermite_est_3))
-  expect_equal(hermite_est, hermite_merged, tolerance = 1e-07)
+  expect_equal(hermite_est, hermite_merged, tolerance = get_eps())
   hermite_merged <-
     merge_hermite(list(hermite_est_1, hermite_est_2, hermite_est_3))
-  expect_equal(hermite_est, hermite_merged, tolerance = 1e-07)
+  expect_equal(hermite_est, hermite_merged, tolerance = get_eps())
   hermite_est <-
     hermite_estimator(N = 10, standardize = TRUE) %>% 
     update_batch(test_observations)
@@ -402,10 +406,10 @@ test_that("hermite_estimators merge consistently", {
     merge_hermite(list(hermite_est_1, hermite_est_2, hermite_est_3))
   expect_equal(hermite_merged,hermite_merged_gen)
   expect_equal(hermite_est$running_mean, hermite_merged$running_mean, 
-               tolerance = 1e-06)
+               tolerance = get_eps())
   expect_equal(hermite_est$running_variance, hermite_merged$running_variance, 
-               tolerance = 1e-06)
-  expect_equal(hermite_merged$num_obs,30, tolerance = 1e-06)
+               tolerance = get_eps())
+  expect_equal(hermite_merged$num_obs,30, tolerance = get_eps())
   target_coeffs <-
     c(
       0.507692830456503,
@@ -421,11 +425,7 @@ test_that("hermite_estimators merge consistently", {
       -0.117430497748064
     )
   expect_equal(hermite_merged$coeff_vec, target_coeffs, 
-               tolerance = 1e-06)
-  expect_equal(hermite_merged$coeff_vec, hermite_est$coeff_vec, 
-               tolerance = 5e-02)
-  
-  
+               tolerance = get_eps())
   hermite_est <-
     hermite_estimator(N = 10, standardize = TRUE) %>% 
     update_batch(test_observations)
@@ -438,10 +438,10 @@ test_that("hermite_estimators merge consistently", {
   hermite_merged <-
     merge_pair(hermite_est_1, hermite_est_2)
   expect_equal(hermite_est$running_mean, hermite_merged$running_mean, 
-               tolerance = 1e-06)
+               tolerance = get_eps())
   expect_equal(hermite_est$running_variance, hermite_merged$running_variance, 
-               tolerance = 1e-06)
-  expect_equal(hermite_merged$num_obs,30, tolerance = 1e-06)
+               tolerance = get_eps())
+  expect_equal(hermite_merged$num_obs,30, tolerance = get_eps())
   target_coeffs <-
     c(
       0.507692794353622,
@@ -457,9 +457,7 @@ test_that("hermite_estimators merge consistently", {
       -0.127949647659276
     )
   expect_equal(hermite_merged$coeff_vec, target_coeffs, 
-               tolerance = 1e-06)
-  expect_equal(hermite_merged$coeff_vec, hermite_est$coeff_vec, 
-               tolerance = 5e-02)
+               tolerance = get_eps())
   hermite_est_1 <-
     hermite_estimator(N = 10, standardize = FALSE) %>% 
     update_batch(test_observations[1:10])
@@ -529,7 +527,7 @@ test_that("probability density estimation works as expected", {
       0.2005586,
       0.1451746
     )
-  expect_equal(pdf_vals, target_pdf_vals_unstandardized, tolerance = 1e-07)
+  expect_equal(pdf_vals, target_pdf_vals_unstandardized, tolerance = get_eps())
   
   hermite_est <-
     hermite_estimator(N = 10, standardize = TRUE) %>%
@@ -547,10 +545,10 @@ test_that("probability density estimation works as expected", {
       0.1576933,
       0.1306844
     )
-  expect_equal(pdf_vals, target_pdf_vals_standardized, tolerance = 1e-07)
+  expect_equal(pdf_vals, target_pdf_vals_standardized, tolerance = get_eps())
   
   pdf_vals <- hermite_est %>% dens(x, clipped=T)
-  expect_equal(pdf_vals, target_pdf_vals_standardized, tolerance = 1e-07)
+  expect_equal(pdf_vals, target_pdf_vals_standardized, tolerance = get_eps())
   
   hermite_est <-
     hermite_estimator(N = 10,
@@ -573,7 +571,7 @@ test_that("probability density estimation works as expected", {
       0.1983007,
       0.2352683
     )
-  expect_equal(pdf_vals, target_pdf_vals_unstandardized, tolerance = 1e-07)
+  expect_equal(pdf_vals, target_pdf_vals_unstandardized, tolerance = get_eps())
   
   hermite_est <-
     hermite_estimator(N = 10,
@@ -597,7 +595,7 @@ test_that("probability density estimation works as expected", {
       0.2352683
     )
   expect_equal(pdf_vals, target_pdf_vals_unstandardized_clipped,
-               tolerance = 1e-07)
+               tolerance = get_eps())
   
   hermite_est <-
     hermite_estimator(N = 10,
@@ -620,7 +618,7 @@ test_that("probability density estimation works as expected", {
       0.1247126,
       0.2253963
     )
-  expect_equal(pdf_vals, target_pdf_vals_standardized, tolerance = 1e-07)
+  expect_equal(pdf_vals, target_pdf_vals_standardized, tolerance = get_eps())
   hermite_est <-
     hermite_estimator(N = 10)
   pdf_vals <- hermite_est %>% dens(x)
@@ -673,14 +671,14 @@ test_that("cumulative distribution function estimation works as expected",
               upper = 0.5
             )$value
             cdf_est <- hermite_est %>% cum_prob(0.5)
-            expect_equal(cdf_est, 0.6549575, tolerance = 1e-07)
-            expect_equal(cdf_from_pdf, cdf_est, tolerance = 1e-07)
+            expect_equal(cdf_est, 0.6549575, tolerance = get_eps())
+            expect_equal(cdf_from_pdf, cdf_est, tolerance = get_eps())
             
             cdf_est <- hermite_est %>% cum_prob(0.5, clipped=TRUE)
-            expect_equal(cdf_est, 0.6549575, tolerance = 1e-07)
+            expect_equal(cdf_est, 0.6549575, tolerance = get_eps())
             
             cdf_est <- hermite_est %>% cum_prob(3, clipped=TRUE)
-            expect_equal(cdf_est, 1, tolerance = 1e-07)
+            expect_equal(cdf_est, 1, tolerance = get_eps())
             
             hermite_est <-
               hermite_estimator(N = 10, standardize = TRUE) %>%
@@ -693,8 +691,8 @@ test_that("cumulative distribution function estimation works as expected",
               upper = 0.5
             )$value
             cdf_est <- hermite_est %>% cum_prob(0.5)
-            expect_equal(cdf_est, 0.6013645, tolerance = 1e-07)
-            expect_equal(cdf_from_pdf, cdf_est, tolerance = 1e-07)
+            expect_equal(cdf_est, 0.6013645, tolerance = get_eps())
+            expect_equal(cdf_from_pdf, cdf_est, tolerance = get_eps())
             
             hermite_est <-
               hermite_estimator(N = 10,
@@ -712,8 +710,8 @@ test_that("cumulative distribution function estimation works as expected",
               upper = 0.5
             )$value
             cdf_est <- hermite_est %>% cum_prob(0.5)
-            expect_equal(cdf_est, 0.6132811, tolerance = 1e-07)
-            expect_equal(cdf_from_pdf, cdf_est, tolerance = 1e-07)
+            expect_equal(cdf_est, 0.6132811, tolerance = get_eps())
+            expect_equal(cdf_from_pdf, cdf_est, tolerance = get_eps())
             
             hermite_est <-
               hermite_estimator(N = 10,
@@ -731,8 +729,8 @@ test_that("cumulative distribution function estimation works as expected",
               upper = 0.5
             )$value
             cdf_est <- hermite_est %>% cum_prob(0.5)
-            expect_equal(cdf_est, 0.4344541, tolerance = 1e-07)
-            expect_equal(cdf_from_pdf, cdf_est, tolerance = 1e-07)
+            expect_equal(cdf_est, 0.4344541, tolerance = get_eps())
+            expect_equal(cdf_from_pdf, cdf_est, tolerance = get_eps())
             hermite_est <-
               hermite_estimator(N = 10)
             expect_equal(hermite_est %>% cum_prob(0.5),NA)
@@ -777,7 +775,7 @@ test_that("quantile estimation works as expected", {
   quantiles_est <- hermite_est %>% quant(c(0.25, 0.5, 0.75))
   expect_equal(quantiles_est,
                c(-1.31079556,  0.04139707,  0.90912314),
-               tolerance = 1e-07)
+               tolerance = get_eps())
   hermite_est <- hermite_estimator(N = 10, standardize = TRUE)
   for (idx in seq_along(test_observations)) {
     hermite_est <-
@@ -786,7 +784,7 @@ test_that("quantile estimation works as expected", {
   quantiles_est <- hermite_est %>% quant(c(0.25, 0.5, 0.75))
   expect_equal(quantiles_est,
                c(-0.5984749,  0.1403919,  1.1469321),
-               tolerance = 1e-07)
+               tolerance = get_eps())
   hermite_est <-
     hermite_estimator(N = 10,
                       standardize = TRUE,
@@ -797,13 +795,13 @@ test_that("quantile estimation works as expected", {
   }
   quantiles_est <- hermite_est %>% quant(c(0.25, 0.5, 0.75))
   expect_equal(quantiles_est, c(-0.05505796,  0.36015454,  1.43755939), 
-               tolerance = 1e-06)
+               tolerance = get_eps())
   hermite_est <-
     hermite_estimator(N = 30,
                       standardize = TRUE) %>% update_batch(c(1:4))
   quantiles_est <- hermite_est %>% quant(c(0.5))
   expect_equal(quantiles_est,2.5, 
-               tolerance = 1e-02)
+               tolerance = get_eps())
 })
 
 test_that("convenience and utility functions work as expected", {
@@ -812,14 +810,14 @@ test_that("convenience and utility functions work as expected", {
     c(
       1
     )
-  expect_equal(hermite_poly_vals,target_values,tolerance=1e-6)
+  expect_equal(hermite_poly_vals,target_values,tolerance=get_eps())
   hermite_poly_vals <- as.vector(hermite_polynomial_N(N=1,x=c(2)))
   target_values <-
     c(
       1,
       4
     )
-  expect_equal(hermite_poly_vals,target_values,tolerance=1e-6)
+  expect_equal(hermite_poly_vals,target_values,tolerance=get_eps())
   hermite_poly_vals <- as.vector(hermite_polynomial_N(N=6,x=c(2)))
   target_values <-
     c(
@@ -831,20 +829,20 @@ test_that("convenience and utility functions work as expected", {
       -16,
       -824
     )
-  expect_equal(hermite_poly_vals,target_values,tolerance=1e-6)
+  expect_equal(hermite_poly_vals,target_values,tolerance=get_eps())
   hermite_function_vals <- as.vector(hermite_function_N(N=0,x=c(2)))
   target_values <-
     c(
       0.101653788306418
     )
-  expect_equal(hermite_function_vals,target_values,tolerance=1e-6)
+  expect_equal(hermite_function_vals,target_values,tolerance=get_eps())
   hermite_function_vals <- as.vector(hermite_function_N(N=1,x=c(2)))
   target_values <-
     c(
       0.101653788306418,
       0.287520332179079
     )
-  expect_equal(hermite_function_vals,target_values,tolerance=1e-6)
+  expect_equal(hermite_function_vals,target_values,tolerance=get_eps())
   hermite_function_vals <- as.vector(hermite_function_N(N=6,x=c(2)))
   target_values <-
     c(
@@ -856,41 +854,43 @@ test_that("convenience and utility functions work as expected", {
       -0.0262468952793101,
       -0.390206540413716
     )
-  expect_equal(hermite_function_vals,target_values,tolerance=1e-6)
+  expect_equal(hermite_function_vals,target_values,tolerance=get_eps())
   target_integral <- stats::integrate(f=function(t)
     {hermite_function_N(N=6,t)[7,]}, lower=-Inf, upper=5)$value
   hermite_int_lower_val <- hermite_int_lower(N=6,x=5)[7]
-  expect_equal(target_integral,hermite_int_lower_val,tolerance=1e-4)
+  expect_equal(target_integral,hermite_int_lower_val,tolerance=get_eps())
   target_integral <- stats::integrate(f=function(t){
     hermite_function_N(N=6,t)[7,]}, lower=2, upper=Inf)$value
   hermite_int_upper_val <- hermite_int_upper(N=6,x=2)[7]
-  expect_equal(target_integral,hermite_int_upper_val,tolerance=1e-4)
+  expect_equal(target_integral,hermite_int_upper_val,tolerance=get_eps())
   target_integral <- stats::integrate(f=function(t){
     hermite_function_N(N=6,t)[7,]}, lower=-Inf, upper=Inf)$value
   hermite_int_full <- hermite_int_full(N=6)[7]
-  expect_equal(target_integral,hermite_int_full,tolerance=1e-4)
+  expect_equal(target_integral,hermite_int_full,tolerance=get_eps())
   target_integral <- stats::integrate(function(x){x*exp(-x^2)}, 
                                       lower=-Inf,upper=Inf)$value
   quad_val <- gauss_hermite_quad_100(function(x){x})
-  expect_equal(target_integral,quad_val,tolerance=1e-5)
+  expect_equal(target_integral,quad_val,tolerance=get_eps())
   hermite_function_sum_vals <- as.vector(
     rowSums(hermite_function_N(N=6,x=c(1))))
   expect_equal(hermite_function_sum_vals,
-                         hermite_function_sum_N(N=6,x=c(1)),tol=1e-7)
+                         hermite_function_sum_N(N=6,x=c(1)), 
+               tolerance=get_eps())
   hermite_function_sum_vals <- as.vector(
     rowSums(hermite_function_N(N=6,x=c(1,2))))
   expect_equal(hermite_function_sum_vals,
-               hermite_function_sum_N(N=6,x=c(1,2)),tol=1e-7)
+               hermite_function_sum_N(N=6,x=c(1,2)),tolerance=get_eps())
   hermite_function_sum_vals <- as.vector(
     rowSums(hermite_function_N(N=6,x=c(1,2,3))))
   expect_equal(hermite_function_sum_vals,
-               hermite_function_sum_N(N=6,x=c(1,2,3)),tol=1e-7)
+               hermite_function_sum_N(N=6,x=c(1,2,3)),tolerance=get_eps())
   hermite_function_sum_vals <- as.vector(
     rowSums(hermite_function_N(N=6,x=c(1,2,3,4))))
   expect_equal(hermite_function_sum_vals,
-               hermite_function_sum_N(N=6,x=c(1,2,3,4)),tol=1e-7)
+               hermite_function_sum_N(N=6,x=c(1,2,3,4)),tolerance=get_eps())
   hermite_function_sum_vals <- as.vector(
     rowSums(hermite_function_N(N=6,x=seq(-4,4,by=0.5))))
   expect_equal(hermite_function_sum_vals,
-               hermite_function_sum_N(N=6,x=seq(-4,4,by=0.5)),tol=1e-7)
+               hermite_function_sum_N(N=6,x=seq(-4,4,by=0.5)), 
+               tolerance=get_eps())
 })
