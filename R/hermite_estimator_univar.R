@@ -556,6 +556,11 @@ quant.hermite_estimator_univar <- function(this, p) {
 }
 
 spearmans.hermite_estimator_univar <- function(this, clipped) {
-  stop("Spearman's correlation estimation is not defined for the univariate 
+  stop("Spearman's Rho correlation estimation is not defined for the univariate 
+       Hermite estimator")
+}
+
+kendall.hermite_estimator_univar <- function(this, clipped) {
+  stop("Kendall Tau correlation estimation is not defined for the univariate 
        Hermite estimator")
 }

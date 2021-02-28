@@ -587,6 +587,37 @@ spearmans.hermite_estimator_bivar <- function(this, clipped = FALSE)
   return(as.numeric(result))
 }
 
+#' Estimates the Kendall rank correlation coefficient
+#'
+#' This method calculates the Kendall rank correlation coefficient value
+#' using the hermite_estimator_bivar object (this).
+#'
+#' The object must be updated with observations prior to the use of this method.
+#'
+#' @param this A hermite_estimator_bivar object.
+#' @param clipped A boolean value. Indicates whether to clip the Kendall rank 
+#' correlation estimates to lie between -1 and 1.
+#' @return A numeric value.
+#' @export
+#' @examples
+#' hermite_est <- hermite_estimator_bivar(N = 10, standardize = TRUE)
+#' hermite_est <- update_batch(hermite_est, matrix(rnorm(30*2), nrow=30, 
+#' ncol=2, byrow = TRUE))
+#' kendall_est <- kendall(hermite_est)
+kendall.hermite_estimator_bivar <- function(this, clipped = FALSE)
+{
+  if (this$num_obs < 2) {
+    return(NA)
+  }
+  W_transpose <- t(this$W)
+  result <- 4*sum(diag(W_transpose%*%t(this$coeff_mat_bivar) %*% 
+                         this$W%*%this$coeff_mat_bivar)) - 1
+  if (clipped == TRUE) {
+    result <- pmin(pmax(result, -1), 1)
+  }
+  return(as.numeric(result))
+}
+
 quant.hermite_estimator_bivar <- function(this, p) {
   stop("Quantile estimation is not defined for the bivariate Hermite 
        estimator")

@@ -298,3 +298,27 @@ spearmans <- function(this, clipped = FALSE)
 {
   UseMethod("spearmans",this)
 }
+
+#' Estimates the Kendall rank correlation coefficient
+#'
+#' This method calculates the Kendall rank correlation coefficient value. It 
+#' is only applicable to the bivariate Hermite estimator i.e. est_type = 
+#' "bivariate".
+#'
+#' The object must be updated with observations prior to the use of this method.
+#'
+#' @param this A hermite_estimator_bivar object.
+#' @param clipped A boolean value. Indicates whether to clip the Kendall rank 
+#' correlation estimates to lie between -1 and 1.
+#' @return A numeric value.
+#' @export
+#' @examples
+#' hermite_est <- hermite_estimator(N = 10, standardize = TRUE,
+#' est_type="bivariate")
+#' hermite_est <- update_batch(hermite_est, matrix(rnorm(30*2), nrow=30, 
+#' ncol=2, byrow = TRUE))
+#' kendall_est <- kendall(hermite_est)
+kendall <- function(this, clipped = FALSE)
+{
+  UseMethod("kendall",this)
+}
