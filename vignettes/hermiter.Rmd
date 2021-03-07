@@ -330,7 +330,7 @@ observations_mat <- mvtnorm::rmvnorm(n=num_obs,mean=rep(0,2),sigma = matrix(c(si
                                                       nrow=2,ncol=2, 
                                                       byrow = TRUE))
 
-hermite_est <- hermite_estimator(N = 20, standardize = TRUE, 
+hermite_est <- hermite_estimator(N = 30, standardize = TRUE, 
                                  est_type = "bivariate") 
 hermite_est <-  update_batch(hermite_est,observations_mat)
 
@@ -351,7 +351,7 @@ rho <- 0.5
 observations_mat <- mvtnorm::rmvnorm(n=num_obs,mean=rep(0,2),sigma = matrix(c(sig_x^2,rho*sig_x*sig_y,rho*sig_x*sig_y,sig_y^2), nrow=2, ncol=2, 
                                                                 byrow = TRUE))
 
-hermite_est <- hermite_estimator(N = 20, standardize = TRUE, 
+hermite_est <- hermite_estimator(N = 30, standardize = TRUE, 
                                  est_type = "bivariate") 
 hermite_est <-  hermite_est %>% update_batch(observations_mat)
 
@@ -360,6 +360,7 @@ x_grid <- as.matrix(expand.grid(X=vals, Y=vals))
 pdf_est <- hermite_est %>% dens(x_grid, clipped = TRUE)
 cdf_est <- hermite_est %>% cum_prob(x_grid, clipped = TRUE)
 spear_est <- hermite_est %>% spearmans()
+kendall_est <- hermite_est %>% kendall()
 ```
 
 ```{r}
@@ -373,6 +374,7 @@ for (row_idx in seq_len(nrow(x_grid))) {
 }
 
 actual_spearmans <- cor(observations_mat,method = "spearman")[1,2]
+actual_kendall <- cor(observations_mat,method = "kendall")[1,2]
 
 df_pdf_cdf <- data.frame(x_grid,pdf_est,cdf_est,actual_pdf,actual_cdf)
 ```
@@ -421,6 +423,13 @@ Spearman's correlation coefficient results:
 | ----------- | ----------- |
 | Actual      | `r round(actual_spearmans,3)`       |
 | Estimated   | `r round(spear_est,3)`        |
+
+Kendall correlation coefficient results:
+
+|             | Kendall Correlation |
+| ----------- | ----------- |
+| Actual      | `r round(actual_kendall,3)`       |
+| Estimated   | `r round(kendall_est,3)`        |
 
 
 # Applying to univariate grouped data (batch setting)

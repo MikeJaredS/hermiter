@@ -25,10 +25,10 @@
 #' hermite_estimator_bivar. 
 #' @export
 #' @examples
-#' hermite_est <- hermite_estimator(N = 10, standardize = TRUE,
+#' hermite_est <- hermite_estimator(N = 30, standardize = TRUE,
 #' est_type="univariate")
 hermite_estimator <-
-  function(N = 10,
+  function(N = 30,
            standardize = FALSE,
            exp_weight_lambda = NA, est_type = "univariate") {
     if (!is.numeric(N)) {
@@ -271,7 +271,7 @@ cum_prob <- function(this, x, clipped) {
 #' est_type="univariate")
 #' hermite_est <- update_batch(hermite_est, rnorm(30))
 #' quant_est <- quant(hermite_est, c(0.25, 0.5, 0.75))
-quant <- function(this, p) {
+quant <- function(this, p, algorithm) {
   UseMethod("quant", this)
 }
 

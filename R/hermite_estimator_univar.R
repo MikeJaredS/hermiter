@@ -23,9 +23,9 @@
 #' density function, distribution function and quantile function estimation.
 #' @export
 #' @examples
-#' hermite_est <- hermite_estimator_univar(N = 10, standardize = TRUE)
+#' hermite_est <- hermite_estimator_univar(N = 30, standardize = TRUE)
 hermite_estimator_univar <-
-  function(N = 10,
+  function(N = 30,
            standardize = FALSE,
            exp_weight_lambda = NA) {
     if (!is.numeric(N)) {
@@ -398,12 +398,12 @@ cum_prob.hermite_estimator_univar <- function(this, x, clipped = FALSE) {
   return(as.vector(cdf_val))
 }
 
-# Estimates the quantile at a single probability value
+# Estimates the quantile at a vector of probability values using a vectorized
+# implementation of the bisection search root finding algorithm.
 #
 # This helper method is intended for internal use by the 
 # hermite_estimator_univar class.
-quantile_helper <- function(this, p_vec, p_lower, p_upper, x_lower,
-                            x_upper) {
+quantile_helper_bisection <- function(this, p_vec) {
   f_est <- function(x,p) {
     lower_idx <- which(x < x_lower)
     upper_idx <- which(x > x_upper)
@@ -434,6 +434,45 @@ quantile_helper <- function(this, p_vec, p_lower, p_upper, x_lower,
     }
     return(res)
   }
+  p_lower <- as.numeric(crossprod(this$coeff_vec,
+                              h_int_lower_zero_serialized[1:(this$N_param+1)]))
+  p_upper <- 1-as.numeric(crossprod(this$coeff_vec,
+                              h_int_upper_zero_serialized[1:(this$N_param+1)]))
+  if (is.na(p_lower) | is.na(p_upper)){
+    return(rep(NA, length(p)))
+  }
+  if (p_upper < p_lower){
+    x_lower <- tryCatch({
+      stats::uniroot(
+        f = function(x) {
+          crossprod(this$coeff_vec,hermite_int_lower(this$N_param,x,
+          normalization_hermite = this$normalization_hermite_vec)) - p_upper
+        },
+        interval = c(-100, 100)
+      )$root
+    },
+    error = function(e) {NA})
+    x_upper <- tryCatch({
+      stats::uniroot(
+        f = function(x) {
+          1-as.numeric(crossprod(this$coeff_vec,
+                         hermite_int_upper(this$N_param,x,
+          normalization_hermite = this$normalization_hermite_vec))) - p_lower
+        },
+        interval = c(-100, 100)
+      )$root
+    },
+    error = function(e) {NA})
+  } else if (p_upper > p_lower) {
+    x_lower <- -1e-6
+    x_upper <- 1e-6
+  } else if (p_upper == p_lower){
+    x_lower <- 0
+    x_upper <- 0
+  }
+  if (is.na(x_lower) | is.na(x_upper)){
+    return(rep(NA, length(p)))
+  }
   # Vectorized bisection search:
   max_steps <- 25
   eps_quant <- 2e-4
@@ -462,6 +501,29 @@ quantile_helper <- function(this, p_vec, p_lower, p_upper, x_lower,
   return(est)
 }
 
+# Estimates the quantile at a vector of probability values using an 
+# interpolation approximation.
+#
+# This helper method is intended for internal use by the 
+# hermite_estimator_univar class.
+quantile_helper_interval <- function(this,p_vec){
+  result <- rep(NA,length(p_vec))
+  coeffs <- as.numeric(this$coeff_vec)
+  p_lower_vals <- crossprod(this$h_int_lower_serialized, coeffs)
+  p_upper_vals <- 1-crossprod(this$h_int_upper_serialized, coeffs)
+  p_all_vals <- cummax(c(p_lower_vals,p_upper_vals))
+  res <- findInterval(p_vec,p_all_vals)
+  result <- x_full_domain_serialized[res]
+  if (is.na(this$exp_weight)) {
+    result <-
+      result * sqrt(this$running_variance / (this$num_obs - 1)) +
+      this$running_mean
+  } else {
+    result <- result * sqrt(this$running_variance) + this$running_mean
+  }
+  return(result)
+}
+
 #' Estimates the quantiles at a vector of probability values
 #' 
 #' This method utilizes the estimator (13) in paper Stephanou, Michael, 
@@ -479,7 +541,7 @@ quantile_helper <- function(this, p_vec, p_lower, p_upper, x_lower,
 #' hermite_est <- hermite_estimator_univar(N = 10, standardize = TRUE)
 #' hermite_est <- update_batch(hermite_est, rnorm(30))
 #' quant_est <- quant(hermite_est, c(0.25, 0.5, 0.75))
-quant.hermite_estimator_univar <- function(this, p) {
+quant.hermite_estimator_univar <- function(this, p, algorithm="interpolate") {
   if (!is.numeric(p)) {
     stop("p must be numeric.")
   }
@@ -492,65 +554,18 @@ quant.hermite_estimator_univar <- function(this, p) {
   if (this$standardize_obs != TRUE) {
     stop("Quantile estimation requires standardization to be true.")
   }
-  if (this$num_obs < 2) {
-    return(rep(NA, length(p)))
+  if (!(algorithm=="interpolate" | algorithm=="bisection") ) {
+    stop("Algorithm must be either 'interpolate' or 'bisection'.")
   }
-  # p_lower <- as.numeric(crossprod(this$coeff_vec, 
-  #                             h_int_lower_zero_serialized[1:(this$N_param+1)]))
-  # p_upper <- 1-as.numeric(crossprod(this$coeff_vec, 
-  #                             h_int_upper_zero_serialized[1:(this$N_param+1)]))
-  # if (is.na(p_lower) | is.na(p_upper)){
-  #   return(rep(NA, length(p)))
-  # }
-  # if (p_upper < p_lower){
-  #   x_lower <- tryCatch({
-  #     stats::uniroot(
-  #       f = function(x) {
-  #         crossprod(this$coeff_vec,hermite_int_lower(this$N_param,x,
-  #         normalization_hermite = this$normalization_hermite_vec)) - p_upper
-  #       },
-  #       interval = c(-100, 100)
-  #     )$root
-  #   },
-  #   error = function(e) {NA})
-  #   x_upper <- tryCatch({
-  #     stats::uniroot(
-  #       f = function(x) {
-  #         1-as.numeric(crossprod(this$coeff_vec, 
-  #                        hermite_int_upper(this$N_param,x,
-  #         normalization_hermite = this$normalization_hermite_vec))) - p_lower
-  #       },
-  #       interval = c(-100, 100)
-  #     )$root
-  #   },
-  #   error = function(e) {NA})
-  # } else if (p_upper > p_lower) {
-  #   x_lower <- -1e-6
-  #   x_upper <- 1e-6
-  # } else if (p_upper == p_lower){
-  #   x_lower <- 0
-  #   x_upper <- 0
-  # }
-  # if (is.na(x_lower) | is.na(x_upper)){
-  #   return(rep(NA, length(p)))
-  # }
-  # result <- quantile_helper(this, p, p_lower, p_upper, x_lower,
-  #                           x_upper)
-  result <- rep(NA,length(p))
-  coeffs <- as.numeric(this$coeff_vec)
-  p_lower_vals <- crossprod(this$h_int_lower_serialized, coeffs)
-  p_upper_vals <- 1-crossprod(this$h_int_upper_serialized, coeffs)
-  # p_lower_vals <- arma_mm(h_int_lower_t,coeffs)
-  # p_upper_vals <- 1-arma_mm(h_int_upper_t,coeffs)
-  p_all_vals <- cummax(c(p_lower_vals,p_upper_vals))
-  res <- findInterval(p,p_all_vals)
-  result <- x_full_domain_serialized[res]
-  if (is.na(this$exp_weight)) {
-    result <-
-      result * sqrt(this$running_variance / (this$num_obs - 1)) +
-      this$running_mean
-  } else {
-    result <- result * sqrt(this$running_variance) + this$running_mean
+  result <- rep(NA, length(p))
+  if (this$num_obs < 2) {
+    return(result)
+  }
+  if (algorithm=="interpolate"){
+    result <- quantile_helper_interval(this,p)
+  }
+  if (algorithm=="bisection"){
+    result <- quantile_helper_bisection(this,p)
   }
   return(result)
 }

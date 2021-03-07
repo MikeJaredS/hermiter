@@ -26,8 +26,8 @@
 #' rank correlation estimation.
 #' @export
 #' @examples
-#' hermite_est <- hermite_estimator_bivar(N = 10, standardize = TRUE)
-hermite_estimator_bivar <- function(N = 10, standardize=FALSE, 
+#' hermite_est <- hermite_estimator_bivar(N = 30, standardize = TRUE)
+hermite_estimator_bivar <- function(N = 30, standardize=FALSE, 
                                     exp_weight_lambda=NA)
 {
   if (!is.numeric(N)) {
@@ -618,7 +618,7 @@ kendall.hermite_estimator_bivar <- function(this, clipped = FALSE)
   return(as.numeric(result))
 }
 
-quant.hermite_estimator_bivar <- function(this, p) {
+quant.hermite_estimator_bivar <- function(this, p, algorithm) {
   stop("Quantile estimation is not defined for the bivariate Hermite 
        estimator")
 }
