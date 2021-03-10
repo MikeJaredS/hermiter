@@ -27,7 +27,7 @@
 #' @export
 #' @examples
 #' hermite_est <- hermite_estimator_bivar(N = 30, standardize = TRUE)
-hermite_estimator_bivar <- function(N = 30, standardize=FALSE, 
+hermite_estimator_bivar <- function(N = 30, standardize=TRUE, 
                                     exp_weight_lambda=NA)
 {
   if (!is.numeric(N)) {
@@ -616,6 +616,27 @@ kendall.hermite_estimator_bivar <- function(this, clipped = FALSE)
     result <- pmin(pmax(result, -1), 1)
   }
   return(as.numeric(result))
+}
+
+print.hermite_estimator_bivar <- function(this) {
+  describe_estimator(this,"bivariate")
+}
+
+summary.hermite_estimator_bivar <- function(this, 
+                              digits = max(3, getOption("digits") - 3)) {
+  describe_estimator(this,"bivariate")
+  if (this$num_obs > 2){
+    running_std <- calculate_running_std(this)
+    cat("\n")
+    cat(paste0("Mean x = ",round(this$running_mean_x,digits), "\n"))
+    cat(paste0("Mean y = ",round(this$running_mean_y,digits), "\n"))
+    cat(paste0("Standard Deviation x = ", 
+               round(running_std[1],digits), "\n"))
+    cat(paste0("Standard Deviation y = ", 
+               round(running_std[2],digits), "\n"))
+    cat(paste0("Spearman's Rho = ",round(spearmans(this),digits), "\n"))
+    cat(paste0("Kendall Tau = ",round(kendall(this),digits), "\n"))
+  }
 }
 
 quant.hermite_estimator_bivar <- function(this, p, algorithm) {

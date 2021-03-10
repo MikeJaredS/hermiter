@@ -29,7 +29,7 @@
 #' est_type="univariate")
 hermite_estimator <-
   function(N = 30,
-           standardize = FALSE,
+           standardize = TRUE,
            exp_weight_lambda = NA, est_type = "univariate") {
     if (!is.numeric(N)) {
       stop("N must be numeric.")
@@ -321,4 +321,22 @@ spearmans <- function(this, clipped = FALSE)
 kendall <- function(this, clipped = FALSE)
 {
   UseMethod("kendall",this)
+}
+
+#' Internal helper function for print methods.
+describe_estimator <- function(this, est_type){
+  if (est_type == "univariate") {
+    cat("Univariate Hermite Estimator:\n")
+  } else {
+    cat("Bivariate Hermite Estimator:\n")
+  }
+  cat(paste0("N = ",this$N_param,"\n"))
+  cat(paste0("Standardize observations = ",this$standardize_obs,"\n"))
+  if (!is.na(this$exp_weight)){
+    cat(paste0("Exponential weighting for coefficents = TRUE, lambda = ", 
+               this$exp_weight,"\n"))
+  } else {
+    cat(paste0("Exponential weighting for coefficents = FALSE","\n"))
+  }
+  cat(paste0("Number of observations = ",this$num_obs,"\n"))
 }

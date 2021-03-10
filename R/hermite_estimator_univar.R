@@ -26,7 +26,7 @@
 #' hermite_est <- hermite_estimator_univar(N = 30, standardize = TRUE)
 hermite_estimator_univar <-
   function(N = 30,
-           standardize = FALSE,
+           standardize = TRUE,
            exp_weight_lambda = NA) {
     if (!is.numeric(N)) {
       stop("N must be numeric.")
@@ -568,6 +568,23 @@ quant.hermite_estimator_univar <- function(this, p, algorithm="interpolate") {
     result <- quantile_helper_bisection(this,p)
   }
   return(result)
+}
+
+print.hermite_estimator_univar <- function(this) {
+  describe_estimator(this,"univariate")
+}
+
+summary.hermite_estimator_univar <- function(this, 
+                              digits = max(3, getOption("digits") - 3)) {
+  describe_estimator(this,"univariate")
+  if (this$num_obs > 2){
+    cat("\n")
+    cat(paste0("Mean = ",round(this$running_mean,digits), "\n"))
+    cat(paste0("Standard Deviation = ", 
+               round(calculate_running_std(this),digits), "\n"))
+    cat(paste0("Estimated Quantiles: ", 
+               round(quant(this,p=c(0.25, 0.5, 0.75)),digits), "\n"))
+  }
 }
 
 spearmans.hermite_estimator_univar <- function(this, clipped) {
