@@ -4,7 +4,7 @@
 \alias{hermite_estimator_univar}
 \title{A class to sequentially estimate univariate pdfs, cdfs and quantile functions}
 \usage{
-hermite_estimator_univar(N = 10, standardize = FALSE, exp_weight_lambda = NA)
+hermite_estimator_univar(N = 30, standardize = TRUE, exp_weight_lambda = NA)
 }
 \arguments{
 \item{N}{An integer between 0 and 75. The Hermite series based estimator
@@ -34,7 +34,7 @@ massive or distributed data sets. Indeed, estimators constructed on different
 subsets of a distributed data set can be consistently merged.
 }
 \examples{
-hermite_est <- hermite_estimator_univar(N = 10, standardize = TRUE)
+hermite_est <- hermite_estimator_univar(N = 30, standardize = TRUE)
 }
 \author{
 Michael Stephanou <michael.stephanou@gmail.com>

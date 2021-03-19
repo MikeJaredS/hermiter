@@ -64,8 +64,6 @@ hermite_estimator_bivar <- function(N = 30, standardize=TRUE,
     z=c()
   )
   this$normalization_hermite_vec <- h_norm_serialized[1:(this$N_param+1)]
-  this$W <- W_serialized[1:(this$N_param+1),1:(this$N_param+1)]
-  this$z <- z_serialized[1:(this$N_param+1)]
   class(this) <- c("hermite_estimator_bivar", "list")
   return(this)
 }
@@ -574,13 +572,15 @@ spearmans.hermite_estimator_bivar <- function(this, clipped = FALSE)
   if (this$num_obs < 2) {
     return(NA)
   }
-  W_transpose <- t(this$W)
+  W <- W_serialized[1:(this$N_param+1),1:(this$N_param+1)]
+  z <- z_serialized[1:(this$N_param+1)]
+  W_transpose <- t(W)
   result <- 12*(t(this$coeff_vec_x) %*% W_transpose) %*% 
-    this$coeff_mat_bivar %*% (this$W %*% this$coeff_vec_y) +
+    this$coeff_mat_bivar %*% (W %*% this$coeff_vec_y) +
     -6 * (t(this$coeff_vec_x) %*% W_transpose) %*% (this$coeff_mat_bivar %*% 
-                                                      this$z) +
-    -6 * (t(this$z)%*% this$coeff_mat_bivar) %*% (this$W %*% this$coeff_vec_y)+
-    3 * t(this$z) %*% (this$coeff_mat_bivar%*%this$z)
+                                                      z) +
+    -6 * (t(z)%*% this$coeff_mat_bivar) %*% (W %*% this$coeff_vec_y)+
+    3 * t(z) %*% (this$coeff_mat_bivar%*%z)
   if (clipped == TRUE) {
     result <- pmin(pmax(result, -1), 1)
   }
@@ -609,19 +609,44 @@ kendall.hermite_estimator_bivar <- function(this, clipped = FALSE)
   if (this$num_obs < 2) {
     return(NA)
   }
-  W_transpose <- t(this$W)
+  W <- W_serialized[1:(this$N_param+1),1:(this$N_param+1)]
+  W_transpose <- t(W)
   result <- 4*sum(diag(W_transpose%*%t(this$coeff_mat_bivar) %*% 
-                         this$W%*%this$coeff_mat_bivar)) - 1
+                         W%*%this$coeff_mat_bivar)) - 1
   if (clipped == TRUE) {
     result <- pmin(pmax(result, -1), 1)
   }
   return(as.numeric(result))
 }
 
+#' Prints bivariate hermite_estimator object.
+#' 
+#'
+#' @param this A hermite_estimator_bivar object.
+#' @export
+#' @examples
+#' hermite_est <- hermite_estimator_bivar(N = 10, standardize = TRUE)
+#' print(hermite_est)
 print.hermite_estimator_bivar <- function(this) {
   describe_estimator(this,"bivariate")
 }
 
+#' Summarizes bivariate hermite_estimator object.
+#' 
+#' Outputs key parameters of a bivariate hermite_estimator object along with
+#' estimates of the mean and standard deviation of the first and second 
+#' dimensions of the bivariate data that the object has been updated with.
+#' Also outputs the Spearman's Rho and Kendall Tau of the bivariate data that 
+#' the object has been updated with.
+#'
+#' @param this A hermite_estimator_bivar object.
+#' @param digits A numeric value. Number of digits to round to.
+#' @export
+#' @examples
+#' hermite_est <- hermite_estimator_bivar(N = 10, standardize = TRUE)
+#' hermite_est <- update_batch(hermite_est, matrix(rnorm(30*2), nrow=30, 
+#' ncol=2, byrow = TRUE))
+#' summary(hermite_est)
 summary.hermite_estimator_bivar <- function(this, 
                               digits = max(3, getOption("digits") - 3)) {
   describe_estimator(this,"bivariate")

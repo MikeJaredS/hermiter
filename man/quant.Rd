@@ -4,7 +4,7 @@
 \alias{quant}
 \title{Estimates the quantiles at a vector of probability values}
 \usage{
-quant(this, p)
+quant(this, p, algorithm)
 }
 \arguments{
 \item{this}{A hermite_estimator_univar object.}

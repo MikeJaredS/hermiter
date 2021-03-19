@@ -439,7 +439,7 @@ quantile_helper_bisection <- function(this, p_vec) {
   p_upper <- 1-as.numeric(crossprod(this$coeff_vec,
                               h_int_upper_zero_serialized[1:(this$N_param+1)]))
   if (is.na(p_lower) | is.na(p_upper)){
-    return(rep(NA, length(p)))
+    return(rep(NA, length(p_vec)))
   }
   if (p_upper < p_lower){
     x_lower <- tryCatch({
@@ -471,7 +471,7 @@ quantile_helper_bisection <- function(this, p_vec) {
     x_upper <- 0
   }
   if (is.na(x_lower) | is.na(x_upper)){
-    return(rep(NA, length(p)))
+    return(rep(NA, length(p_vec)))
   }
   # Vectorized bisection search:
   max_steps <- 25
@@ -570,20 +570,47 @@ quant.hermite_estimator_univar <- function(this, p, algorithm="interpolate") {
   return(result)
 }
 
+#' Prints univariate hermite_estimator object.
+#' 
+#'
+#' @param this A hermite_estimator_univar object.
+#' @export
+#' @examples
+#' hermite_est <- hermite_estimator_univar(N = 10, standardize = TRUE)
+#' print(hermite_est)
 print.hermite_estimator_univar <- function(this) {
   describe_estimator(this,"univariate")
 }
 
+#' Summarizes univariate hermite_estimator object.
+#' 
+#' Outputs key parameters of a univariate hermite_estimator object along with
+#' estimates of the mean, standard deviation and deciles of the data that
+#' the object has been updated with.
+#'
+#' @param this A hermite_estimator_univar object.
+#' @param digits A numeric value. Number of digits to round to.
+#' @export
+#' @examples
+#' hermite_est <- hermite_estimator_univar(N = 10, standardize = TRUE)
+#' hermite_est <- update_batch(hermite_est, rnorm(30))
+#' summary(hermite_est)
 summary.hermite_estimator_univar <- function(this, 
                               digits = max(3, getOption("digits") - 3)) {
   describe_estimator(this,"univariate")
   if (this$num_obs > 2){
     cat("\n")
     cat(paste0("Mean = ",round(this$running_mean,digits), "\n"))
-    cat(paste0("Standard Deviation = ", 
+    cat(paste0("Standard Deviation = ",
                round(calculate_running_std(this),digits), "\n"))
-    cat(paste0("Estimated Quantiles: ", 
-               round(quant(this,p=c(0.25, 0.5, 0.75)),digits), "\n"))
+    cat("Estimated Quantiles:\n")
+    cumulative_probs <- seq(10,90,10)
+    cum_probs_size <- length(cumulative_probs)
+    quantile_values <- matrix(round(quant(this,p=cumulative_probs/100),digits),
+                              nrow = 1, ncol = cum_probs_size, byrow = TRUE)
+    colnames(quantile_values) <- paste0(cumulative_probs ,"%")
+    rownames(quantile_values) <- ""
+    print(quantile_values, quote = FALSE)
   }
 }
 

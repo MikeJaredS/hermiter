@@ -265,4 +265,4 @@ save(h_norm_serialized,W_serialized,z_serialized,
      h_int_lower_serialized, 
      h_int_upper_serialized,
      x_full_domain_serialized,
-     file = "sysdata.rda",compress=TRUE)
+     file = "sysdata.rda",compress="xz")

@@ -216,6 +216,7 @@ gauss_hermite_quad_100 <- function(f){
   return(result)
 }
 
+# Helper method for merging univariate hermite_estimator objects.
 integrand_coeff_univar <- function(t,hermite_est_current, 
                                    hermite_estimator_merged, current_k, 
                                    dimension = NA){
