@@ -4,10 +4,12 @@
 \alias{print.hermite_estimator_univar}
 \title{Prints univariate hermite_estimator object.}
 \usage{
-\method{print}{hermite_estimator_univar}(this)
+\method{print}{hermite_estimator_univar}(x, ...)
 }
 \arguments{
-\item{this}{A hermite_estimator_univar object.}
+\item{x}{A hermite_estimator_univar object.}
+
+\item{...}{Other arguments passed on to methods used in printing.}
 }
 \description{
 Prints univariate hermite_estimator object.

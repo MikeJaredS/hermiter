@@ -481,8 +481,8 @@ dens.hermite_estimator_bivar <- function(this,x, clipped = FALSE){
   return(result)
 }
 
-# Internal helper method to calculate the cumulative probability at a single 2-d
-# x value
+# Internal helper method to calculate the cumulative probability at a single 
+# 2-d x value
 cum_prob_helper <- function(this, x, clipped = FALSE)
 {
   UseMethod("cum_prob_helper",this)
@@ -622,13 +622,14 @@ kendall.hermite_estimator_bivar <- function(this, clipped = FALSE)
 #' Prints bivariate hermite_estimator object.
 #' 
 #'
-#' @param this A hermite_estimator_bivar object.
+#' @param x A hermite_estimator_bivar object.
+#' @param ... Other arguments passed on to methods used in printing.
 #' @export
 #' @examples
 #' hermite_est <- hermite_estimator_bivar(N = 10, standardize = TRUE)
 #' print(hermite_est)
-print.hermite_estimator_bivar <- function(this) {
-  describe_estimator(this,"bivariate")
+print.hermite_estimator_bivar <- function(x, ...) {
+  describe_estimator(x,"bivariate")
 }
 
 #' Summarizes bivariate hermite_estimator object.
@@ -639,32 +640,34 @@ print.hermite_estimator_bivar <- function(this) {
 #' Also outputs the Spearman's Rho and Kendall Tau of the bivariate data that 
 #' the object has been updated with.
 #'
-#' @param this A hermite_estimator_bivar object.
+#' @param object A hermite_estimator_bivar object.
 #' @param digits A numeric value. Number of digits to round to.
+#' @param ... Other arguments passed on to methods used in summary.
 #' @export
 #' @examples
 #' hermite_est <- hermite_estimator_bivar(N = 10, standardize = TRUE)
 #' hermite_est <- update_batch(hermite_est, matrix(rnorm(30*2), nrow=30, 
 #' ncol=2, byrow = TRUE))
 #' summary(hermite_est)
-summary.hermite_estimator_bivar <- function(this, 
-                              digits = max(3, getOption("digits") - 3)) {
-  describe_estimator(this,"bivariate")
-  if (this$num_obs > 2){
-    running_std <- calculate_running_std(this)
+summary.hermite_estimator_bivar <- function(object, 
+                              digits = max(3, getOption("digits") - 3), ...) {
+  describe_estimator(object,"bivariate")
+  if (object$num_obs > 2){
+    running_std <- calculate_running_std(object)
     cat("\n")
-    cat(paste0("Mean x = ",round(this$running_mean_x,digits), "\n"))
-    cat(paste0("Mean y = ",round(this$running_mean_y,digits), "\n"))
+    cat(paste0("Mean x = ",round(object$running_mean_x,digits), "\n"))
+    cat(paste0("Mean y = ",round(object$running_mean_y,digits), "\n"))
     cat(paste0("Standard Deviation x = ", 
                round(running_std[1],digits), "\n"))
     cat(paste0("Standard Deviation y = ", 
                round(running_std[2],digits), "\n"))
-    cat(paste0("Spearman's Rho = ",round(spearmans(this),digits), "\n"))
-    cat(paste0("Kendall Tau = ",round(kendall(this),digits), "\n"))
+    cat(paste0("Spearman's Rho = ",round(spearmans(object),digits), "\n"))
+    cat(paste0("Kendall Tau = ",round(kendall(object),digits), "\n"))
   }
 }
 
-quant.hermite_estimator_bivar <- function(this, p, algorithm) {
+quant.hermite_estimator_bivar <- 
+  function(this, p, algorithm, accelerate_series) {
   stop("Quantile estimation is not defined for the bivariate Hermite 
        estimator")
 }

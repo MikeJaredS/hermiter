@@ -4,10 +4,12 @@
 \alias{print.hermite_estimator_bivar}
 \title{Prints bivariate hermite_estimator object.}
 \usage{
-\method{print}{hermite_estimator_bivar}(this)
+\method{print}{hermite_estimator_bivar}(x, ...)
 }
 \arguments{
-\item{this}{A hermite_estimator_bivar object.}
+\item{x}{A hermite_estimator_bivar object.}
+
+\item{...}{Other arguments passed on to methods used in printing.}
 }
 \description{
 Prints bivariate hermite_estimator object.

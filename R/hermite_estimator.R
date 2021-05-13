@@ -263,6 +263,10 @@ cum_prob <- function(this, x, clipped) {
 #'
 #' @param this A hermite_estimator_univar object.
 #' @param p A numeric vector. A vector of probability values.
+#' @param algorithm A string. Choices are "interpolate" or "bisection".
+#' @param accelerate_series A boolean value. TRUE to use series acceleration to
+#' attempt to reduce bias and improve accuracy and FALSE to sum the Hermite 
+#' series in a standard manner.
 #' @return A numeric vector. The vector of quantile values associated with the
 #' probabilities p.
 #' @export
@@ -271,7 +275,7 @@ cum_prob <- function(this, x, clipped) {
 #' est_type="univariate")
 #' hermite_est <- update_batch(hermite_est, rnorm(30))
 #' quant_est <- quant(hermite_est, c(0.25, 0.5, 0.75))
-quant <- function(this, p, algorithm) {
+quant <- function(this, p, algorithm="interpolate", accelerate_series = TRUE) {
   UseMethod("quant", this)
 }
 
@@ -323,7 +327,7 @@ kendall <- function(this, clipped = FALSE)
   UseMethod("kendall",this)
 }
 
-#' Internal helper function for print methods.
+# Internal helper function for print methods.
 describe_estimator <- function(this, est_type){
   if (est_type == "univariate") {
     cat("Univariate Hermite Estimator:\n")

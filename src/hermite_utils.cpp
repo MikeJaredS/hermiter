@@ -166,7 +166,7 @@ NumericVector hermite_function_sum(int N, NumericVector x,
   int i = 0;
   int j = 0;
   // Uses unrolling loop optimization below
-  for(i = 0; i <= x_size -4 ; i += 4) {
+  for(i = 0; i <= x_size - 4 ; i += 4) {
     expFac(i) = exp(-1 * x[i] * x[i] / 2);
     expFac(i+1) = exp(-1 * x[i+1] * x[i+1] / 2);
     expFac(i+2) = exp(-1 * x[i+2] * x[i+2] / 2);
@@ -183,7 +183,7 @@ NumericVector hermite_function_sum(int N, NumericVector x,
     resultOut(0) += out(0,i);
   }
   if (N==0){
-    return out;
+    return resultOut;
   }
   for(i = 0; i <= x_size-4; i += 4) {
     out(1,i) = sqrt2 * piConst * x(i)* expFac(i);
@@ -197,7 +197,7 @@ NumericVector hermite_function_sum(int N, NumericVector x,
     resultOut(1) += out(1,i);
   }
   if (N==1){
-    return out;
+    return resultOut;
   }
   for(j = 0; j <= x_size - 4; j += 4) {
     for(i = 2; i <= N; ++i) {

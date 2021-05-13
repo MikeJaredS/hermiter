@@ -59,8 +59,10 @@ hermite_estimator_univar <-
         h_int_upper_serialized = c()
       )
     this$normalization_hermite_vec <- h_norm_serialized[1:(this$N_param+1)]
-    this$h_int_lower_serialized <- h_int_lower_serialized[1:(this$N_param+1),]
-    this$h_int_upper_serialized <- h_int_upper_serialized[1:(this$N_param+1),]
+    this$h_int_lower_serialized <- h_int_lower_serialized[1:(this$N_param+1),
+                                                          ,drop = FALSE]
+    this$h_int_upper_serialized <- h_int_upper_serialized[1:(this$N_param+1),
+                                                          ,drop = FALSE]
     class(this) <- c("hermite_estimator_univar", "list")
     return(this)
   }
@@ -403,22 +405,21 @@ cum_prob.hermite_estimator_univar <- function(this, x, clipped = FALSE) {
 #
 # This helper method is intended for internal use by the 
 # hermite_estimator_univar class.
-quantile_helper_bisection <- function(this, p_vec) {
+quantile_helper_bisection <- function(this, p_vec, accelerate_series) {
   f_est <- function(x,p) {
     lower_idx <- which(x < x_lower)
     upper_idx <- which(x > x_upper)
     ambig_idx <- which(x >= x_lower & x <= x_upper)
     res <- rep(NA,length(x))
     if (length(lower_idx)>0){
-      res[lower_idx] <- crossprod(hermite_int_lower(this$N_param, 
-           x[lower_idx], normalization_hermite = 
-             this$normalization_hermite_vec), this$coeff_vec) - p[lower_idx]
+      res[lower_idx] <- series_calculate(hermite_int_lower(this$N_param,
+         x[lower_idx], normalization_hermite = this$normalization_hermite_vec), 
+         this$coeff_vec, accelerate_series) - p[lower_idx]
     }
     if (length(upper_idx)>0){
-      res[upper_idx] <- 1 - 
-        crossprod(hermite_int_upper(this$N_param, 
-           x[upper_idx], normalization_hermite = 
-             this$normalization_hermite_vec), this$coeff_vec) - p[upper_idx]
+      res[upper_idx] <- 1 - series_calculate(hermite_int_upper(this$N_param,
+        x[upper_idx], normalization_hermite = this$normalization_hermite_vec), 
+         this$coeff_vec, accelerate_series) - p[upper_idx]
     }
     if (length(ambig_idx)>0){
       if (p_upper < p_lower){
@@ -434,10 +435,16 @@ quantile_helper_bisection <- function(this, p_vec) {
     }
     return(res)
   }
-  p_lower <- as.numeric(crossprod(this$coeff_vec,
-                              h_int_lower_zero_serialized[1:(this$N_param+1)]))
-  p_upper <- 1-as.numeric(crossprod(this$coeff_vec,
-                              h_int_upper_zero_serialized[1:(this$N_param+1)]))
+  h_int_lower_zero_serialized_mat <- 
+    h_int_lower_zero_serialized[1:(this$N_param+1)]
+  dim(h_int_lower_zero_serialized_mat) <- c(this$N_param+1,1)
+  h_int_upper_zero_serialized_mat <- 
+    h_int_upper_zero_serialized[1:(this$N_param+1)]
+  dim(h_int_upper_zero_serialized_mat) <- c(this$N_param+1,1)
+  p_lower <- as.numeric(series_calculate(h_int_lower_zero_serialized_mat, 
+                                         this$coeff_vec, accelerate_series))
+  p_upper <- 1-as.numeric(series_calculate(h_int_upper_zero_serialized_mat, 
+                                           this$coeff_vec, accelerate_series))
   if (is.na(p_lower) | is.na(p_upper)){
     return(rep(NA, length(p_vec)))
   }
@@ -445,8 +452,9 @@ quantile_helper_bisection <- function(this, p_vec) {
     x_lower <- tryCatch({
       stats::uniroot(
         f = function(x) {
-          crossprod(this$coeff_vec,hermite_int_lower(this$N_param,x,
-          normalization_hermite = this$normalization_hermite_vec)) - p_upper
+          series_calculate(hermite_int_lower(this$N_param,x, 
+               normalization_hermite = this$normalization_hermite_vec), 
+               this$coeff_vec, accelerate_series) - p_upper
         },
         interval = c(-100, 100)
       )$root
@@ -455,9 +463,9 @@ quantile_helper_bisection <- function(this, p_vec) {
     x_upper <- tryCatch({
       stats::uniroot(
         f = function(x) {
-          1-as.numeric(crossprod(this$coeff_vec,
-                         hermite_int_upper(this$N_param,x,
-          normalization_hermite = this$normalization_hermite_vec))) - p_lower
+          1- series_calculate(hermite_int_upper(this$N_param,x,
+             normalization_hermite = this$normalization_hermite_vec), 
+             this$coeff_vec, accelerate_series) - p_lower
         },
         interval = c(-100, 100)
       )$root
@@ -494,7 +502,7 @@ quantile_helper_bisection <- function(this, p_vec) {
   }
   if (is.na(this$exp_weight)) {
     est <-
-      est * sqrt(this$running_variance / (this$num_obs - 1)) + this$running_mean
+    est * sqrt(this$running_variance / (this$num_obs - 1)) + this$running_mean
   } else {
     est <- est * sqrt(this$running_variance) + this$running_mean
   }
@@ -506,14 +514,15 @@ quantile_helper_bisection <- function(this, p_vec) {
 #
 # This helper method is intended for internal use by the 
 # hermite_estimator_univar class.
-quantile_helper_interval <- function(this,p_vec){
+quantile_helper_interpolate <- function(this, p_vec, accelerate_series = TRUE){
   result <- rep(NA,length(p_vec))
-  coeffs <- as.numeric(this$coeff_vec)
-  p_lower_vals <- crossprod(this$h_int_lower_serialized, coeffs)
-  p_upper_vals <- 1-crossprod(this$h_int_upper_serialized, coeffs)
+  p_lower_vals <- series_calculate(this$h_int_lower_serialized, 
+                                   this$coeff_vec, accelerate_series)
+  p_upper_vals <- 1 - series_calculate(this$h_int_upper_serialized, 
+                                       this$coeff_vec, accelerate_series)
   p_all_vals <- cummax(c(p_lower_vals,p_upper_vals))
-  res <- findInterval(p_vec,p_all_vals)
-  result <- x_full_domain_serialized[res]
+  result <- stats::approx(p_all_vals,x_full_domain_serialized,
+                   xout = p_vec,method="linear",ties = "ordered")$y
   if (is.na(this$exp_weight)) {
     result <-
       result * sqrt(this$running_variance / (this$num_obs - 1)) +
@@ -534,6 +543,12 @@ quantile_helper_interval <- function(this,p_vec){
 #'
 #' @param this A hermite_estimator_univar object.
 #' @param p A numeric vector. A vector of probability values.
+#' @param algorithm A string. Two possible values 'interpolate' which is faster
+#' but may be less accurate or 'bisection' which is slower but potentially more
+#' accurate.
+#' @param accelerate_series A boolean value. If set to TRUE, the series 
+#' acceleration methods described in ref are applied. If set to FALSE, then 
+#' standard summation is applied.
 #' @return A numeric vector. The vector of quantile values associated with the
 #' probabilities p.
 #' @export
@@ -541,7 +556,8 @@ quantile_helper_interval <- function(this,p_vec){
 #' hermite_est <- hermite_estimator_univar(N = 10, standardize = TRUE)
 #' hermite_est <- update_batch(hermite_est, rnorm(30))
 #' quant_est <- quant(hermite_est, c(0.25, 0.5, 0.75))
-quant.hermite_estimator_univar <- function(this, p, algorithm="interpolate") {
+quant.hermite_estimator_univar <- function(this, p, algorithm="interpolate", 
+                                           accelerate_series = TRUE) {
   if (!is.numeric(p)) {
     stop("p must be numeric.")
   }
@@ -561,11 +577,14 @@ quant.hermite_estimator_univar <- function(this, p, algorithm="interpolate") {
   if (this$num_obs < 2) {
     return(result)
   }
+  if (this$running_variance == 0) {
+    return(rep(this$running_mean, length(p)))
+  }
   if (algorithm=="interpolate"){
-    result <- quantile_helper_interval(this,p)
+    result <- quantile_helper_interpolate(this,p,accelerate_series)
   }
   if (algorithm=="bisection"){
-    result <- quantile_helper_bisection(this,p)
+    result <- quantile_helper_bisection(this,p,accelerate_series)
   }
   return(result)
 }
@@ -573,13 +592,14 @@ quant.hermite_estimator_univar <- function(this, p, algorithm="interpolate") {
 #' Prints univariate hermite_estimator object.
 #' 
 #'
-#' @param this A hermite_estimator_univar object.
+#' @param x A hermite_estimator_univar object.
+#' @param ... Other arguments passed on to methods used in printing.
 #' @export
 #' @examples
 #' hermite_est <- hermite_estimator_univar(N = 10, standardize = TRUE)
 #' print(hermite_est)
-print.hermite_estimator_univar <- function(this) {
-  describe_estimator(this,"univariate")
+print.hermite_estimator_univar <- function(x, ...) {
+  describe_estimator(x,"univariate")
 }
 
 #' Summarizes univariate hermite_estimator object.
@@ -588,25 +608,27 @@ print.hermite_estimator_univar <- function(this) {
 #' estimates of the mean, standard deviation and deciles of the data that
 #' the object has been updated with.
 #'
-#' @param this A hermite_estimator_univar object.
+#' @param object A hermite_estimator_univar object.
 #' @param digits A numeric value. Number of digits to round to.
+#' @param ... Other arguments passed on to methods used in summary.
 #' @export
 #' @examples
 #' hermite_est <- hermite_estimator_univar(N = 10, standardize = TRUE)
 #' hermite_est <- update_batch(hermite_est, rnorm(30))
 #' summary(hermite_est)
-summary.hermite_estimator_univar <- function(this, 
-                              digits = max(3, getOption("digits") - 3)) {
-  describe_estimator(this,"univariate")
-  if (this$num_obs > 2){
+summary.hermite_estimator_univar <- function(object, 
+                              digits = max(3, getOption("digits") - 3),...) {
+  describe_estimator(object,"univariate")
+  if (object$num_obs > 2){
     cat("\n")
-    cat(paste0("Mean = ",round(this$running_mean,digits), "\n"))
+    cat(paste0("Mean = ",round(object$running_mean,digits), "\n"))
     cat(paste0("Standard Deviation = ",
-               round(calculate_running_std(this),digits), "\n"))
+               round(calculate_running_std(object),digits), "\n"))
     cat("Estimated Quantiles:\n")
     cumulative_probs <- seq(10,90,10)
     cum_probs_size <- length(cumulative_probs)
-    quantile_values <- matrix(round(quant(this,p=cumulative_probs/100),digits),
+    quantile_values <- matrix(round(quant(object,p=cumulative_probs/100),
+                                    digits),
                               nrow = 1, ncol = cum_probs_size, byrow = TRUE)
     colnames(quantile_values) <- paste0(cumulative_probs ,"%")
     rownames(quantile_values) <- ""

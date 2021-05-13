@@ -4,12 +4,14 @@
 \alias{summary.hermite_estimator_univar}
 \title{Summarizes univariate hermite_estimator object.}
 \usage{
-\method{summary}{hermite_estimator_univar}(this, digits = max(3, getOption("digits") - 3))
+\method{summary}{hermite_estimator_univar}(object, digits = max(3, getOption("digits") - 3), ...)
 }
 \arguments{
-\item{this}{A hermite_estimator_univar object.}
+\item{object}{A hermite_estimator_univar object.}
 
 \item{digits}{A numeric value. Number of digits to round to.}
+
+\item{...}{Other arguments passed on to methods used in summary.}
 }
 \description{
 Outputs key parameters of a univariate hermite_estimator object along with
