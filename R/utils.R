@@ -258,7 +258,11 @@ integrand_coeff_univar <- function(t,hermite_est_current,
 }
 
 # Helper method for estimating Hermite series sums, with or without series 
-# acceleration as per:
+# acceleration. These series acceleration techniques are drawn from the below 
+# reference:
+# 
+# Boyd, John P., and Dennis W. Moore. "Summability methods for 
+# Hermite functions." Dynamics of atmospheres and oceans 10.1 (1986): 51-62. 
 # 
 # Note that h_input is a numeric matrix of N+1 rows and length(x) columns,
 # coeffs is a numeric vector of length N+1

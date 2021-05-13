@@ -9,7 +9,7 @@ Author: Michael Stephanou [aut, cre],
 Maintainer: Michael Stephanou <michael.stephanou@gmail.com>
 Description: Facilitates estimation of full univariate and bivariate 
   probability density functions and cumulative distribution functions along with
-  full quantile functions (univariate) and Spearman's rank correlation 
+  full quantile functions (univariate) and nonparametric correlation 
   (bivariate) using Hermite series based estimators. These estimators are 
   particularly useful in the sequential setting (both stationary and 
   non-stationary) and one-pass batch estimation setting for large data sets. 

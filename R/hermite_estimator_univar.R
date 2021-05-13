@@ -547,8 +547,12 @@ quantile_helper_interpolate <- function(this, p_vec, accelerate_series = TRUE){
 #' but may be less accurate or 'bisection' which is slower but potentially more
 #' accurate.
 #' @param accelerate_series A boolean value. If set to TRUE, the series 
-#' acceleration methods described in ref are applied. If set to FALSE, then 
-#' standard summation is applied.
+#' acceleration methods described in:
+#'
+#' Boyd, John P., and Dennis W. Moore. "Summability methods for 
+#' Hermite functions." Dynamics of atmospheres and oceans 10.1 (1986): 51-62. 
+#'  
+#' are applied. If set to FALSE, then standard summation is applied.
 #' @return A numeric vector. The vector of quantile values associated with the
 #' probabilities p.
 #' @export
