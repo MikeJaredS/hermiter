@@ -11,11 +11,17 @@ quant(this, p, algorithm = "interpolate", accelerate_series = TRUE)
 
 \item{p}{A numeric vector. A vector of probability values.}
 
-\item{algorithm}{A string. Choices are "interpolate" or "bisection".}
+\item{algorithm}{A string. Two possible values 'interpolate' which is faster
+but may be less accurate or 'bisection' which is slower but potentially more
+accurate.}
 
-\item{accelerate_series}{A boolean value. TRUE to use series acceleration to
-attempt to reduce bias and improve accuracy and FALSE to sum the Hermite 
-series in a standard manner.}
+\item{accelerate_series}{A boolean value. If set to TRUE, the series 
+acceleration methods described in:
+
+Boyd, John P., and Dennis W. Moore. "Summability methods for 
+Hermite functions." Dynamics of atmospheres and oceans 10.1 (1986): 51-62. 
+ 
+are applied. If set to FALSE, then standard summation is applied.}
 }
 \value{
 A numeric vector. The vector of quantile values associated with the

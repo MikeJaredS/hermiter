@@ -273,6 +273,9 @@ series_calculate <- function(h_input, coeffs, accelerate_series = TRUE){
   if (!is.numeric(coeffs)) {
     stop("coeffs must be numeric.")
   }
+  if (!is.numeric(h_input)) {
+    stop("h_input must be numeric.")
+  }
   if (is.null(nrow(h_input))) {
     stop("h_input must be numeric matrix.")
   }

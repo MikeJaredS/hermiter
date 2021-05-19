@@ -12,6 +12,7 @@ by default.
 the same accuracy.
 * Added print and summary methods for both the univariate and bivariate 
 hermite_estimator objects.
+* Convenience function added to calculate sums of Hermite functions.
 
 ## Documentation improvements
 
