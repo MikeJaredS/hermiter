@@ -204,6 +204,8 @@ calculate_running_std <- function(this)
 #' values at which to calculate the probability density.
 #' @param clipped A boolean value. This value determines whether
 #' probability densities are clipped to be bigger than zero.
+#' @param accelerate_series A boolean value. This value determines whether
+#' Hermite series acceleration is applied.
 #' @return A numeric vector of probability density values.
 #' @export
 #' @examples
@@ -217,7 +219,7 @@ calculate_running_std <- function(this)
 #' nrow=30, ncol=2,byrow=TRUE))
 #' pdf_est <- dens(hermite_est, matrix(c(0,0,0.5,0.5,1,1),nrow=3,
 #' ncol=2,byrow=TRUE))
-dens <- function(this, x, clipped) {
+dens <- function(this, x, clipped, accelerate_series = TRUE) {
   UseMethod("dens", this)
 }
 
@@ -235,6 +237,8 @@ dens <- function(this, x, clipped) {
 #' Values at which to calculate the cumulative probability.
 #' @param clipped A boolean value. This value determines whether
 #' cumulative probabilities are clipped to lie between 0 and 1.
+#' @param accelerate_series A boolean value. This value determines whether
+#' Hermite series acceleration is applied.
 #' @return A numeric vector of cumulative probability values.
 #' @export
 #' @examples
@@ -248,7 +252,7 @@ dens <- function(this, x, clipped) {
 #' nrow=30, ncol=2,byrow=TRUE))
 #' cdf_est <- cum_prob(hermite_est, matrix(c(0,0,0.5,0.5,1,1),nrow=3,
 #' ncol=2,byrow=TRUE))
-cum_prob <- function(this, x, clipped) {
+cum_prob <- function(this, x, clipped, accelerate_series = TRUE) {
   UseMethod("cum_prob", this)
 }
 

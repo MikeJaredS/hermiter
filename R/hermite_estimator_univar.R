@@ -231,6 +231,10 @@ update_sequential.hermite_estimator_univar <- function(this, x) {
     stop("The sequential method is only 
          applicable to one observation at a time.")
   }
+  if (is.na(x) | !is.finite(x)){
+    stop("The sequential method is only 
+         applicable to finite, non NaN, non NA values.")
+  }
   this$num_obs <- this$num_obs + 1
   if (this$standardize_obs == TRUE) {
     if (is.na(this$exp_weight)) {
@@ -332,7 +336,8 @@ calculate_running_std.hermite_estimator_univar<- function(this){
 #' hermite_est <- hermite_estimator_univar(N = 10, standardize = TRUE)
 #' hermite_est <- update_batch(hermite_est, rnorm(30))
 #' pdf_est <- dens(hermite_est, c(0, 0.5, 1))
-dens.hermite_estimator_univar <- function(this, x, clipped = FALSE) {
+dens.hermite_estimator_univar <- function(this, x, clipped = FALSE, 
+                                          accelerate_series = TRUE) {
   if (!is.numeric(x)) {
     stop("x must be numeric.")
   }
@@ -350,7 +355,9 @@ dens.hermite_estimator_univar <- function(this, x, clipped = FALSE) {
   }
   h_k <-
     hermite_function_N(this$N_param, x, this$normalization_hermite_vec)
-  pdf_val <- crossprod(h_k, this$coeff_vec) * factor
+  # pdf_val <- crossprod(h_k, this$coeff_vec) * factor
+  pdf_val <- series_calculate(h_k, this$coeff_vec, accelerate_series = 
+                                accelerate_series) * factor
   if (clipped == TRUE) {
     pdf_val <- pmax(pdf_val, 1e-08)
   }
@@ -375,7 +382,8 @@ dens.hermite_estimator_univar <- function(this, x, clipped = FALSE) {
 #' hermite_est <- hermite_estimator_univar(N = 10, standardize = TRUE)
 #' hermite_est <- update_batch(hermite_est, rnorm(30))
 #' cdf_est <- cum_prob(hermite_est, c(0, 0.5, 1))
-cum_prob.hermite_estimator_univar <- function(this, x, clipped = FALSE) {
+cum_prob.hermite_estimator_univar <- function(this, x, clipped = FALSE, 
+                                              accelerate_series = TRUE) {
   if (!is.numeric(x)) {
     stop("x must be numeric.")
   }
@@ -393,7 +401,9 @@ cum_prob.hermite_estimator_univar <- function(this, x, clipped = FALSE) {
     hermite_function_N(this$N_param, x, this$normalization_hermite_vec)
   integrals_hermite <- hermite_int_lower(this$N_param, x, 
                                          hermite_function_matrix = h_k)
-  cdf_val <- crossprod(integrals_hermite, this$coeff_vec)
+  # cdf_val <- crossprod(integrals_hermite, this$coeff_vec)
+  cdf_val <- series_calculate(integrals_hermite, this$coeff_vec, 
+                              accelerate_series = accelerate_series)
   if (clipped == TRUE) {
     cdf_val <- pmin(pmax(cdf_val, 1e-08), 1)
   }
@@ -481,7 +491,6 @@ quantile_helper_bisection <- function(this, p_vec, accelerate_series) {
   if (is.na(x_lower) | is.na(x_upper)){
     return(rep(NA, length(p_vec)))
   }
-  # Vectorized bisection search:
   max_steps <- 25
   eps_quant <- 2e-4
   x_0 <- rep(-50,length(p_vec))
@@ -516,9 +525,9 @@ quantile_helper_bisection <- function(this, p_vec, accelerate_series) {
 # hermite_estimator_univar class.
 quantile_helper_interpolate <- function(this, p_vec, accelerate_series = TRUE){
   result <- rep(NA,length(p_vec))
-  p_lower_vals <- series_calculate(this$h_int_lower_serialized, 
+  p_lower_vals <- series_calculate(this$h_int_lower_serialized,
                                    this$coeff_vec, accelerate_series)
-  p_upper_vals <- 1 - series_calculate(this$h_int_upper_serialized, 
+  p_upper_vals <- 1 - series_calculate(this$h_int_upper_serialized,
                                        this$coeff_vec, accelerate_series)
   p_all_vals <- cummax(c(p_lower_vals,p_upper_vals))
   result <- stats::approx(p_all_vals,x_full_domain_serialized,

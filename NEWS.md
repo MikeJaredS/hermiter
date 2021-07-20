@@ -20,6 +20,12 @@ hermite_estimator objects.
 included examples pertaining to estimation of the Kendall Tau nonparametric
 correlation coefficient in the bivariate setting.
 
+# hermiter v2.0.3
+
+## Minor improvements and bug fixes
+
+* Minor update to test cases.
+
 # hermiter v2.0.2
 
 ## Breaking changes
