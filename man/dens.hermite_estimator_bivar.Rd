@@ -4,7 +4,7 @@
 \alias{dens.hermite_estimator_bivar}
 \title{Estimates the probability densities for a matrix of 2-d x values}
 \usage{
-\method{dens}{hermite_estimator_bivar}(this, x, clipped = FALSE)
+\method{dens}{hermite_estimator_bivar}(this, x, clipped = FALSE, accelerate_series = FALSE)
 }
 \arguments{
 \item{this}{A hermite_estimator_bivar object.}
@@ -13,6 +13,9 @@
 
 \item{clipped}{A boolean value. This value determines whether
 probability densities are clipped to be bigger than zero.}
+
+\item{accelerate_series}{A boolean value. Series acceleration has not yet 
+been implemented for bivariate estimators.}
 }
 \value{
 A numeric vector of probability density values.

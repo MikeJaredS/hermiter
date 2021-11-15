@@ -297,6 +297,10 @@ update_batch.hermite_estimator_univar <- function(this, x) {
   if (length(x) < 1) {
     stop("x must contain at least one value.")
   }
+  if (any(is.na(x)) | any(!is.finite(x))){
+    stop("The batch update method is only 
+         applicable to finite, non NaN, non NA values.")
+  }
   this$num_obs <- length(x)
   if (this$standardize_obs == TRUE) {
     this$running_mean <- mean(x)
@@ -330,6 +334,8 @@ calculate_running_std.hermite_estimator_univar<- function(this){
 #' density.
 #' @param clipped A boolean value. This value determines whether
 #' probability densities are clipped to be bigger than zero.
+#' @param accelerate_series A boolean value. This value determines whether
+#' Hermite series acceleration is applied.
 #' @return A numeric vector of probability density values.
 #' @export
 #' @examples
@@ -376,6 +382,8 @@ dens.hermite_estimator_univar <- function(this, x, clipped = FALSE,
 #' probability
 #' @param clipped A boolean value. This value determines whether cumulative
 #' probabilities are clipped to lie within the range [0,1].
+#' @param accelerate_series A boolean value. This value determines whether
+#' Hermite series acceleration is applied.
 #' @return A numeric vector of cumulative probability values.
 #' @export
 #' @examples
@@ -394,6 +402,9 @@ cum_prob.hermite_estimator_univar <- function(this, x, clipped = FALSE,
     return(rep(NA, length(x)))
   }
   if (this$standardize_obs == TRUE) {
+    if (this$running_variance == 0) {
+      return(ifelse(this$running_mean <= x,1,0))
+    }
     running_std <- calculate_running_std(this)
     x <- (x - this$running_mean) / running_std
   }
@@ -401,7 +412,6 @@ cum_prob.hermite_estimator_univar <- function(this, x, clipped = FALSE,
     hermite_function_N(this$N_param, x, this$normalization_hermite_vec)
   integrals_hermite <- hermite_int_lower(this$N_param, x, 
                                          hermite_function_matrix = h_k)
-  # cdf_val <- crossprod(integrals_hermite, this$coeff_vec)
   cdf_val <- series_calculate(integrals_hermite, this$coeff_vec, 
                               accelerate_series = accelerate_series)
   if (clipped == TRUE) {

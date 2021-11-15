@@ -4,7 +4,7 @@
 \alias{cum_prob.hermite_estimator_bivar}
 \title{Estimates the cumulative probabilities for a matrix of 2-d x values}
 \usage{
-\method{cum_prob}{hermite_estimator_bivar}(this, x, clipped = FALSE)
+\method{cum_prob}{hermite_estimator_bivar}(this, x, clipped = FALSE, accelerate_series = FALSE)
 }
 \arguments{
 \item{this}{A hermite_estimator_bivar object.}
@@ -13,6 +13,9 @@
 
 \item{clipped}{A boolean value. This value determines whether cumulative
 probabilities are clipped to lie within the range [0,1].}
+
+\item{accelerate_series}{A boolean value. Series acceleration has not yet 
+been implemented for bivariate estimators.}
 }
 \value{
 A numeric vector of cumulative probability values.

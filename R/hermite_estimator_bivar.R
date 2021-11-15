@@ -287,6 +287,10 @@ update_sequential.hermite_estimator_bivar <- function(this, x)
   if (length(x) != 2){
     stop("x must be a vector of length 2 (bivariate observation).")
   }
+  if (any(is.na(x)) | any(!is.finite(x))){
+    stop("The sequential update method is only 
+         applicable to finite, non NaN, non NA values.")
+  }
   this$num_obs <- this$num_obs + 1
   if (this$standardize_obs == TRUE) {
     if (is.na(this$exp_weight)) {
@@ -380,6 +384,10 @@ update_batch.hermite_estimator_bivar <- function(this, x) {
   if (!is.na(this$exp_weight)) {
     stop("The Hermite estimator cannot be exponentially weighted.")
   }
+  if (any(is.na(x)) | any(!is.finite(x))){
+    stop("The batch update method is only 
+         applicable to finite, non NaN, non NA values.")
+  }
   this$num_obs <- nrow(x)
   if (this$standardize_obs == TRUE) {
     this$running_mean_x <-mean(x[,1])
@@ -450,6 +458,8 @@ dens_helper.hermite_estimator_bivar <- function(this,x, clipped = FALSE){
 #' @param x A numeric matrix. Each row corresponds to a 2-d coordinate.
 #' @param clipped A boolean value. This value determines whether
 #' probability densities are clipped to be bigger than zero.
+#' @param accelerate_series A boolean value. Series acceleration has not yet 
+#' been implemented for bivariate estimators.
 #' @return A numeric vector of probability density values.
 #' @export
 #' @examples
@@ -458,7 +468,8 @@ dens_helper.hermite_estimator_bivar <- function(this,x, clipped = FALSE){
 #' ncol=2, byrow = TRUE))
 #' cdf_est <- dens(hermite_est, matrix(c(0, 0, 1, 1, 2, 2), nrow=3, ncol=2, 
 #' byrow = TRUE))
-dens.hermite_estimator_bivar <- function(this,x, clipped = FALSE){
+dens.hermite_estimator_bivar <- function(this,x, clipped = FALSE, 
+                                         accelerate_series = FALSE){
   if (!is.numeric(x)) {
     stop("x must be numeric.")
   }
@@ -514,6 +525,8 @@ cum_prob_helper.hermite_estimator_bivar <- function(this,x, clipped = FALSE){
 #' @param x A numeric matrix. Each row corresponds to a 2-d coordinate.
 #' @param clipped A boolean value. This value determines whether cumulative
 #' probabilities are clipped to lie within the range [0,1].
+#' @param accelerate_series A boolean value. Series acceleration has not yet 
+#' been implemented for bivariate estimators.
 #' @return A numeric vector of cumulative probability values.
 #' @export
 #' @examples
@@ -522,7 +535,8 @@ cum_prob_helper.hermite_estimator_bivar <- function(this,x, clipped = FALSE){
 #' ncol=2, byrow = TRUE))
 #' cdf_est <- cum_prob(hermite_est, matrix(c(0, 0, 1, 1, 2, 2), nrow=3, ncol=2, 
 #' byrow = TRUE))
-cum_prob.hermite_estimator_bivar <- function(this,x, clipped = FALSE){
+cum_prob.hermite_estimator_bivar <- function(this,x, clipped = FALSE,
+                                             accelerate_series = FALSE){
   if (!is.numeric(x)) {
     stop("x must be numeric.")
   }

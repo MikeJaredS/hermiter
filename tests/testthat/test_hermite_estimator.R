@@ -525,7 +525,7 @@ test_that("probability density estimation works as expected", {
   hermite_est <-
     hermite_estimator(N = 10, standardize = FALSE) %>% 
     update_batch(test_observations)
-  pdf_vals <- hermite_est %>% dens(x)
+  pdf_vals <- hermite_est %>% dens(x, accelerate_series = FALSE)
   target_pdf_vals_unstandardized <-
     c(
       0.2700498,
@@ -543,7 +543,7 @@ test_that("probability density estimation works as expected", {
   hermite_est <-
     hermite_estimator(N = 10, standardize = TRUE) %>%
     update_batch(test_observations)
-  pdf_vals <- hermite_est %>% dens(x)
+  pdf_vals <- hermite_est %>% dens(x, accelerate_series = FALSE)
   target_pdf_vals_standardized <-
     c(
       0.2495028,
@@ -558,7 +558,7 @@ test_that("probability density estimation works as expected", {
     )
   expect_equal(pdf_vals, target_pdf_vals_standardized, tolerance = get_eps())
   
-  pdf_vals <- hermite_est %>% dens(x, clipped=T)
+  pdf_vals <- hermite_est %>% dens(x, clipped=T, accelerate_series = FALSE)
   expect_equal(pdf_vals, target_pdf_vals_standardized, tolerance = get_eps())
   
   hermite_est <-
@@ -569,7 +569,7 @@ test_that("probability density estimation works as expected", {
     hermite_est <-
       hermite_est %>% update_sequential(test_observations[idx])
   }
-  pdf_vals <- hermite_est %>% dens(x)
+  pdf_vals <- hermite_est %>% dens(x, accelerate_series = FALSE)
   target_pdf_vals_unstandardized <-
     c(
       0.2632709,
@@ -592,7 +592,30 @@ test_that("probability density estimation works as expected", {
     hermite_est <-
       hermite_est %>% update_sequential(test_observations[idx])
   }
-  pdf_vals <- hermite_est %>% dens(x, clipped = TRUE)
+  pdf_vals <- hermite_est %>% dens(x, accelerate_series = TRUE)
+  target_pdf_vals_unstandardized <-
+    c(
+      0.25810091,
+      0.23093187,
+      -0.00677207,
+      0.11099507,
+      0.40381941,
+      0.27076818,
+      0.07213663,
+      0.18380665,
+      0.25292388
+    )
+  expect_equal(pdf_vals, target_pdf_vals_unstandardized, tolerance = get_eps())
+  
+  hermite_est <-
+    hermite_estimator(N = 10,
+                      standardize = FALSE,
+                      exp_weight_lambda = 0.1)
+  for (idx in seq_along(test_observations)) {
+    hermite_est <-
+      hermite_est %>% update_sequential(test_observations[idx])
+  }
+  pdf_vals <- hermite_est %>% dens(x, clipped = TRUE, accelerate_series = FALSE)
   target_pdf_vals_unstandardized_clipped <-
     c(
       0.2632709,
@@ -616,7 +639,7 @@ test_that("probability density estimation works as expected", {
     hermite_est <-
       hermite_est %>% update_sequential(test_observations[idx])
   }
-  pdf_vals <- hermite_est %>% dens(x)
+  pdf_vals <- hermite_est %>% dens(x, accelerate_series = FALSE)
   target_pdf_vals_standardized <-
     c(
       0.224348,
@@ -632,7 +655,7 @@ test_that("probability density estimation works as expected", {
   expect_equal(pdf_vals, target_pdf_vals_standardized, tolerance = get_eps())
   hermite_est <-
     hermite_estimator(N = 10)
-  pdf_vals <- hermite_est %>% dens(x)
+  pdf_vals <- hermite_est %>% dens(x, accelerate_series = FALSE)
   expect_equal(length(pdf_vals), length(x))
   expect_true(all(is.na(pdf_vals)))
 })
@@ -676,19 +699,21 @@ test_that("cumulative distribution function estimation works as expected",
               update_batch(test_observations)
             cdf_from_pdf <- stats::integrate(
               f = function(x) {
-                hermite_est %>% dens(x)
+                hermite_est %>% dens(x, accelerate_series = FALSE)
               },
               lower = -Inf,
               upper = 0.5
             )$value
-            cdf_est <- hermite_est %>% cum_prob(0.5)
+            cdf_est <- hermite_est %>% cum_prob(0.5, accelerate_series = FALSE)
             expect_equal(cdf_est, 0.6549575, tolerance = get_eps())
             expect_equal(cdf_from_pdf, cdf_est, tolerance = get_eps())
             
-            cdf_est <- hermite_est %>% cum_prob(0.5, clipped=TRUE)
+            cdf_est <- hermite_est %>% cum_prob(0.5, clipped=TRUE, 
+                                                accelerate_series = FALSE)
             expect_equal(cdf_est, 0.6549575, tolerance = get_eps())
             
-            cdf_est <- hermite_est %>% cum_prob(3, clipped=TRUE)
+            cdf_est <- hermite_est %>% cum_prob(3, clipped=TRUE,
+                                                accelerate_series = FALSE)
             expect_equal(cdf_est, 1, tolerance = get_eps())
             
             hermite_est <-
@@ -696,12 +721,12 @@ test_that("cumulative distribution function estimation works as expected",
               update_batch(test_observations)
             cdf_from_pdf <- stats::integrate(
               f = function(x) {
-                hermite_est %>% dens(x)
+                hermite_est %>% dens(x, accelerate_series = FALSE)
               },
               lower = -Inf,
               upper = 0.5
             )$value
-            cdf_est <- hermite_est %>% cum_prob(0.5)
+            cdf_est <- hermite_est %>% cum_prob(0.5, accelerate_series = FALSE)
             expect_equal(cdf_est, 0.6013645, tolerance = get_eps())
             expect_equal(cdf_from_pdf, cdf_est, tolerance = get_eps())
             
@@ -715,12 +740,12 @@ test_that("cumulative distribution function estimation works as expected",
             }
             cdf_from_pdf <- stats::integrate(
               f = function(x) {
-                hermite_est %>% dens(x)
+                hermite_est %>% dens(x, accelerate_series = FALSE)
               },
               lower = -Inf,
               upper = 0.5
             )$value
-            cdf_est <- hermite_est %>% cum_prob(0.5)
+            cdf_est <- hermite_est %>% cum_prob(0.5, accelerate_series = FALSE)
             expect_equal(cdf_est, 0.6132811, tolerance = get_eps())
             expect_equal(cdf_from_pdf, cdf_est, tolerance = get_eps())
             
@@ -734,17 +759,38 @@ test_that("cumulative distribution function estimation works as expected",
             }
             cdf_from_pdf <- stats::integrate(
               f = function(x) {
-                hermite_est %>% dens(x)
+                hermite_est %>% dens(x, accelerate_series = FALSE)
               },
               lower = -Inf,
               upper = 0.5
             )$value
-            cdf_est <- hermite_est %>% cum_prob(0.5)
+            cdf_est <- hermite_est %>% cum_prob(0.5, accelerate_series = FALSE)
             expect_equal(cdf_est, 0.4344541, tolerance = get_eps())
             expect_equal(cdf_from_pdf, cdf_est, tolerance = get_eps())
+            
+            hermite_est <-
+              hermite_estimator(N = 10,
+                                standardize = TRUE,
+                                exp_weight_lambda = 0.1)
+            for (idx in seq_along(test_observations)) {
+              hermite_est <-
+                hermite_est %>% update_sequential(test_observations[idx])
+            }
+            cdf_from_pdf <- stats::integrate(
+              f = function(x) {
+                hermite_est %>% dens(x, accelerate_series = TRUE)
+              },
+              lower = -Inf,
+              upper = 0.5
+            )$value
+            cdf_est <- hermite_est %>% cum_prob(0.5, accelerate_series = TRUE)
+            expect_equal(cdf_est, 0.4955906, tolerance = get_eps())
+            expect_equal(cdf_from_pdf, cdf_est, tolerance = get_eps())
+            
             hermite_est <-
               hermite_estimator(N = 10)
-            expect_equal(hermite_est %>% cum_prob(0.5),NA)
+            expect_equal(hermite_est %>% cum_prob(0.5, 
+                                                accelerate_series = FALSE),NA)
           })
 
 test_that("quantile estimation works as expected", {
