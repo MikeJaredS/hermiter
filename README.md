@@ -1,8 +1,8 @@
 # hermiter
 
 <!-- badges: start -->
-[![Travis build status](https://travis-ci.com/MikeJaredS/hermiter.svg?branch=master)](https://travis-ci.com/MikeJaredS/hermiter)
-[![codecov](https://codecov.io/gh/MikeJaredS/hermiter/branch/master/graph/badge.svg)](https://codecov.io/gh/MikeJaredS/hermiter)
+[![Travis build status](https://travis-ci.com/MikeJaredS/hermiter.svg?branch=master)]()
+[![codecov](https://codecov.io/gh/MikeJaredS/hermiter/branch/master/graph/badge.svg)](https://app.codecov.io/gh/MikeJaredS/hermiter)
 [![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/hermiter?color=green)](https://cran.r-project.org/package=dlstats)
 ![](https://cranlogs.r-pkg.org/badges/grand-total/hermiter?color=green)
 <!-- badges: end -->
@@ -33,7 +33,7 @@ articles below. The investigations demonstrate that the Hermite series based
 estimators are particularly effective in distribution function, quantile 
 function and Spearman correlation estimation.
 
-* [Stephanou, Michael, Varughese, Melvin and Macdonald, Iain. "Sequential quantiles via Hermite series density estimation." Electronic Journal of Statistics 11.1 (2017): 570-607.](https://projecteuclid.org/euclid.ejs/1488531636) 
+* [Stephanou, Michael, Varughese, Melvin and Macdonald, Iain. "Sequential quantiles via Hermite series density estimation." Electronic Journal of Statistics 11.1 (2017): 570-607.](https://projecteuclid.org/journals/electronic-journal-of-statistics/volume-11/issue-1/Sequential-quantiles-via-Hermite-series-density-estimation/10.1214/17-EJS1245.full) 
 * [Stephanou, Michael and Varughese, Melvin. "On the properties of hermite series based distribution function estimators." Metrika (2020).](https://link.springer.com/article/10.1007/s00184-020-00785-z)
 * [Stephanou, Michael and Varughese, Melvin. "Sequential estimation of Spearman rank correlation using Hermite series estimators." Journal of Multivariate Analysis (2021)](https://www.sciencedirect.com/science/article/pii/S0047259X21000610)
 
