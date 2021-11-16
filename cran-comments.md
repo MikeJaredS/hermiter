@@ -25,19 +25,37 @@ correlation coefficient in the bivariate setting.
 
 
 ## Test environments
-* local R installation, Windows 10, R 4.0.3
-* local Linux Mint 20 installation, R 4.0.3 with valgrind
-* rocker/r-devel-ubsan-clang docker image 
-* Ubuntu 16.04 (on travis-ci and r-hub), R 4.0.3
-* Debian Linux (r-hub)
+* local R installation, Windows 10, R 4.1.2
+* local R installation, Ubuntu Linux 21.10, R 4.1.2
+* Ubuntu Linux 20.04.1 LTS (r-hub)
+* Debian Linux, R-release, GCC (r-hub)
 * Debian Linux, R-devel, GCC ASAN/UBSAN (r-hub)
 * Fedora Linux (r-hub)
+* Apple Silicon (M1), macOS 11.6 Big Sur, R-release
+* macOS 10.13.6 High Sierra, R-release, CRAN's setup
 * Oracle Solaris 10, x86, 32 bit, R-release (r-hub)
-* Oracle Solaris 10, x86, 32 bit, R-release, Oracle Developer Studio 12.6 (r-hub)
-* macOS 10.13.6 High Sierra, R-release, brew (r-hub)
-* macOS 10.13.6 High Sierra, R-release, CRAN's setup (r-hub)
 * win-builder (devel and release)
 
 ## R CMD check results
-There were no ERRORs, WARNINGs or NOTES.
+
+There was 1 NOTE:
+
+Found the following (possibly) invalid URLs:
+  URL: https://projecteuclid.org/euclid.ejs/1488531636
+    From: inst/doc/hermiter.html
+    Status: 500
+    Message: Internal Server Error
+  URL: https://projecteuclid.org/journals/electronic-journal-of-statistics/volume-11/issue-1/Sequential-quantiles-via-Hermite-series-density-estimation/10.1214/17-EJS1245.full
+    From: README.md
+    Status: 500
+    Message: Internal Server Error
+
+Found the following (possibly) invalid DOIs:
+  DOI: 10.1214/17-EJS1245
+    From: DESCRIPTION
+    Status: Internal Server Error
+    Message: 500
+    
+    
+* The URL and DOI listed above appear to be valid and work when tested directly.
 
