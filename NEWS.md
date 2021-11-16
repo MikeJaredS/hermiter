@@ -3,8 +3,11 @@
 ## New features
 
 * A method has been added for estimating the Kendall rank correlation 
-coefficient.
+coefficient in the bivariate setting.
 * The univariate quantile estimation method has been significantly enhanced in
+accuracy using series acceleration techniques. Series acceleration is enabled
+by default.
+* The univariate pdf and cdf methods have been significantly enhanced in
 accuracy using series acceleration techniques. Series acceleration is enabled
 by default.
 * The new default method for the univariate quantile estimation method, 

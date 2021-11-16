@@ -3,6 +3,7 @@
 <!-- badges: start -->
 [![Travis build status](https://travis-ci.com/MikeJaredS/hermiter.svg?branch=master)](https://travis-ci.com/MikeJaredS/hermiter)
 [![codecov](https://codecov.io/gh/MikeJaredS/hermiter/branch/master/graph/badge.svg)](https://codecov.io/gh/MikeJaredS/hermiter)
+![](https://cranlogs.r-pkg.org/badges/grand-total/hermiter?color=green)
 <!-- badges: end -->
 
 
@@ -33,7 +34,7 @@ function and Spearman correlation estimation.
 
 * [Stephanou, Michael, Varughese, Melvin and Macdonald, Iain. "Sequential quantiles via Hermite series density estimation." Electronic Journal of Statistics 11.1 (2017): 570-607.](https://projecteuclid.org/euclid.ejs/1488531636) 
 * [Stephanou, Michael and Varughese, Melvin. "On the properties of hermite series based distribution function estimators." Metrika (2020).](https://link.springer.com/article/10.1007/s00184-020-00785-z)
-* [Stephanou, Michael and Varughese, Melvin. "Sequential Estimation of Nonparametric Correlation using Hermite Series Estimators." arXiv Preprint (2020).](https://arxiv.org/abs/2012.06287)
+* [Stephanou, Michael and Varughese, Melvin. "Sequential estimation of Spearman rank correlation using Hermite series estimators." Journal of Multivariate Analysis (2021)](https://www.sciencedirect.com/science/article/pii/S0047259X21000610)
 
 ## Features
 
@@ -50,8 +51,7 @@ probabilities at arbitrary x
 * uses small and constant memory for the estimator
 * provides a very compact, simultaneous representation of the pdf, cdf and 
 quantile function that can be efficiently stored and communicated using e.g. 
-saveRDS and readRDS functions (potentially even suitable for data with privacy 
-restrictions since observations are not directly stored in the estimator object)
+saveRDS and readRDS functions
 
 ### Bivariate
 
@@ -337,7 +337,7 @@ ggplot(df_quant,aes(x=actual_quantiles)) + geom_point(aes(y=quantile_est),
 
 ![](./vignettes/quantile_static.png)
 
-# Estimate bivariate pdf, cdf and Spearman's correlation
+# Estimate bivariate pdf, cdf and Nonparametric correlation
 
 The aforementioned suitability of Hermite series based estimators in sequential 
 and one-pass batch estimation settings extends to the bivariate case. 
@@ -451,15 +451,15 @@ Spearman's correlation coefficient results:
 
 |             | Spearman's Correlation |
 | ----------- | ----------- |
-| Actual      | `r round(actual_spearmans,3)`       |
-| Estimated   | `r round(spear_est,3)`        |
+| Actual      | 0.453       |
+| Estimated   | 0.449        |
 
 Kendall correlation coefficient results:
 
 |             | Kendall Correlation |
 | ----------- | ----------- |
-| Actual      | `r round(actual_kendall,3)`       |
-| Estimated   | `r round(kendall_est,3)`        |
+| Actual      | 0.312       |
+| Estimated   | 0.309        |
 
 # Applying to stationary data (sequential setting)
 

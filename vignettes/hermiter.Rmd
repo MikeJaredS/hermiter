@@ -47,7 +47,7 @@ function and Spearman correlation estimation.
 
 * [Stephanou, Michael, Varughese, Melvin and Macdonald, Iain. "Sequential quantiles via Hermite series density estimation." Electronic Journal of Statistics 11.1 (2017): 570-607.](https://projecteuclid.org/euclid.ejs/1488531636) 
 * [Stephanou, Michael and Varughese, Melvin. "On the properties of hermite series based distribution function estimators." Metrika (2020).](https://link.springer.com/article/10.1007/s00184-020-00785-z)
-* [Stephanou, Michael and Varughese, Melvin. "Sequential Estimation of Nonparametric Correlation using Hermite Series Estimators." arXiv Preprint (2020).](https://arxiv.org/abs/2012.06287)
+* [Stephanou, Michael and Varughese, Melvin. "Sequential estimation of Spearman rank correlation using Hermite series estimators." Journal of Multivariate Analysis (2021)](https://www.sciencedirect.com/science/article/pii/S0047259X21000610)
 
 # Load Packages
 
@@ -202,7 +202,7 @@ on subsets of a data set are exactly equal to those obtained by constructing a
 single hermite_estimator and updating on the full data set (corresponding to the 
 concatenation of the aforementioned subsets). This holds true for the pdf, cdf 
 and quantile results in the univariate case and the pdf, cdf
-and Spearman's correlation results in the bivariate case. When standardize = 
+and nonparametric correlation results in the bivariate case. When standardize = 
 TRUE, the equivalence is no longer exact, but is accurate enough to be 
 practically useful. Combining/merging hermite_estimators is illustrated below.
 

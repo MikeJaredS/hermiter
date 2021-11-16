@@ -14,7 +14,7 @@ Description: Facilitates estimation of full univariate and bivariate
   particularly useful in the sequential setting (both stationary and 
   non-stationary) and one-pass batch estimation setting for large data sets. 
   Based on: Stephanou, Michael, Varughese, Melvin and Macdonald, Iain. "Sequential quantiles via Hermite series density estimation." Electronic Journal of Statistics 11.1 (2017): 570-607 <doi:10.1214/17-EJS1245>, 
-  Stephanou, Michael and Varughese, Melvin. "On the properties of Hermite series based distribution function estimators." Metrika (2020) <doi:10.1007/s00184-020-00785-z> and Stephanou, Michael and Varughese, Melvin. "Sequential Estimation of Nonparametric Correlation using Hermite Series Estimators." arXiv Preprint (2020) <arXiv:2012.06287>.
+  Stephanou, Michael and Varughese, Melvin. "On the properties of Hermite series based distribution function estimators." Metrika (2020) <doi:10.1007/s00184-020-00785-z> and Stephanou, Michael and Varughese, Melvin. "Sequential estimation of Spearman rank correlation using Hermite series estimators." Journal of Multivariate Analysis (2021) <doi:10.1016/j.jmva.2021.104783>.
 License: MIT + file LICENSE
 Depends: R (>= 3.5.0)
 Imports: 
