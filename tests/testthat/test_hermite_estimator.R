@@ -158,8 +158,7 @@ test_that("batch updates of hermite_estimator work as expected", {
   expect_equal(mean(test_observations), 
                hermite_est$running_mean,tolerance = get_eps())
   expect_equal(sd(test_observations),sqrt(hermite_est$running_variance / 
-                                  (hermite_est$num_obs-1)),tolerance =
-                 get_eps())
+(hermite_est$num_obs-1)),tolerance = get_eps())
   hermite_est <- hermite_estimator(N = 10, standardize = FALSE)
   hermite_est <- hermite_est %>% update_batch(test_observations)
   expect_equal(target_coeff_vec_unstandardized,
@@ -583,8 +582,7 @@ test_that("probability density estimation works as expected", {
       0.2352683
     )
   expect_equal(pdf_vals, target_pdf_vals_unstandardized, tolerance = get_eps())
-  
-  hermite_est <-
+hermite_est <-
     hermite_estimator(N = 10,
                       standardize = FALSE,
                       exp_weight_lambda = 0.1)
@@ -606,7 +604,7 @@ test_that("probability density estimation works as expected", {
       0.25292388
     )
   expect_equal(pdf_vals, target_pdf_vals_unstandardized, tolerance = get_eps())
-  
+
   hermite_est <-
     hermite_estimator(N = 10,
                       standardize = FALSE,
@@ -786,7 +784,6 @@ test_that("cumulative distribution function estimation works as expected",
             cdf_est <- hermite_est %>% cum_prob(0.5, accelerate_series = TRUE)
             expect_equal(cdf_est, 0.4955906, tolerance = get_eps())
             expect_equal(cdf_from_pdf, cdf_est, tolerance = get_eps())
-            
             hermite_est <-
               hermite_estimator(N = 10)
             expect_equal(hermite_est %>% cum_prob(0.5, 
@@ -917,7 +914,7 @@ test_that("quantile estimation works as expected", {
                tolerance = get_eps())
   quantiles_est <- hermite_est %>% quant(c(0.25, 0.5, 0.75), 
                                          algorithm = "bisection")
-  expect_equal(quantiles_est, c(-0.8793468 , 0.4445265,  1.4835805), 
+  expect_equal(quantiles_est, c(-0.8793468 , 0.4445265,  1.4835805),
                tolerance = get_eps())
   hermite_est <-
     hermite_estimator(N = 20,

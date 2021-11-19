@@ -1329,7 +1329,6 @@ test_that("bivariate Spearman's correlation estimation works as expected",
               update_batch(test_observations_mat)
             est_spear <- hermite_est %>% spearmans()
             expect_equal(0.5639884, est_spear, tolerance = get_eps())
-
             hermite_est <-
               hermite_estimator(
                 N = 10,
@@ -1343,7 +1342,6 @@ test_that("bivariate Spearman's correlation estimation works as expected",
             }
             est_spear <- hermite_est %>% spearmans()
             expect_equal(0.4455953, est_spear, tolerance = get_eps())
-            
             hermite_est <-
               hermite_estimator(
                 N = 10,
@@ -1357,7 +1355,6 @@ test_that("bivariate Spearman's correlation estimation works as expected",
             }
             est_spear <- hermite_est %>% spearmans()
             expect_equal(0.4494662, est_spear, tolerance = get_eps())
-            
             hermite_est <-
               hermite_estimator(N = 10,
                                 standardize = FALSE,
