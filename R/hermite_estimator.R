@@ -4,7 +4,7 @@
 #'
 #' The hermite_estimator class provides a unified interface to the univariate 
 #' and bivariate Hermite series based estimators, leveraging generic methods and
-#' multiple dispatch. Methods are included for the sequential or one-pass batch 
+#' S3 dispatch. Methods are included for the sequential or one-pass batch 
 #' estimation of the full probability density function and cumulative 
 #' distribution function in the univariate and bivariate settings. Sequential 
 #' or one-pass batch estimation methods are also provided for the full quantile 
