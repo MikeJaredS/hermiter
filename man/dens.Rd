@@ -4,7 +4,7 @@
 \alias{dens}
 \title{Estimates the probability density at one or more x values}
 \usage{
-dens(this, x, clipped)
+dens(this, x, clipped, accelerate_series = TRUE)
 }
 \arguments{
 \item{this}{A hermite_estimator_univar or hermite_estimator_bivar object.}
@@ -14,6 +14,9 @@ values at which to calculate the probability density.}
 
 \item{clipped}{A boolean value. This value determines whether
 probability densities are clipped to be bigger than zero.}
+
+\item{accelerate_series}{A boolean value. This value determines whether
+Hermite series acceleration is applied.}
 }
 \value{
 A numeric vector of probability density values.

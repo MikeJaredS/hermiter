@@ -216,6 +216,7 @@ gauss_hermite_quad_100 <- function(f){
   return(result)
 }
 
+# Helper method for merging univariate hermite_estimator objects.
 integrand_coeff_univar <- function(t,hermite_est_current, 
                                    hermite_estimator_merged, current_k, 
                                    dimension = NA){
@@ -254,4 +255,59 @@ integrand_coeff_univar <- function(t,hermite_est_current,
                                             original_mean) -  new_mean)/new_sd, 
                              normalization_hermite[1:current_k])[current_k, ] * 
            as.vector(crossprod(herm_mod, original_coeff_vec)))
+}
+
+# Helper method for estimating Hermite series sums, with or without series 
+# acceleration. These series acceleration techniques are drawn from the below 
+# reference:
+# 
+# Boyd, John P., and Dennis W. Moore. "Summability methods for 
+# Hermite functions." Dynamics of atmospheres and oceans 10.1 (1986): 51-62. 
+# 
+# Note that h_input is a numeric matrix of N+1 rows and length(x) columns,
+# coeffs is a numeric vector of length N+1
+#
+# This helper method is intended for internal use by the 
+# hermite_estimator_univar class.
+series_calculate <- function(h_input, coeffs, accelerate_series = TRUE){
+  if (!is.numeric(coeffs)) {
+    stop("coeffs must be numeric.")
+  }
+  if (!is.numeric(h_input)) {
+    stop("h_input must be numeric.")
+  }
+  if (is.null(nrow(h_input))) {
+    stop("h_input must be numeric matrix.")
+  }
+  if (nrow(h_input) != length(coeffs)) {
+    stop("Number of rows of h_input and length of coeffs must match.")
+  }
+  sz <- nrow(h_input) - 1
+  if (length(coeffs) < 3 | accelerate_series == FALSE){
+    return(as.numeric(crossprod(h_input,coeffs)))
+  }
+  if (length(coeffs) >=3 & length(coeffs) < 6){
+    result <- h_input[1,] * coeffs[1] + 1/2 * h_input[2,] * coeffs[2]
+    return(as.numeric(result))
+  }
+  if (length(coeffs) >=6 & length(coeffs) < 12){
+    result <- crossprod(h_input[1:(sz-3),,drop=FALSE], coeffs[1:(sz-3)])
+    result <- result + 15/16*h_input[sz-2,]*coeffs[sz-2]+
+      11/16*h_input[sz-1,]*coeffs[sz-1]+
+      5/16*h_input[sz,]*coeffs[sz]+
+      1/16*h_input[sz+1,]*coeffs[sz+1]
+    return(as.numeric(result))
+  }
+  if (length(coeffs) >= 12){
+    result <- crossprod(h_input[1:(sz-8),,drop=FALSE], coeffs[1:(sz-8)])
+    result <- result + 255/256*h_input[sz-7,]*coeffs[sz-7]+
+      247/256*h_input[sz-6,]*coeffs[sz-6]+
+      219/256*h_input[sz-5,]*coeffs[sz-5]+
+      163/256*h_input[sz-4,]*coeffs[sz-4]+
+      93/256*h_input[sz-3,]*coeffs[sz-3]+
+      37/256*h_input[sz-2,]*coeffs[sz-2]+
+      9/256*h_input[sz-1,]*coeffs[sz-1]+
+      1/256*h_input[sz+1,]*coeffs[sz+1]
+    return(as.numeric(result))
+  }
 }

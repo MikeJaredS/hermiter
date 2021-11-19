@@ -5,7 +5,7 @@
 \title{A class to sequentially estimate bivariate pdfs, cdfs and nonparametric 
 correlations}
 \usage{
-hermite_estimator_bivar(N = 10, standardize = FALSE, exp_weight_lambda = NA)
+hermite_estimator_bivar(N = 30, standardize = TRUE, exp_weight_lambda = NA)
 }
 \arguments{
 \item{N}{An integer between 0 and 75. The Hermite series based estimator
@@ -37,7 +37,7 @@ distributed data sets. Indeed,estimators constructed on different subsets
 of a distributed data set can be consistently merged.
 }
 \examples{
-hermite_est <- hermite_estimator_bivar(N = 10, standardize = TRUE)
+hermite_est <- hermite_estimator_bivar(N = 30, standardize = TRUE)
 }
 \author{
 Michael Stephanou <michael.stephanou@gmail.com>

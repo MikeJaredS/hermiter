@@ -4,7 +4,7 @@
 \alias{dens.hermite_estimator_univar}
 \title{Estimates the probability density for a vector of x values}
 \usage{
-\method{dens}{hermite_estimator_univar}(this, x, clipped = FALSE)
+\method{dens}{hermite_estimator_univar}(this, x, clipped = FALSE, accelerate_series = TRUE)
 }
 \arguments{
 \item{this}{A hermite_estimator_univar object.}
@@ -14,6 +14,9 @@ density.}
 
 \item{clipped}{A boolean value. This value determines whether
 probability densities are clipped to be bigger than zero.}
+
+\item{accelerate_series}{A boolean value. This value determines whether
+Hermite series acceleration is applied.}
 }
 \value{
 A numeric vector of probability density values.

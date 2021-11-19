@@ -7,8 +7,8 @@ with quantile functions in the univariate setting and nonparametric
 correlations in the bivariate setting.}
 \usage{
 hermite_estimator(
-  N = 10,
-  standardize = FALSE,
+  N = 30,
+  standardize = TRUE,
   exp_weight_lambda = NA,
   est_type = "univariate"
 )
@@ -41,7 +41,7 @@ function in the univariate setting and the Spearman's rank correlation
 estimator in the bivariate setting.
 }
 \examples{
-hermite_est <- hermite_estimator(N = 10, standardize = TRUE,
+hermite_est <- hermite_estimator(N = 30, standardize = TRUE,
 est_type="univariate")
 }
 \author{

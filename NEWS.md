@@ -1,3 +1,28 @@
+# hermiter v2.1.0
+
+## New features
+
+* A method has been added for estimating the Kendall rank correlation 
+coefficient in the bivariate setting.
+* The univariate quantile estimation method has been significantly enhanced in
+accuracy using series acceleration techniques. Series acceleration is enabled
+by default.
+* The univariate pdf and cdf methods have been significantly enhanced in
+accuracy using series acceleration techniques. Series acceleration is enabled
+by default.
+* The new default method for the univariate quantile estimation method, 
+'interpolate' is much faster than the alternate method, 'bisection' with nearly
+the same accuracy.
+* Added print and summary methods for both the univariate and bivariate 
+hermite_estimator objects.
+* Convenience function added to calculate sums of Hermite functions.
+
+## Documentation improvements
+
+* The vignette `hermiter`, namely `vignette("hermiter")` has been extended to 
+included examples pertaining to estimation of the Kendall Tau nonparametric
+correlation coefficient in the bivariate setting.
+
 # hermiter v2.0.3
 
 ## Minor improvements and bug fixes

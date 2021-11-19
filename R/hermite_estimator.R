@@ -25,11 +25,11 @@
 #' hermite_estimator_bivar. 
 #' @export
 #' @examples
-#' hermite_est <- hermite_estimator(N = 10, standardize = TRUE,
+#' hermite_est <- hermite_estimator(N = 30, standardize = TRUE,
 #' est_type="univariate")
 hermite_estimator <-
-  function(N = 10,
-           standardize = FALSE,
+  function(N = 30,
+           standardize = TRUE,
            exp_weight_lambda = NA, est_type = "univariate") {
     if (!is.numeric(N)) {
       stop("N must be numeric.")
@@ -204,6 +204,8 @@ calculate_running_std <- function(this)
 #' values at which to calculate the probability density.
 #' @param clipped A boolean value. This value determines whether
 #' probability densities are clipped to be bigger than zero.
+#' @param accelerate_series A boolean value. This value determines whether
+#' Hermite series acceleration is applied.
 #' @return A numeric vector of probability density values.
 #' @export
 #' @examples
@@ -217,7 +219,7 @@ calculate_running_std <- function(this)
 #' nrow=30, ncol=2,byrow=TRUE))
 #' pdf_est <- dens(hermite_est, matrix(c(0,0,0.5,0.5,1,1),nrow=3,
 #' ncol=2,byrow=TRUE))
-dens <- function(this, x, clipped) {
+dens <- function(this, x, clipped, accelerate_series = TRUE) {
   UseMethod("dens", this)
 }
 
@@ -235,6 +237,8 @@ dens <- function(this, x, clipped) {
 #' Values at which to calculate the cumulative probability.
 #' @param clipped A boolean value. This value determines whether
 #' cumulative probabilities are clipped to lie between 0 and 1.
+#' @param accelerate_series A boolean value. This value determines whether
+#' Hermite series acceleration is applied.
 #' @return A numeric vector of cumulative probability values.
 #' @export
 #' @examples
@@ -248,7 +252,7 @@ dens <- function(this, x, clipped) {
 #' nrow=30, ncol=2,byrow=TRUE))
 #' cdf_est <- cum_prob(hermite_est, matrix(c(0,0,0.5,0.5,1,1),nrow=3,
 #' ncol=2,byrow=TRUE))
-cum_prob <- function(this, x, clipped) {
+cum_prob <- function(this, x, clipped, accelerate_series = TRUE) {
   UseMethod("cum_prob", this)
 }
 
@@ -263,6 +267,16 @@ cum_prob <- function(this, x, clipped) {
 #'
 #' @param this A hermite_estimator_univar object.
 #' @param p A numeric vector. A vector of probability values.
+#' @param algorithm A string. Two possible values 'interpolate' which is faster
+#' but may be less accurate or 'bisection' which is slower but potentially more
+#' accurate.
+#' @param accelerate_series A boolean value. If set to TRUE, the series 
+#' acceleration methods described in:
+#'
+#' Boyd, John P., and Dennis W. Moore. "Summability methods for 
+#' Hermite functions." Dynamics of atmospheres and oceans 10.1 (1986): 51-62. 
+#'  
+#' are applied. If set to FALSE, then standard summation is applied.
 #' @return A numeric vector. The vector of quantile values associated with the
 #' probabilities p.
 #' @export
@@ -271,7 +285,7 @@ cum_prob <- function(this, x, clipped) {
 #' est_type="univariate")
 #' hermite_est <- update_batch(hermite_est, rnorm(30))
 #' quant_est <- quant(hermite_est, c(0.25, 0.5, 0.75))
-quant <- function(this, p) {
+quant <- function(this, p, algorithm="interpolate", accelerate_series = TRUE) {
   UseMethod("quant", this)
 }
 
@@ -297,4 +311,46 @@ quant <- function(this, p) {
 spearmans <- function(this, clipped = FALSE)
 {
   UseMethod("spearmans",this)
+}
+
+#' Estimates the Kendall rank correlation coefficient
+#'
+#' This method calculates the Kendall rank correlation coefficient value. It 
+#' is only applicable to the bivariate Hermite estimator i.e. est_type = 
+#' "bivariate".
+#'
+#' The object must be updated with observations prior to the use of this method.
+#'
+#' @param this A hermite_estimator_bivar object.
+#' @param clipped A boolean value. Indicates whether to clip the Kendall rank 
+#' correlation estimates to lie between -1 and 1.
+#' @return A numeric value.
+#' @export
+#' @examples
+#' hermite_est <- hermite_estimator(N = 10, standardize = TRUE,
+#' est_type="bivariate")
+#' hermite_est <- update_batch(hermite_est, matrix(rnorm(30*2), nrow=30, 
+#' ncol=2, byrow = TRUE))
+#' kendall_est <- kendall(hermite_est)
+kendall <- function(this, clipped = FALSE)
+{
+  UseMethod("kendall",this)
+}
+
+# Internal helper function for print methods.
+describe_estimator <- function(this, est_type){
+  if (est_type == "univariate") {
+    cat("Univariate Hermite Estimator:\n")
+  } else {
+    cat("Bivariate Hermite Estimator:\n")
+  }
+  cat(paste0("N = ",this$N_param,"\n"))
+  cat(paste0("Standardize observations = ",this$standardize_obs,"\n"))
+  if (!is.na(this$exp_weight)){
+    cat(paste0("Exponential weighting for coefficents = TRUE, lambda = ", 
+               this$exp_weight,"\n"))
+  } else {
+    cat(paste0("Exponential weighting for coefficents = FALSE","\n"))
+  }
+  cat(paste0("Number of observations = ",this$num_obs,"\n"))
 }

@@ -1,20 +1,21 @@
 # hermiter
 
 <!-- badges: start -->
-[![Travis build status](https://travis-ci.com/MikeJaredS/hermiter.svg?branch=master)](https://travis-ci.com/MikeJaredS/hermiter)
-[![codecov](https://codecov.io/gh/MikeJaredS/hermiter/branch/master/graph/badge.svg)](https://codecov.io/gh/MikeJaredS/hermiter)
+[![codecov](https://codecov.io/gh/MikeJaredS/hermiter/branch/master/graph/badge.svg)](https://app.codecov.io/gh/MikeJaredS/hermiter)
+[![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/hermiter?color=green)](https://cran.r-project.org/package=hermiter)
+![](https://cranlogs.r-pkg.org/badges/grand-total/hermiter?color=green)
 <!-- badges: end -->
 
 
 ## What does hermiter do?
 
-`hermiter` is an R package that facilitates the estimation of the probability density function 
-and cumulative distribution function in univariate and bivariate settings using 
-Hermite series based estimators. In addition, `hermiter` allows the 
-estimation of the quantile function in the univariate case and the Spearman's 
-rank correlation coefficient in the bivariate case. The package is applicable to
-streaming, batch and grouped data. The core methods of the package are written 
-in C++ for speed.
+`hermiter` is an R package that facilitates the estimation of the probability 
+density function and cumulative distribution function in univariate and 
+bivariate settings using Hermite series based estimators. In addition, 
+`hermiter` allows the estimation of the quantile function in the univariate 
+case and nonparametric correlation coefficients in the bivariate case. The 
+package is applicable to streaming, batch and grouped data. The core methods of 
+the package are written in C++ for speed.
 
 These estimators are particularly useful in the sequential setting (both 
 stationary and non-stationary data streams). In addition, they are useful in 
@@ -24,15 +25,16 @@ applicable in decentralized (distributed) settings in that estimators formed on
 subsets of the data can be consistently merged. The Hermite series based 
 estimators have the distinct advantage of being able to estimate the full 
 density function, distribution function and quantile function (univariate 
-setting) along with the Spearman's rank correlation (bivariate setting) in an 
-online manner. The theoretical and empirical properties of these estimators have 
-been studied in-depth in the articles below. The investigations demonstrate that
-the Hermite series based estimators are particularly effective in distribution
-function, quantile function and nonparametric correlation estimation.
+setting) along with the Spearman Rho and Kendall Tau correlation coefficients
+(bivariate setting) in an online manner. The theoretical and empirical 
+properties of most of these estimators have been studied in-depth in the 
+articles below. The investigations demonstrate that the Hermite series based 
+estimators are particularly effective in distribution function, quantile 
+function and Spearman correlation estimation.
 
 * [Stephanou, Michael, Varughese, Melvin and Macdonald, Iain. "Sequential quantiles via Hermite series density estimation." Electronic Journal of Statistics 11.1 (2017): 570-607.](https://projecteuclid.org/euclid.ejs/1488531636) 
 * [Stephanou, Michael and Varughese, Melvin. "On the properties of hermite series based distribution function estimators." Metrika (2020).](https://link.springer.com/article/10.1007/s00184-020-00785-z)
-* [Stephanou, Michael and Varughese, Melvin. "Sequential Estimation of Nonparametric Correlation using Hermite Series Estimators." arXiv Preprint (2020).](https://arxiv.org/abs/2012.06287)
+* [Stephanou, Michael and Varughese, Melvin. "Sequential estimation of Spearman rank correlation using Hermite series estimators." Journal of Multivariate Analysis (2021)](https://www.sciencedirect.com/science/article/pii/S0047259X21000610)
 
 ## Features
 
@@ -49,22 +51,21 @@ probabilities at arbitrary x
 * uses small and constant memory for the estimator
 * provides a very compact, simultaneous representation of the pdf, cdf and 
 quantile function that can be efficiently stored and communicated using e.g. 
-saveRDS and readRDS functions (potentially even suitable for data with privacy 
-restrictions since observations are not directly stored in the estimator object)
+saveRDS and readRDS functions
 
 ### Bivariate
 
-* fast batch estimation of bivariate pdf, cdf and Spearman's correlation 
-coefficient
+* fast batch estimation of bivariate pdf, cdf and nonparametric correlation 
+coefficients (Spearman Rho and Kendall Tau)
 * consistent merging of estimates
-* fast sequential estimation of bivariate pdf, cdf and Spearman's correlation 
-coefficient on streaming data
+* fast sequential estimation of bivariate pdf, cdf and nonparametric correlation 
+coefficients on streaming data
 * adaptive sequential estimation on non-stationary bivariate streams via 
 exponential weighting
 * provides online, O(1) time complexity estimates of bivariate probability 
 densities and cumulative probabilities at arbitrary points, x
-* provides online, O(1) time complexity estimates of the Spearman's rank 
-correlation coefficient
+* provides online, O(1) time complexity estimates of the Spearman and Kendall 
+rank correlation coefficients
 * uses small and constant memory for the estimator
 
 ## Installation
@@ -222,7 +223,7 @@ on subsets of a data set are exactly equal to those obtained by constructing a
 single hermite_estimator and updating on the full data set (corresponding to the 
 concatenation of the aforementioned subsets). This holds true for the pdf, cdf 
 and quantile results in the univariate case and the pdf, cdf
-and Spearman's correlation results in the bivariate case. When standardize = 
+and nonparametric correlation results in the bivariate case. When standardize = 
 TRUE, the equivalence is no longer exact, but is accurate enough to be 
 practically useful. Combining/merging hermite_estimators is illustrated below.
 
@@ -336,14 +337,14 @@ ggplot(df_quant,aes(x=actual_quantiles)) + geom_point(aes(y=quantile_est),
 
 ![](./vignettes/quantile_static.png)
 
-# Estimate bivariate pdf, cdf and Spearman's correlation
+# Estimate bivariate pdf, cdf and Nonparametric correlation
 
 The aforementioned suitability of Hermite series based estimators in sequential 
 and one-pass batch estimation settings extends to the bivariate case. 
 Probability densities and cumulative probabilities can be obtained at arbitrary 
-points. The syntax to calculate probability densities, 
-cumulative probabilities and the Spearman's correlation coefficient in the 
-bivariate setting is presented below.
+points. The syntax to calculate probability densities and  
+cumulative probabilities along with the Spearman and Kendall correlation 
+coefficients in the bivariate setting is presented below.
 
 ## Standard syntax
 
@@ -353,21 +354,20 @@ sig_x <- 1
 sig_y <- 1
 num_obs <- 4000
 rho <- 0.5
-observations_mat <- mvtnorm::rmvnorm(n=num_obs,mean=rep(0,2),sigma = matrix(c(sig_x^2,rho*sig_x*sig_y,rho*sig_x*sig_y,sig_y^2), 
-                                                      nrow=2,ncol=2, 
-                                                      byrow = TRUE))
+observations_mat <- mvtnorm::rmvnorm(n=num_obs,mean=rep(0,2),
+          sigma = matrix(c(sig_x^2,rho*sig_x*sig_y,rho*sig_x*sig_y,sig_y^2), 
+          nrow=2,ncol=2, byrow = TRUE))
 
-hermite_est <- hermite_estimator(N = 20, standardize = TRUE, 
+hermite_est <- hermite_estimator(N = 30, standardize = TRUE, 
                                  est_type = "bivariate") 
 hermite_est <-  update_batch(hermite_est,observations_mat)
-
 vals <- seq(-5,5,by=0.25)
 x_grid <- as.matrix(expand.grid(X=vals, Y=vals))
 pdf_est <- dens(hermite_est,x_grid)
 cdf_est <- cum_prob(hermite_est,x_grid)
 spear_est <- spearmans(hermite_est)
+kendall_est <- kendall(hermite_est)
 ```
-
 ## Piped syntax
 
 ```{r}
@@ -375,10 +375,11 @@ sig_x <- 1
 sig_y <- 1
 num_obs <- 4000
 rho <- 0.5
-observations_mat <- mvtnorm::rmvnorm(n=num_obs,mean=rep(0,2),sigma = matrix(c(sig_x^2,rho*sig_x*sig_y,rho*sig_x*sig_y,sig_y^2), nrow=2, ncol=2, 
-                                                                byrow = TRUE))
+observations_mat <- mvtnorm::rmvnorm(n=num_obs,mean=rep(0,2),
+        sigma = matrix(c(sig_x^2,rho*sig_x*sig_y,rho*sig_x*sig_y,sig_y^2), 
+          nrow=2, ncol=2, byrow = TRUE))
 
-hermite_est <- hermite_estimator(N = 20, standardize = TRUE, 
+hermite_est <- hermite_estimator(N = 30, standardize = TRUE, 
                                  est_type = "bivariate") 
 hermite_est <-  hermite_est %>% update_batch(observations_mat)
 
@@ -387,20 +388,21 @@ x_grid <- as.matrix(expand.grid(X=vals, Y=vals))
 pdf_est <- hermite_est %>% dens(x_grid, clipped = TRUE)
 cdf_est <- hermite_est %>% cum_prob(x_grid, clipped = TRUE)
 spear_est <- hermite_est %>% spearmans()
+kendall_est <- hermite_est %>% kendall()
 ```
 
 ```{r}
-actual_pdf <-mvtnorm::dmvnorm(x_grid,mean=rep(0,2),sigma = matrix(c(sig_x^2,rho*sig_x*sig_y,rho*sig_x*sig_y,sig_y^2), nrow=2,ncol=2, 
-                                                                byrow = TRUE))
-
+actual_pdf <-mvtnorm::dmvnorm(x_grid,mean=rep(0,2),
+            sigma = matrix(c(sig_x^2,rho*sig_x*sig_y,rho*sig_x*sig_y,sig_y^2), 
+                           nrow=2,ncol=2, byrow = TRUE))
 actual_cdf <- rep(NA,nrow(x_grid))
 for (row_idx in seq_len(nrow(x_grid))) {
-  actual_cdf[row_idx] <-  mvtnorm::pmvnorm(lower = c(-Inf,-Inf),upper=as.numeric(x_grid[row_idx,]),mean=rep(0,2),sigma = matrix(c(sig_x^2,rho*sig_x*sig_y,rho*sig_x*sig_y,sig_y^2), nrow=2,ncol=2, 
-                                                                                                                                byrow = TRUE))
+  actual_cdf[row_idx] <-  mvtnorm::pmvnorm(lower = c(-Inf,-Inf),
+    upper=as.numeric(x_grid[row_idx,]),mean=rep(0,2),sigma = matrix(c(sig_x^2, 
+        rho*sig_x*sig_y,rho*sig_x*sig_y,sig_y^2), nrow=2,ncol=2,byrow = TRUE))
 }
-
 actual_spearmans <- cor(observations_mat,method = "spearman")[1,2]
-
+actual_kendall <- cor(observations_mat,method = "kendall")[1,2]
 df_pdf_cdf <- data.frame(x_grid,pdf_est,cdf_est,actual_pdf,actual_cdf)
 ```
 
@@ -450,7 +452,14 @@ Spearman's correlation coefficient results:
 |             | Spearman's Correlation |
 | ----------- | ----------- |
 | Actual      | 0.453       |
-| Estimated   | 0.452       |
+| Estimated   | 0.449        |
+
+Kendall correlation coefficient results:
+
+|             | Kendall Correlation |
+| ----------- | ----------- |
+| Actual      | 0.312       |
+| Estimated   | 0.309        |
 
 # Applying to stationary data (sequential setting)
 
@@ -541,9 +550,9 @@ The hermite_estimator is also applicable to non-stationary data streams.
 A weighted form of the Hermite series based estimator can be applied to handle 
 this case. The estimator will adapt to the new distribution and 
 "forget" the old distribution as illustrated in the example below. In this 
-univariate example, the  distribution from which the observations are drawn switches from
-a Chi-square distribution to a logistic distribution and finally to a normal 
-distribution. In order to use the exponentially weighted form of the 
+univariate example, the  distribution from which the observations are drawn 
+switches from a Chi-square distribution to a logistic distribution and finally 
+to a normal distribution. In order to use the exponentially weighted form of the 
 hermite_estimator, the exp_weight_lambda argument must be set to a non-NA value.
 Typical values for this parameter are 0.01, 0.05 and 0.1. The lower the 
 exponential weighting parameter, the slower the estimator adapts and vice versa 
@@ -620,10 +629,13 @@ res_q <- res_q %>% mutate(idx_vals=idx_vals*100)
 ```{r eval=FALSE}
 # Visualize Results for PDF (Not run, requires gganimate, gifski and transformr
 # packages)
-p <- ggplot(res,aes(x=x)) + geom_line(aes(y=pdf_est_vals, colour="Estimated")) + geom_line(aes(y=actual_pdf_vals, colour="Actual")) +
+p <- ggplot(res,aes(x=x)) + geom_line(aes(y=pdf_est_vals, colour="Estimated")) +
+geom_line(aes(y=actual_pdf_vals, colour="Actual")) +
   scale_colour_manual("", 
                       breaks = c("Estimated", "Actual"),
-                      values = c("blue", "black")) + ylab("Probability Density") +transition_states(idx_vals,transition_length = 2,state_length = 1) +
+                      values = c("blue", "black")) + 
+            ylab("Probability Density") +
+            transition_states(idx_vals,transition_length = 2,state_length = 1) +
   ggtitle('Observation index {closest_state}')
 anim_save("pdf.gif",p)
 ```
@@ -633,7 +645,8 @@ anim_save("pdf.gif",p)
 ```{r eval=FALSE}
 # Visualize Results for CDF (Not run, requires gganimate, gifski and transformr
 # packages)
-p <- ggplot(res,aes(x=x)) + geom_line(aes(y=cdf_est_vals, colour="Estimated")) + geom_line(aes(y=actual_cdf_vals, colour="Actual")) +
+p <- ggplot(res,aes(x=x)) + geom_line(aes(y=cdf_est_vals, colour="Estimated")) +
+geom_line(aes(y=actual_cdf_vals, colour="Actual")) +
   scale_colour_manual("", 
                       breaks = c("Estimated", "Actual"),
                       values = c("blue", "black")) +
@@ -708,8 +721,9 @@ server <- function(input, output) {
     sig_y <- 1
     num_obs <- 100
     rho <- 2 *sin(pi/6 * input$spearmans)
-    observations_mat <- mvtnorm::rmvnorm(n=num_obs,mean=rep(0,2),sigma = matrix(c(sig_x^2,rho*sig_x*sig_y,rho*sig_x*sig_y,sig_y^2), nrow=2,ncol=2, 
-                                                                byrow = TRUE))
+    observations_mat <- mvtnorm::rmvnorm(n=num_obs,mean=rep(0,2), 
+    sigma = matrix(c(sig_x^2,rho*sig_x*sig_y,rho*sig_x*sig_y,sig_y^2),
+    nrow=2,ncol=2, byrow = TRUE))
     return(observations_mat)
   })
   updated_spear_calc <- reactive({
@@ -726,8 +740,9 @@ server <- function(input, output) {
     vals <- seq(-5,5,by=0.25)
     x_grid <- as.matrix(expand.grid(X=vals, Y=vals))
     rho <- 2 *sin(pi/6 * input$spearmans)
-    actual_pdf <-mvtnorm::dmvnorm(x_grid,mean=rep(0,2),sigma = matrix(c(sig_x^2,rho*sig_x*sig_y,rho*sig_x*sig_y,sig_y^2), nrow=2,ncol=2, 
-                                                                byrow = TRUE))
+    actual_pdf <-mvtnorm::dmvnorm(x_grid,mean=rep(0,2), 
+    sigma = matrix(c(sig_x^2,rho*sig_x*sig_y,rho*sig_x*sig_y,sig_y^2), 
+    nrow=2,ncol=2, byrow = TRUE))
     df_pdf <- data.frame(x_grid,actual_pdf)
     p1 <- ggplot(df_pdf) + geom_tile(aes(X, Y, fill= actual_pdf)) +
       scale_fill_gradient2(low="blue", mid="cyan", high="purple",

@@ -4,7 +4,7 @@
 \alias{cum_prob.hermite_estimator_univar}
 \title{Estimates the cumulative probability for a vector of x values}
 \usage{
-\method{cum_prob}{hermite_estimator_univar}(this, x, clipped = FALSE)
+\method{cum_prob}{hermite_estimator_univar}(this, x, clipped = FALSE, accelerate_series = TRUE)
 }
 \arguments{
 \item{this}{A hermite_estimator_univar object.}
@@ -14,6 +14,9 @@ probability}
 
 \item{clipped}{A boolean value. This value determines whether cumulative
 probabilities are clipped to lie within the range [0,1].}
+
+\item{accelerate_series}{A boolean value. This value determines whether
+Hermite series acceleration is applied.}
 }
 \value{
 A numeric vector of cumulative probability values.

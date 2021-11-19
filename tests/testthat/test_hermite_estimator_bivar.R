@@ -1320,71 +1320,15 @@ test_that("bivariate Spearman's correlation estimation works as expected",
                                 standardize = FALSE,
                                 est_type = "bivariate") %>%
               update_batch(test_observations_mat)
-            integrand <- function(h_est, x, y) {
-              x_std <- x
-              y_std <- y
-              if (h_est$standardize_obs == TRUE) {
-                if (is.na(h_est$exp_weight)) {
-                  x_std <-
-                    (x - h_est$running_mean_x) / sqrt(h_est$running_variance_x /
-                                                        (h_est$num_obs - 1))
-                  y_std <-
-                    (y - h_est$running_mean_y) / sqrt(h_est$running_variance_y /
-                                                        (h_est$num_obs - 1))
-                } else {
-                  x_std <- (x - h_est$running_mean_x) / 
-                    sqrt(h_est$running_variance_x)
-                  y_std <-
-                    (y - h_est$running_mean_y) / sqrt(h_est$running_variance_y)
-                }
-              }
-              12 * t(crossprod(
-                hermite_int_lower(h_est$N_param, x_std),
-                h_est$coeff_vec_x
-              ) - 1 / 2) *
-                t(crossprod(
-                  hermite_int_lower(h_est$N_param, y_std),
-                  h_est$coeff_vec_y
-                ) - 1 / 2)  *
-                dens(h_est, c(x, y))
-            }
-            integrand_vec <- Vectorize(integrand, vectorize.args = c("x", "y"))
-            
-            inner_func <- function(x, y) {
-              integrand_vec(hermite_est, x, y)
-            }
-            inner_integral <- Vectorize(function(y) {
-              integrate(function(x) {
-                inner_func(x, y)
-              }, lower = -Inf, upper = Inf)$value
-            })
-            target_spear <-
-              integrate(function(y) {
-                inner_integral(y)
-              }, lower = -Inf, upper = Inf)$value
             est_spear <- hermite_est %>% spearmans()
-            expect_equal(target_spear, est_spear, tolerance = get_eps())
-            
+            expect_equal(0.5486201, est_spear, tolerance = get_eps())
             hermite_est <-
               hermite_estimator(N = 10,
                                 standardize = TRUE,
                                 est_type = "bivariate") %>%
               update_batch(test_observations_mat)
-            inner_func <- function(x, y) {
-              integrand_vec(hermite_est, x, y)
-            }
-            inner_integral <- Vectorize(function(y) {
-              integrate(function(x) {
-                inner_func(x, y)
-              }, lower = -Inf, upper = Inf)$value
-            })
-            target_spear <-
-              integrate(function(y) {
-                inner_integral(y)
-              }, lower = -Inf, upper = Inf)$value
             est_spear <- hermite_est %>% spearmans()
-            expect_equal(target_spear, est_spear, tolerance = get_eps())
-            
+            expect_equal(0.5639884, est_spear, tolerance = get_eps())
             hermite_est <-
               hermite_estimator(
                 N = 10,
@@ -1396,21 +1340,8 @@ test_that("bivariate Spearman's correlation estimation works as expected",
               hermite_est <-
                 hermite_est %>% update_sequential(test_observations_mat[idx, ])
             }
-            inner_func <- function(x, y) {
-              integrand_vec(hermite_est, x, y)
-            }
-            inner_integral <- Vectorize(function(y) {
-              integrate(function(x) {
-                inner_func(x, y)
-              }, lower = -Inf, upper = Inf)$value
-            })
-            target_spear <-
-              integrate(function(y) {
-                inner_integral(y)
-              }, lower = -Inf, upper = Inf)$value
             est_spear <- hermite_est %>% spearmans()
-            expect_equal(target_spear, est_spear, tolerance = get_eps())
-            
+            expect_equal(0.4455953, est_spear, tolerance = get_eps())
             hermite_est <-
               hermite_estimator(
                 N = 10,
@@ -1422,21 +1353,8 @@ test_that("bivariate Spearman's correlation estimation works as expected",
               hermite_est <-
                 hermite_est %>% update_sequential(test_observations_mat[idx, ])
             }
-            inner_func <- function(x, y) {
-              integrand_vec(hermite_est, x, y)
-            }
-            inner_integral <- Vectorize(function(y) {
-              integrate(function(x) {
-                inner_func(x, y)
-              }, lower = -Inf, upper = Inf)$value
-            })
-            target_spear <-
-              integrate(function(y) {
-                inner_integral(y)
-              }, lower = -Inf, upper = Inf)$value
             est_spear <- hermite_est %>% spearmans()
-            expect_equal(target_spear, est_spear, tolerance = get_eps())
-            
+            expect_equal(0.4494662, est_spear, tolerance = get_eps())
             hermite_est <-
               hermite_estimator(N = 10,
                                 standardize = FALSE,
@@ -1501,3 +1419,141 @@ test_that("bivariate Spearman's correlation estimation works as expected",
             expect_equal(length(spear_est), 1)
             expect_true(all(is.na(spear_est)))
           })
+
+
+test_that("bivariate Kendall correlation estimation works as expected",
+          {
+            test_observations <- c(
+              -0.37826482129403,
+              -1.47945641842633,
+              0.586716971868732,
+              -0.665669486496455,
+              -1.43166984568682,
+              0.474563723449495,
+              -1.11341217646342,
+              1.36541799968729,
+              -0.24770649613921,
+              1.4481757755572,
+              -0.529665159959186,
+              0.686121642323148,
+              1.01383912025988,
+              -0.780484609763183,
+              -0.545088136349466,
+              0.135846098413723,
+              -0.240679160926683,
+              1.77147252004363,
+              -1.45865271681631,
+              0.0628601340760367,
+              1.07810464037276,
+              -0.17475267390839,
+              -0.66888270234312,
+              -0.408256095712664,
+              0.172717270523465,
+              -0.741493500626988,
+              1.01132229766528,
+              -0.959035155862129,
+              -0.482739678200718,
+              -0.753321211065154,
+              0.503938515418142,
+              -1.78785564896096,
+              2.47357639665998,
+              -0.489738640544134,
+              -0.714875932607426,
+              0.806157676535886,
+              -1.00656011023483,
+              -0.984503617692169,
+              1.30774013514267,
+              0.440505965420727,
+              -0.650310967710673,
+              -1.66222913387161,
+              1.25306046766581,
+              0.0171057800672902,
+              -0.563511566403471,
+              0.388015625901842,
+              0.66092470022605,
+              1.65884426783205,
+              -0.123975093954792,
+              -0.552324416383275,
+              1.18682631574925,
+              0.435917095119776,
+              -0.732475285222769,
+              0.0837044467479744,
+              0.0011521929124057,
+              0.0224946049862673,
+              1.64913440622687,
+              -2.35583419045975,
+              -0.350200566468806,
+              0.578709836500825
+            )
+            test_observations_mat <-
+              matrix(test_observations,
+                     nrow = 30,
+                     ncol = 2,
+                     byrow = F)
+            hermite_est <-
+              hermite_estimator(N = 10,
+                                standardize = FALSE,
+                                est_type = "bivariate") %>%
+              update_batch(test_observations_mat)
+            est_kendall <- hermite_est %>% kendall()
+            expect_equal(0.4500084, est_kendall, tolerance = get_eps())
+            
+            hermite_est <-
+              hermite_estimator(N = 10,
+                                standardize = TRUE,
+                                est_type = "bivariate") %>%
+              update_batch(test_observations_mat)
+            est_kendall <- hermite_est %>% kendall()
+            expect_equal(0.4585442, est_kendall, tolerance = get_eps())
+            hermite_est <-
+              hermite_estimator(
+                N = 10,
+                standardize = FALSE,
+                exp_weight_lambda = 0.1,
+                est_type = "bivariate"
+              )
+            for (idx in seq_len(nrow(test_observations_mat))) {
+              hermite_est <-
+                hermite_est %>% update_sequential(test_observations_mat[idx, ])
+            }
+            est_kendall <- hermite_est %>% kendall()
+            expect_equal(0.3050382, est_kendall, tolerance = get_eps())
+            hermite_est <-
+              hermite_estimator(
+                N = 10,
+                standardize = TRUE,
+                exp_weight_lambda = 0.1,
+                est_type = "bivariate"
+              )
+            for (idx in seq_len(nrow(test_observations_mat))) {
+              hermite_est <-
+                hermite_est %>% update_sequential(test_observations_mat[idx, ])
+            }
+            est_kendall <- hermite_est %>% kendall()
+            expect_equal(0.2602773, est_kendall, tolerance = get_eps())
+            est_kendall <- hermite_est %>% kendall(clipped = TRUE)
+            expect_equal(0.2602773, est_kendall, tolerance = get_eps())
+            hermite_est <-
+              hermite_estimator(N = 10, est_type = "bivariate")
+            kendall_est <- hermite_est %>% kendall()
+            expect_equal(length(kendall_est), 1)
+            expect_true(all(is.na(kendall_est)))
+          })
+
+test_that("Print and Summary work as expected", {
+  hermite_est <- hermite_estimator(est_type = "bivariate")
+  expect_equal(capture.output(print(hermite_est)), 
+               c("Bivariate Hermite Estimator:",
+                 "N = 30", "Standardize observations = TRUE",
+                 "Exponential weighting for coefficents = FALSE",
+                 "Number of observations = 0"))
+  hermite_est <- update_batch(hermite_est, x = matrix(c(1, 2, 3, 4,5, 6),nrow=3,
+                                                      ncol=2, byrow = TRUE))
+  expect_equal(capture.output(summary(hermite_est)), 
+               c('Bivariate Hermite Estimator:','N = 30',
+               'Standardize observations = TRUE',
+               'Exponential weighting for coefficents = FALSE',
+               'Number of observations = 3','','Mean x = 3','Mean y = 4',
+               'Standard Deviation x = 2','Standard Deviation y = 2',
+               'Spearman\'s Rho = 1.2154','Kendall Tau = 0.7662'))
+})

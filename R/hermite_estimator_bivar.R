@@ -26,8 +26,8 @@
 #' rank correlation estimation.
 #' @export
 #' @examples
-#' hermite_est <- hermite_estimator_bivar(N = 10, standardize = TRUE)
-hermite_estimator_bivar <- function(N = 10, standardize=FALSE, 
+#' hermite_est <- hermite_estimator_bivar(N = 30, standardize = TRUE)
+hermite_estimator_bivar <- function(N = 30, standardize=TRUE, 
                                     exp_weight_lambda=NA)
 {
   if (!is.numeric(N)) {
@@ -64,8 +64,6 @@ hermite_estimator_bivar <- function(N = 10, standardize=FALSE,
     z=c()
   )
   this$normalization_hermite_vec <- h_norm_serialized[1:(this$N_param+1)]
-  this$W <- W_serialized[1:(this$N_param+1),1:(this$N_param+1)]
-  this$z <- z_serialized[1:(this$N_param+1)]
   class(this) <- c("hermite_estimator_bivar", "list")
   return(this)
 }
@@ -289,6 +287,10 @@ update_sequential.hermite_estimator_bivar <- function(this, x)
   if (length(x) != 2){
     stop("x must be a vector of length 2 (bivariate observation).")
   }
+  if (any(is.na(x)) | any(!is.finite(x))){
+    stop("The sequential update method is only 
+         applicable to finite, non NaN, non NA values.")
+  }
   this$num_obs <- this$num_obs + 1
   if (this$standardize_obs == TRUE) {
     if (is.na(this$exp_weight)) {
@@ -382,6 +384,10 @@ update_batch.hermite_estimator_bivar <- function(this, x) {
   if (!is.na(this$exp_weight)) {
     stop("The Hermite estimator cannot be exponentially weighted.")
   }
+  if (any(is.na(x)) | any(!is.finite(x))){
+    stop("The batch update method is only 
+         applicable to finite, non NaN, non NA values.")
+  }
   this$num_obs <- nrow(x)
   if (this$standardize_obs == TRUE) {
     this$running_mean_x <-mean(x[,1])
@@ -452,6 +458,8 @@ dens_helper.hermite_estimator_bivar <- function(this,x, clipped = FALSE){
 #' @param x A numeric matrix. Each row corresponds to a 2-d coordinate.
 #' @param clipped A boolean value. This value determines whether
 #' probability densities are clipped to be bigger than zero.
+#' @param accelerate_series A boolean value. Series acceleration has not yet 
+#' been implemented for bivariate estimators.
 #' @return A numeric vector of probability density values.
 #' @export
 #' @examples
@@ -460,7 +468,8 @@ dens_helper.hermite_estimator_bivar <- function(this,x, clipped = FALSE){
 #' ncol=2, byrow = TRUE))
 #' cdf_est <- dens(hermite_est, matrix(c(0, 0, 1, 1, 2, 2), nrow=3, ncol=2, 
 #' byrow = TRUE))
-dens.hermite_estimator_bivar <- function(this,x, clipped = FALSE){
+dens.hermite_estimator_bivar <- function(this,x, clipped = FALSE, 
+                                         accelerate_series = FALSE){
   if (!is.numeric(x)) {
     stop("x must be numeric.")
   }
@@ -483,8 +492,8 @@ dens.hermite_estimator_bivar <- function(this,x, clipped = FALSE){
   return(result)
 }
 
-# Internal helper method to calculate the cumulative probability at a single 2-d
-# x value
+# Internal helper method to calculate the cumulative probability at a single 
+# 2-d x value
 cum_prob_helper <- function(this, x, clipped = FALSE)
 {
   UseMethod("cum_prob_helper",this)
@@ -516,6 +525,8 @@ cum_prob_helper.hermite_estimator_bivar <- function(this,x, clipped = FALSE){
 #' @param x A numeric matrix. Each row corresponds to a 2-d coordinate.
 #' @param clipped A boolean value. This value determines whether cumulative
 #' probabilities are clipped to lie within the range [0,1].
+#' @param accelerate_series A boolean value. Series acceleration has not yet 
+#' been implemented for bivariate estimators.
 #' @return A numeric vector of cumulative probability values.
 #' @export
 #' @examples
@@ -524,7 +535,8 @@ cum_prob_helper.hermite_estimator_bivar <- function(this,x, clipped = FALSE){
 #' ncol=2, byrow = TRUE))
 #' cdf_est <- cum_prob(hermite_est, matrix(c(0, 0, 1, 1, 2, 2), nrow=3, ncol=2, 
 #' byrow = TRUE))
-cum_prob.hermite_estimator_bivar <- function(this,x, clipped = FALSE){
+cum_prob.hermite_estimator_bivar <- function(this,x, clipped = FALSE,
+                                             accelerate_series = FALSE){
   if (!is.numeric(x)) {
     stop("x must be numeric.")
   }
@@ -574,20 +586,102 @@ spearmans.hermite_estimator_bivar <- function(this, clipped = FALSE)
   if (this$num_obs < 2) {
     return(NA)
   }
-  W_transpose <- t(this$W)
+  W <- W_serialized[1:(this$N_param+1),1:(this$N_param+1)]
+  z <- z_serialized[1:(this$N_param+1)]
+  W_transpose <- t(W)
   result <- 12*(t(this$coeff_vec_x) %*% W_transpose) %*% 
-    this$coeff_mat_bivar %*% (this$W %*% this$coeff_vec_y) +
+    this$coeff_mat_bivar %*% (W %*% this$coeff_vec_y) +
     -6 * (t(this$coeff_vec_x) %*% W_transpose) %*% (this$coeff_mat_bivar %*% 
-                                                      this$z) +
-    -6 * (t(this$z)%*% this$coeff_mat_bivar) %*% (this$W %*% this$coeff_vec_y)+
-    3 * t(this$z) %*% (this$coeff_mat_bivar%*%this$z)
+                                                      z) +
+    -6 * (t(z)%*% this$coeff_mat_bivar) %*% (W %*% this$coeff_vec_y)+
+    3 * t(z) %*% (this$coeff_mat_bivar%*%z)
   if (clipped == TRUE) {
     result <- pmin(pmax(result, -1), 1)
   }
   return(as.numeric(result))
 }
 
-quant.hermite_estimator_bivar <- function(this, p) {
+#' Estimates the Kendall rank correlation coefficient
+#'
+#' This method calculates the Kendall rank correlation coefficient value
+#' using the hermite_estimator_bivar object (this).
+#'
+#' The object must be updated with observations prior to the use of this method.
+#'
+#' @param this A hermite_estimator_bivar object.
+#' @param clipped A boolean value. Indicates whether to clip the Kendall rank 
+#' correlation estimates to lie between -1 and 1.
+#' @return A numeric value.
+#' @export
+#' @examples
+#' hermite_est <- hermite_estimator_bivar(N = 10, standardize = TRUE)
+#' hermite_est <- update_batch(hermite_est, matrix(rnorm(30*2), nrow=30, 
+#' ncol=2, byrow = TRUE))
+#' kendall_est <- kendall(hermite_est)
+kendall.hermite_estimator_bivar <- function(this, clipped = FALSE)
+{
+  if (this$num_obs < 2) {
+    return(NA)
+  }
+  W <- W_serialized[1:(this$N_param+1),1:(this$N_param+1)]
+  W_transpose <- t(W)
+  result <- 4*sum(diag(W_transpose%*%t(this$coeff_mat_bivar) %*% 
+                         W%*%this$coeff_mat_bivar)) - 1
+  if (clipped == TRUE) {
+    result <- pmin(pmax(result, -1), 1)
+  }
+  return(as.numeric(result))
+}
+
+#' Prints bivariate hermite_estimator object.
+#' 
+#'
+#' @param x A hermite_estimator_bivar object.
+#' @param ... Other arguments passed on to methods used in printing.
+#' @export
+#' @examples
+#' hermite_est <- hermite_estimator_bivar(N = 10, standardize = TRUE)
+#' print(hermite_est)
+print.hermite_estimator_bivar <- function(x, ...) {
+  describe_estimator(x,"bivariate")
+}
+
+#' Summarizes bivariate hermite_estimator object.
+#' 
+#' Outputs key parameters of a bivariate hermite_estimator object along with
+#' estimates of the mean and standard deviation of the first and second 
+#' dimensions of the bivariate data that the object has been updated with.
+#' Also outputs the Spearman's Rho and Kendall Tau of the bivariate data that 
+#' the object has been updated with.
+#'
+#' @param object A hermite_estimator_bivar object.
+#' @param digits A numeric value. Number of digits to round to.
+#' @param ... Other arguments passed on to methods used in summary.
+#' @export
+#' @examples
+#' hermite_est <- hermite_estimator_bivar(N = 10, standardize = TRUE)
+#' hermite_est <- update_batch(hermite_est, matrix(rnorm(30*2), nrow=30, 
+#' ncol=2, byrow = TRUE))
+#' summary(hermite_est)
+summary.hermite_estimator_bivar <- function(object, 
+                              digits = max(3, getOption("digits") - 3), ...) {
+  describe_estimator(object,"bivariate")
+  if (object$num_obs > 2){
+    running_std <- calculate_running_std(object)
+    cat("\n")
+    cat(paste0("Mean x = ",round(object$running_mean_x,digits), "\n"))
+    cat(paste0("Mean y = ",round(object$running_mean_y,digits), "\n"))
+    cat(paste0("Standard Deviation x = ", 
+               round(running_std[1],digits), "\n"))
+    cat(paste0("Standard Deviation y = ", 
+               round(running_std[2],digits), "\n"))
+    cat(paste0("Spearman's Rho = ",round(spearmans(object),digits), "\n"))
+    cat(paste0("Kendall Tau = ",round(kendall(object),digits), "\n"))
+  }
+}
+
+quant.hermite_estimator_bivar <- 
+  function(this, p, algorithm, accelerate_series) {
   stop("Quantile estimation is not defined for the bivariate Hermite 
        estimator")
 }

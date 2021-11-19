@@ -4,12 +4,24 @@
 \alias{quant}
 \title{Estimates the quantiles at a vector of probability values}
 \usage{
-quant(this, p)
+quant(this, p, algorithm = "interpolate", accelerate_series = TRUE)
 }
 \arguments{
 \item{this}{A hermite_estimator_univar object.}
 
 \item{p}{A numeric vector. A vector of probability values.}
+
+\item{algorithm}{A string. Two possible values 'interpolate' which is faster
+but may be less accurate or 'bisection' which is slower but potentially more
+accurate.}
+
+\item{accelerate_series}{A boolean value. If set to TRUE, the series 
+acceleration methods described in:
+
+Boyd, John P., and Dennis W. Moore. "Summability methods for 
+Hermite functions." Dynamics of atmospheres and oceans 10.1 (1986): 51-62. 
+ 
+are applied. If set to FALSE, then standard summation is applied.}
 }
 \value{
 A numeric vector. The vector of quantile values associated with the
