@@ -1,7 +1,7 @@
 # hermiter
 
 <!-- badges: start -->
-[![Build Status](https://app.travis-ci.com/MikeJaredS/hermiter.svg?branch=master)](https://travis-ci.com/MikeJaredS/hermiter)
+[![Build Status](https://app.travis-ci.com/MikeJaredS/hermiter.svg?branch=master)](https://travis-ci.org/MikeJaredS/hermiter)
 [![codecov](https://codecov.io/gh/MikeJaredS/hermiter/branch/master/graph/badge.svg)](https://app.codecov.io/gh/MikeJaredS/hermiter)
 [![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/hermiter?color=green)](https://cran.r-project.org/package=hermiter)
 ![](https://cranlogs.r-pkg.org/badges/grand-total/hermiter?color=green)
