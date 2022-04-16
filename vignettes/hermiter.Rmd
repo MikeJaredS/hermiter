@@ -49,6 +49,11 @@ function and Spearman correlation estimation.
 * [Stephanou, Michael and Varughese, Melvin. "On the properties of hermite series based distribution function estimators." Metrika (2020).](https://link.springer.com/article/10.1007/s00184-020-00785-z)
 * [Stephanou, Michael and Varughese, Melvin. "Sequential estimation of Spearman rank correlation using Hermite series estimators." Journal of Multivariate Analysis (2021)](https://www.sciencedirect.com/science/article/pii/S0047259X21000610)
 
+A summary of the estimators and algorithms in `hermiter` can be found in the 
+article below.
+
+* [Stephanou, Michael and Varughese, Melvin. "hermiter: R package for Sequential Nonparametric Estimation." arXiv (2021)](https://arxiv.org/abs/2111.14091)
+
 # Load Packages
 
 In order to utilize the hermiter package, the package must be loaded using the 
