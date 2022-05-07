@@ -4,10 +4,10 @@
 \alias{update_sequential.hermite_estimator_univar}
 \title{Updates the Hermite series based estimator sequentially}
 \usage{
-\method{update_sequential}{hermite_estimator_univar}(this, x)
+\method{update_sequential}{hermite_estimator_univar}(h_est_obj, x)
 }
 \arguments{
-\item{this}{A hermite_estimator_univar object.}
+\item{h_est_obj}{A hermite_estimator_univar object.}
 
 \item{x}{A numeric value. An observation to be incorporated into the
 estimator.}
@@ -17,8 +17,4 @@ An object of class hermite_estimator_univar.
 }
 \description{
 This method can be applied in sequential estimation settings.
-}
-\examples{
-hermite_est <- hermite_estimator_univar(N = 10, standardize = TRUE)
-hermite_est <- update_sequential(hermite_est, x = 2)
 }

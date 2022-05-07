@@ -4,10 +4,10 @@
 \alias{merge_pair.hermite_estimator_univar}
 \title{Merges two Hermite estimators}
 \usage{
-\method{merge_pair}{hermite_estimator_univar}(this, hermite_estimator_other)
+\method{merge_pair}{hermite_estimator_univar}(h_est_obj, hermite_estimator_other)
 }
 \arguments{
-\item{this}{A hermite_estimator_univar object. The first Hermite series based
+\item{h_est_obj}{A hermite_estimator_univar object. The first Hermite series based
 estimator.}
 
 \item{hermite_estimator_other}{A hermite_estimator_univar object. The 
@@ -29,11 +29,4 @@ constructing a single estimator on the data set formed by combining the
 data sets used to update the respective hermite_estimator_univar inputs.
 If the input Hermite estimators are standardized however, then the
 equivalence will be approximate but still accurate in most cases.
-}
-\examples{
-hermite_est_1 <- hermite_estimator_univar(N = 10, standardize = FALSE)
-hermite_est_1 <- update_batch(hermite_est_1, rnorm(30))
-hermite_est_2 <- hermite_estimator_univar(N = 10, standardize = FALSE)
-hermite_est_2 <- update_batch(hermite_est_2, rnorm(30))
-hermite_merged <- merge_pair(hermite_est_1, hermite_est_2)
 }

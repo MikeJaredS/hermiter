@@ -4,10 +4,10 @@
 \alias{spearmans.hermite_estimator_bivar}
 \title{Estimates the Spearman's rank correlation coefficient}
 \usage{
-\method{spearmans}{hermite_estimator_bivar}(this, clipped = FALSE)
+\method{spearmans}{hermite_estimator_bivar}(h_est_obj, clipped = FALSE)
 }
 \arguments{
-\item{this}{A hermite_estimator_bivar object.}
+\item{h_est_obj}{A hermite_estimator_bivar object.}
 
 \item{clipped}{A boolean value. Indicates whether to clip Spearman's rank 
 correlation estimates to lie between -1 and 1.}
@@ -17,7 +17,7 @@ A numeric value.
 }
 \description{
 This method calculates the Spearman's rank correlation coefficient value
-using the hermite_estimator_bivar object (this).
+using the hermite_estimator_bivar object (h_est_obj).
 }
 \details{
 The method utilizes the estimator defined in the paper Stephanou, Michael 
@@ -26,10 +26,4 @@ using Hermite Series Estimators." arXiv Preprint (2020),
 https://arxiv.org/abs/2012.06287
 
 The object must be updated with observations prior to the use of this method.
-}
-\examples{
-hermite_est <- hermite_estimator_bivar(N = 10, standardize = TRUE)
-hermite_est <- update_batch(hermite_est, matrix(rnorm(30*2), nrow=30, 
-ncol=2, byrow = TRUE))
-spearmans_est <- spearmans(hermite_est)
 }

@@ -27,9 +27,9 @@ estimators are standardized however, then the equivalence will be approximate
 but still accurate in most cases.
 }
 \examples{
-hermite_est_1 <- hermite_estimator(N = 10, standardize = FALSE)
-hermite_est_1 <- update_batch(hermite_est_1, rnorm(30))
-hermite_est_2 <- hermite_estimator(N = 10, standardize = FALSE)
-hermite_est_2 <- update_batch(hermite_est_2, rnorm(30))
+hermite_est_1 <- hermite_estimator(N = 10, standardize = FALSE, 
+observations = rnorm(30))
+hermite_est_2 <- hermite_estimator(N = 10, standardize = FALSE, 
+observations = rnorm(30))
 hermite_merged <- merge_hermite(list(hermite_est_1, hermite_est_2))
 }

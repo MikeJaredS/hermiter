@@ -4,10 +4,10 @@
 \alias{update_sequential.hermite_estimator_bivar}
 \title{Updates the Hermite series based estimator sequentially}
 \usage{
-\method{update_sequential}{hermite_estimator_bivar}(this, x)
+\method{update_sequential}{hermite_estimator_bivar}(h_est_obj, x)
 }
 \arguments{
-\item{this}{A hermite_estimator_bivar object.}
+\item{h_est_obj}{A hermite_estimator_bivar object.}
 
 \item{x}{A numeric vector of length 2. A bivariate observation to be 
 incorporated into the estimator.}
@@ -17,8 +17,4 @@ An object of class hermite_estimator_bivar.
 }
 \description{
 This method can be applied in sequential estimation settings.
-}
-\examples{
-hermite_estimator <- hermite_estimator_bivar(N = 10, standardize = TRUE)
-hermite_estimator <- update_sequential(hermite_estimator, x = c(1,2))
 }

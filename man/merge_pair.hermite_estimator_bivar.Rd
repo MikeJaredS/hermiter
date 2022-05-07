@@ -4,10 +4,10 @@
 \alias{merge_pair.hermite_estimator_bivar}
 \title{Merges two bivariate Hermite estimators}
 \usage{
-\method{merge_pair}{hermite_estimator_bivar}(this, hermite_estimator_other)
+\method{merge_pair}{hermite_estimator_bivar}(h_est_obj, hermite_estimator_other)
 }
 \arguments{
-\item{this}{A hermite_estimator_bivar object. The first Hermite series based
+\item{h_est_obj}{A hermite_estimator_bivar object. The first Hermite series based
 estimator.}
 
 \item{hermite_estimator_other}{A hermite_estimator_bivar object. The second 

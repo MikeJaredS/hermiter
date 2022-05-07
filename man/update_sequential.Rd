@@ -4,10 +4,10 @@
 \alias{update_sequential}
 \title{Updates the Hermite series based estimator sequentially}
 \usage{
-update_sequential(this, x)
+update_sequential(h_est_obj, x)
 }
 \arguments{
-\item{this}{A hermite_estimator_univar or hermite_estimator_bivar object.}
+\item{h_est_obj}{A hermite_estimator_univar or hermite_estimator_bivar object.}
 
 \item{x}{A numeric value or vector. An observation to be incorporated into 
 the estimator. Note that for univariate estimators, x is a numeric value 

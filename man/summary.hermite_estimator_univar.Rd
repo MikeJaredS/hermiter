@@ -18,8 +18,3 @@ Outputs key parameters of a univariate hermite_estimator object along with
 estimates of the mean, standard deviation and deciles of the data that
 the object has been updated with.
 }
-\examples{
-hermite_est <- hermite_estimator_univar(N = 10, standardize = TRUE)
-hermite_est <- update_batch(hermite_est, rnorm(30))
-summary(hermite_est)
-}

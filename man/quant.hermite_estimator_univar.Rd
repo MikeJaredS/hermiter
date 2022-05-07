@@ -4,10 +4,10 @@
 \alias{quant.hermite_estimator_univar}
 \title{Estimates the quantiles at a vector of probability values}
 \usage{
-\method{quant}{hermite_estimator_univar}(this, p, algorithm = "interpolate", accelerate_series = TRUE)
+\method{quant}{hermite_estimator_univar}(h_est_obj, p, algorithm = "interpolate", accelerate_series = TRUE)
 }
 \arguments{
-\item{this}{A hermite_estimator_univar object.}
+\item{h_est_obj}{A hermite_estimator_univar object.}
 
 \item{p}{A numeric vector. A vector of probability values.}
 
@@ -33,9 +33,4 @@ Varughese, Melvin and Iain Macdonald. "Sequential quantiles via Hermite
 series density estimation." Electronic Journal of Statistics 11.1 (2017): 
 570-607 <doi:10.1214/17-EJS1245>, with some modifications to improve the 
 stability of numerical root finding.
-}
-\examples{
-hermite_est <- hermite_estimator_univar(N = 10, standardize = TRUE)
-hermite_est <- update_batch(hermite_est, rnorm(30))
-quant_est <- quant(hermite_est, c(0.25, 0.5, 0.75))
 }

@@ -4,10 +4,10 @@
 \alias{dens}
 \title{Estimates the probability density at one or more x values}
 \usage{
-dens(this, x, clipped, accelerate_series = TRUE)
+dens(h_est_obj, x, clipped, accelerate_series = TRUE)
 }
 \arguments{
-\item{this}{A hermite_estimator_univar or hermite_estimator_bivar object.}
+\item{h_est_obj}{A hermite_estimator_univar or hermite_estimator_bivar object.}
 
 \item{x}{A numeric vector (univariate) or a numeric matrix (bivariate) of
 values at which to calculate the probability density.}
@@ -32,12 +32,10 @@ The object must be updated with observations prior to the use of the method.
 }
 \examples{
 hermite_est <- hermite_estimator(N = 10, standardize = TRUE, 
-est_type="univariate")
-hermite_est <- update_batch(hermite_est, rnorm(30))
+est_type="univariate", observations = rnorm(30))
 pdf_est <- dens(hermite_est, c(0, 0.5, 1))
 hermite_est <- hermite_estimator(N = 10, standardize = TRUE, 
-est_type="bivariate")
-hermite_est <- update_batch(hermite_est, x = matrix(rnorm(60), 
+est_type="bivariate", observations = matrix(rnorm(60), 
 nrow=30, ncol=2,byrow=TRUE))
 pdf_est <- dens(hermite_est, matrix(c(0,0,0.5,0.5,1,1),nrow=3,
 ncol=2,byrow=TRUE))

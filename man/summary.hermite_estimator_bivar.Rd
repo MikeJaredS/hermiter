@@ -20,9 +20,3 @@ dimensions of the bivariate data that the object has been updated with.
 Also outputs the Spearman's Rho and Kendall Tau of the bivariate data that 
 the object has been updated with.
 }
-\examples{
-hermite_est <- hermite_estimator_bivar(N = 10, standardize = TRUE)
-hermite_est <- update_batch(hermite_est, matrix(rnorm(30*2), nrow=30, 
-ncol=2, byrow = TRUE))
-summary(hermite_est)
-}

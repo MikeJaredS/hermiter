@@ -1,0 +1,12 @@
+citation(auto = meta)
+
+## hermiter paper
+bibentry(bibtype = "article",
+         title = "hermiter: R package for Sequential Nonparametric Estimation",
+         author = c(person("Michael", "Stephanou"),
+                    person("Melvin", "Varughese")),
+         year = "2021", journal = "arXiv preprint arXiv:2111.14091",
+         url = "https://arxiv.org/abs/2111.14091")
+         
+         
+         

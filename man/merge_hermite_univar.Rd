@@ -26,10 +26,3 @@ data sets used to update the respective hermite_estimator_univar inputs.
 If the input Hermite estimators are standardized however, then the
 equivalence will be approximate but still accurate in most cases.
 }
-\examples{
-hermite_est_1 <- hermite_estimator_univar(N = 10, standardize = FALSE)
-hermite_est_1 <- update_batch(hermite_est_1, rnorm(30))
-hermite_est_2 <- hermite_estimator_univar(N = 10, standardize = FALSE)
-hermite_est_2 <- update_batch(hermite_est_2, rnorm(30))
-hermite_merged <- merge_hermite(list(hermite_est_1, hermite_est_2))
-}

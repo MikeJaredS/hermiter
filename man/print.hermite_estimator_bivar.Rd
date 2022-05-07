@@ -14,7 +14,3 @@
 \description{
 Prints bivariate hermite_estimator object.
 }
-\examples{
-hermite_est <- hermite_estimator_bivar(N = 10, standardize = TRUE)
-print(hermite_est)
-}

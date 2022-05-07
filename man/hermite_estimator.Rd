@@ -10,7 +10,8 @@ hermite_estimator(
   N = 30,
   standardize = TRUE,
   exp_weight_lambda = NA,
-  est_type = "univariate"
+  est_type = "univariate",
+  observations = c()
 )
 }
 \arguments{
@@ -25,6 +26,11 @@ controls the exponential weighting of the Hermite series based estimator.
 If this parameter is NA, no exponential weighting is applied.}
 
 \item{est_type}{A string value. Options are "univariate" or "bivariate".}
+
+\item{observations}{A numeric vector or a numeric matrix. Note that for 
+univariate estimators, x is a numeric vector of observations to be 
+incorporated. For bivariate estimators, x is a numeric matrix with n rows for
+n observations and 2 columns.}
 }
 \value{
 An S3 object of class hermite_estimator_univar or 
@@ -33,7 +39,7 @@ hermite_estimator_bivar.
 \description{
 The hermite_estimator class provides a unified interface to the univariate 
 and bivariate Hermite series based estimators, leveraging generic methods and
-multiple dispatch. Methods are included for the sequential or one-pass batch 
+S3 dispatch. Methods are included for the sequential or one-pass batch 
 estimation of the full probability density function and cumulative 
 distribution function in the univariate and bivariate settings. Sequential 
 or one-pass batch estimation methods are also provided for the full quantile 
@@ -43,6 +49,11 @@ estimator in the bivariate setting.
 \examples{
 hermite_est <- hermite_estimator(N = 30, standardize = TRUE,
 est_type="univariate")
+hermite_est <- hermite_estimator(N = 30, standardize = TRUE,
+est_type="univariate", observations = c(1,2,3))
+hermite_est <- hermite_estimator(N = 10, standardize = TRUE, 
+est_type="bivariate", observations = matrix(c(1,1,2,2,3,3), 
+nrow=3, ncol=2,byrow=TRUE))
 }
 \author{
 Michael Stephanou <michael.stephanou@gmail.com>

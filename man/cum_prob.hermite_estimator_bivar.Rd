@@ -4,10 +4,10 @@
 \alias{cum_prob.hermite_estimator_bivar}
 \title{Estimates the cumulative probabilities for a matrix of 2-d x values}
 \usage{
-\method{cum_prob}{hermite_estimator_bivar}(this, x, clipped = FALSE, accelerate_series = FALSE)
+\method{cum_prob}{hermite_estimator_bivar}(h_est_obj, x, clipped = FALSE, accelerate_series = FALSE)
 }
 \arguments{
-\item{this}{A hermite_estimator_bivar object.}
+\item{h_est_obj}{A hermite_estimator_bivar object.}
 
 \item{x}{A numeric matrix. Each row corresponds to a 2-d coordinate.}
 
@@ -22,15 +22,8 @@ A numeric vector of cumulative probability values.
 }
 \description{
 This method calculates the cumulative probability values for a matrix of 
-2-d x vector values using the hermite_estimator_bivar object (this).
+2-d x vector values using the hermite_estimator_bivar object (h_est_obj).
 }
 \details{
 The object must be updated with observations prior to the use of this method.
-}
-\examples{
-hermite_est <- hermite_estimator_bivar(N = 10, standardize = TRUE)
-hermite_est <- update_batch(hermite_est, matrix(rnorm(30*2), nrow=30, 
-ncol=2, byrow = TRUE))
-cdf_est <- cum_prob(hermite_est, matrix(c(0, 0, 1, 1, 2, 2), nrow=3, ncol=2, 
-byrow = TRUE))
 }

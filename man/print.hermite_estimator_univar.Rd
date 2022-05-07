@@ -14,7 +14,3 @@
 \description{
 Prints univariate hermite_estimator object.
 }
-\examples{
-hermite_est <- hermite_estimator_univar(N = 10, standardize = TRUE)
-print(hermite_est)
-}

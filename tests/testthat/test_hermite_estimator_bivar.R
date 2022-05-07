@@ -25,12 +25,13 @@ test_that("error trapping for hermite_estimator_bivar work as expected", {
   hermite_est <- hermite_estimator_bivar(N = 10, standardize = TRUE)
   expect_error(update_sequential(hermite_est, "a"))
   expect_error(update_sequential(hermite_est, c(1,2,3)))
-  expect_error(update_batch(hermite_est, c("a","b")))
-  expect_error(update_batch(hermite_est, c(1,2,3)))
-  expect_error(update_batch(hermite_est, matrix(c(1,2,3), nrow=1,ncol=3)))
-  hermite_est <- hermite_estimator_bivar(N = 10, standardize = TRUE, 
-                                         exp_weight_lambda = 0.01)
-  expect_error(update_batch(hermite_est, matrix(c(1,2), nrow=1,ncol=2)))
+  expect_error(hermite_estimator_bivar(N = 10, standardize = TRUE, 
+                                       observations = c("a","b")))
+  expect_error(hermite_estimator_bivar(N = 10, standardize = TRUE, 
+                                       observations = c(1,2,3)))
+  expect_error(hermite_estimator_bivar(N = 10, standardize = TRUE, 
+                                       observations = matrix(c(1,2,3), 
+                                                             nrow=1,ncol=3)))
   expect_error(dens(hermite_est,x=c()))
   expect_error(dens(hermite_est,x=c("a","b")))
   expect_error(dens(hermite_est,x=c(1,2,3)))
@@ -175,8 +176,8 @@ test_that("batch updates of hermite_estimator_bivar work as expected", {
   hermite_est <-
     hermite_estimator(N = 10,
                       standardize = TRUE,
-                      est_type = "bivariate")
-  hermite_est <- hermite_est %>% update_batch(test_observations_mat)
+                      est_type = "bivariate", 
+                      observations = test_observations_mat)
   expect_equal(target_coeff_vec_standardized_x,
                hermite_est$coeff_vec_x,
                tolerance = get_eps())
@@ -200,8 +201,8 @@ test_that("batch updates of hermite_estimator_bivar work as expected", {
   hermite_est <-
     hermite_estimator(N = 10,
                       standardize = FALSE,
-                      est_type = "bivariate")
-  hermite_est <- hermite_est %>% update_batch(test_observations_mat)
+                      est_type = "bivariate", 
+                      observations = test_observations_mat)
   expect_equal(target_coeff_vec_unstandardized_x,
                hermite_est$coeff_vec_x,
                tolerance = get_eps())
@@ -213,8 +214,8 @@ test_that("batch updates of hermite_estimator_bivar work as expected", {
   hermite_est <-
     hermite_estimator(N = 10,
                       standardize = FALSE,
-                      est_type = "bivariate")
-  hermite_est <- hermite_est %>% update_batch(c(0.1,0.4))
+                      est_type = "bivariate", 
+                      observations = c(0.1,0.4))
   expect_equal(0.3864793, sum(hermite_est$coeff_mat_bivar), tolerance = 
                  get_eps())
 })
@@ -613,23 +614,23 @@ test_that("bivariate hermite estimators merge consistently", {
   hermite_est <-
     hermite_estimator(N = 10,
                       standardize = FALSE,
-                      est_type = "bivariate") %>%
-    update_batch(test_observations_mat)
+                      est_type = "bivariate", 
+                      observations = test_observations_mat)
   hermite_est_1 <-
     hermite_estimator(N = 10,
                       standardize = FALSE,
-                      est_type = "bivariate") %>%
-    update_batch(test_observations_mat[1:10, ])
+                      est_type = "bivariate", 
+                      observations = test_observations_mat[1:10, ])
   hermite_est_2 <-
     hermite_estimator(N = 10,
                       standardize = FALSE,
-                      est_type = "bivariate") %>%
-    update_batch(test_observations_mat[11:20, ])
+                      est_type = "bivariate", 
+                      observations = test_observations_mat[11:20, ])
   hermite_est_3 <-
     hermite_estimator(N = 10,
                       standardize = FALSE,
-                      est_type = "bivariate") %>%
-    update_batch(test_observations_mat[21:30, ])
+                      est_type = "bivariate", 
+                      observations = test_observations_mat[21:30, ])
   hermite_merged <-
     merge_hermite_bivar(list(hermite_est_1))
   expect_equal(hermite_est_1, hermite_merged, tolerance = get_eps())
@@ -645,23 +646,23 @@ test_that("bivariate hermite estimators merge consistently", {
   hermite_est <-
     hermite_estimator(N = 10,
                       standardize = TRUE,
-                      est_type = "bivariate") %>%
-    update_batch(test_observations_mat)
+                      est_type = "bivariate", 
+                      observations = test_observations_mat)
   hermite_est_1 <-
     hermite_estimator(N = 10,
                       standardize = TRUE,
-                      est_type = "bivariate") %>%
-    update_batch(test_observations_mat[1:10, ])
+                      est_type = "bivariate", 
+                      observations = test_observations_mat[1:10, ])
   hermite_est_2 <-
     hermite_estimator(N = 10,
                       standardize = TRUE,
-                      est_type = "bivariate") %>%
-    update_batch(test_observations_mat[11:20, ])
+                      est_type = "bivariate", 
+                      observations = test_observations_mat[11:20, ])
   hermite_est_3 <-
     hermite_estimator(N = 10,
                       standardize = TRUE,
-                      est_type = "bivariate") %>%
-    update_batch(test_observations_mat[21:30, ])
+                      est_type = "bivariate", 
+                      observations = test_observations_mat[21:30, ]) 
   hermite_merged <-
     merge_pair(hermite_est_1, hermite_est_2)
   expect_equal(0.3236014, sum(hermite_merged$coeff_mat_bivar), tolerance =
@@ -686,23 +687,23 @@ test_that("bivariate hermite estimators merge consistently", {
   expect_equal(hermite_merged$num_obs, 30, tolerance = get_eps())
   
   hermite_est_univar_1_x <-
-    hermite_estimator(N = 10, standardize = T) %>%
-    update_batch(test_observations_mat[1:10, 1])
+    hermite_estimator(N = 10, standardize = T, 
+                      observations = test_observations_mat[1:10, 1])
   hermite_est_univar_1_y <-
-    hermite_estimator(N = 10, standardize = T) %>%
-    update_batch(test_observations_mat[1:10, 2])
+    hermite_estimator(N = 10, standardize = T, 
+                      observations = test_observations_mat[1:10, 2])
   hermite_est_univar_2_x <-
-    hermite_estimator(N = 10, standardize = T) %>%
-    update_batch(test_observations_mat[11:20, 1])
+    hermite_estimator(N = 10, standardize = T, 
+                      observations = test_observations_mat[11:20, 1])
   hermite_est_univar_2_y <-
-    hermite_estimator(N = 10, standardize = T) %>%
-    update_batch(test_observations_mat[11:20, 2])
+    hermite_estimator(N = 10, standardize = T, 
+                      observations = test_observations_mat[11:20, 2])
   hermite_est_univar_3_x <-
-    hermite_estimator(N = 10, standardize = T) %>%
-    update_batch(test_observations_mat[21:30, 1])
+    hermite_estimator(N = 10, standardize = T, 
+                      observations = test_observations_mat[21:30, 1])
   hermite_est_univar_3_y <-
-    hermite_estimator(N = 10, standardize = T) %>%
-    update_batch(test_observations_mat[21:30, 2])
+    hermite_estimator(N = 10, standardize = T, 
+                      observations = test_observations_mat[21:30, 2])
   hermite_merged_univar_x <-
     merge_hermite(list(
       hermite_est_univar_1_x,
@@ -724,14 +725,14 @@ test_that("bivariate hermite estimators merge consistently", {
   expect_equal(sum(hermite_merged$coeff_mat_bivar), 0.3444092,
                tolerance = get_eps())
   hermite_est_1 <-
-    hermite_estimator(N = 10, standardize = FALSE, est_type = "bivariate") %>% 
-    update_batch(test_observations_mat[1:10,])
+    hermite_estimator(N = 10, standardize = FALSE, est_type = "bivariate", 
+                      observations = test_observations_mat[1:10,])
   hermite_est_2 <-
-    hermite_estimator(N = 20, standardize = FALSE, est_type = "bivariate") %>% 
-    update_batch(test_observations_mat[11:20,])
+    hermite_estimator(N = 20, standardize = FALSE, est_type = "bivariate",
+                      observations = test_observations_mat[11:20,])
   hermite_est_3 <-
-    hermite_estimator(N = 10, standardize = TRUE, est_type = "bivariate") %>% 
-    update_batch(test_observations_mat[21:30,])
+    hermite_estimator(N = 10, standardize = TRUE, est_type = "bivariate",
+                      observations = test_observations_mat[21:30,])
   hermite_est_4 <-
     hermite_estimator(N = 10, standardize = FALSE,exp_weight_lambda = 0.01,
                       est_type = "bivariate")
@@ -820,8 +821,8 @@ test_that("bivariate probability density estimation works as expected", {
   hermite_est <-
     hermite_estimator(N = 10,
                       standardize = FALSE,
-                      est_type = "bivariate") %>%
-    update_batch(test_observations_mat)
+                      est_type = "bivariate", 
+                      observations = test_observations_mat)
   pdf_vals <- hermite_est %>% dens(x_mat)
   target_pdf_vals_unstandardized <-
     c(
@@ -836,8 +837,8 @@ test_that("bivariate probability density estimation works as expected", {
   hermite_est <-
     hermite_estimator(N = 10,
                       standardize = TRUE,
-                      est_type = "bivariate") %>%
-    update_batch(test_observations_mat)
+                      est_type = "bivariate", 
+                      observations = test_observations_mat)
   pdf_vals <- hermite_est %>% dens(x_mat)
   target_pdf_vals_standardized <-
     c(
@@ -991,8 +992,8 @@ test_that("bivariate cumulative probability estimation works as expected",
             hermite_est <-
               hermite_estimator(N = 10,
                                 standardize = FALSE,
-                                est_type = "bivariate") %>%
-              update_batch(test_observations_mat)
+                                est_type = "bivariate", 
+                                observations = test_observations_mat)
             integrand_pdf <- function(h_est, x, y) {
               dens(h_est, c(x, y))
             }
@@ -1082,8 +1083,8 @@ test_that("bivariate cumulative probability estimation works as expected",
             hermite_est <-
               hermite_estimator(N = 10,
                                 standardize = TRUE,
-                                est_type = "bivariate") %>%
-              update_batch(test_observations_mat)
+                                est_type = "bivariate", 
+                                observations = test_observations_mat)
             inner_func <- function(x, y) {
               integrand_pdf_vec(hermite_est, x, y)
             }
@@ -1156,8 +1157,8 @@ test_that("bivariate cumulative probability estimation works as expected",
             hermite_est <-
               hermite_estimator(N = 10,
                                 standardize = FALSE,
-                                est_type = "bivariate") %>%
-              update_batch(test_observations_mat)
+                                est_type = "bivariate", 
+                                observations = test_observations_mat)
             cdf_vals <- hermite_est %>% cum_prob(x_mat)
             target_cdf_vals_unstandardized <-
               c(
@@ -1172,8 +1173,8 @@ test_that("bivariate cumulative probability estimation works as expected",
             hermite_est <-
               hermite_estimator(N = 10,
                                 standardize = TRUE,
-                                est_type = "bivariate") %>%
-              update_batch(test_observations_mat)
+                                est_type = "bivariate", 
+                                observations = test_observations_mat)
             cdf_vals <- hermite_est %>% cum_prob(x_mat)
             target_cdf_vals_standardized <-
               c(
@@ -1188,8 +1189,8 @@ test_that("bivariate cumulative probability estimation works as expected",
             hermite_est <-
               hermite_estimator(N = 10,
                                 standardize = TRUE,
-                                est_type = "bivariate") %>%
-              update_batch(test_observations_mat)
+                                est_type = "bivariate", 
+                                observations = test_observations_mat)
             cdf_vals <- hermite_est %>% cum_prob(x_mat, clipped = TRUE)
             target_cdf_vals_standardized <-
               c(0.87449356687884, 0.871314320667304, 1, 1, 1)
@@ -1318,15 +1319,15 @@ test_that("bivariate Spearman's correlation estimation works as expected",
             hermite_est <-
               hermite_estimator(N = 10,
                                 standardize = FALSE,
-                                est_type = "bivariate") %>%
-              update_batch(test_observations_mat)
+                                est_type = "bivariate", 
+                                observations = test_observations_mat)
             est_spear <- hermite_est %>% spearmans()
             expect_equal(0.5486201, est_spear, tolerance = get_eps())
             hermite_est <-
               hermite_estimator(N = 10,
                                 standardize = TRUE,
-                                est_type = "bivariate") %>%
-              update_batch(test_observations_mat)
+                                est_type = "bivariate", 
+                                observations = test_observations_mat)
             est_spear <- hermite_est %>% spearmans()
             expect_equal(0.5639884, est_spear, tolerance = get_eps())
             hermite_est <-
@@ -1358,16 +1359,15 @@ test_that("bivariate Spearman's correlation estimation works as expected",
             hermite_est <-
               hermite_estimator(N = 10,
                                 standardize = FALSE,
-                                est_type = "bivariate") %>%
-              update_batch(test_observations_mat)
+                                est_type = "bivariate", 
+                                observations = test_observations_mat)
             spear_est <- hermite_est %>% spearmans()
             expect_equal(spear_est, 0.5486199, tolerance = get_eps())
-            
             hermite_est <-
               hermite_estimator(N = 10,
                                 standardize = TRUE,
-                                est_type = "bivariate") %>%
-              update_batch(test_observations_mat)
+                                est_type = "bivariate", 
+                                observations = test_observations_mat)
             spear_est <- hermite_est %>% spearmans()
             expect_equal(spear_est, 0.5639886, tolerance = get_eps())
             
@@ -1493,16 +1493,16 @@ test_that("bivariate Kendall correlation estimation works as expected",
             hermite_est <-
               hermite_estimator(N = 10,
                                 standardize = FALSE,
-                                est_type = "bivariate") %>%
-              update_batch(test_observations_mat)
+                                est_type = "bivariate", 
+                                observations = test_observations_mat)
             est_kendall <- hermite_est %>% kendall()
             expect_equal(0.4500084, est_kendall, tolerance = get_eps())
             
             hermite_est <-
               hermite_estimator(N = 10,
                                 standardize = TRUE,
-                                est_type = "bivariate") %>%
-              update_batch(test_observations_mat)
+                                est_type = "bivariate", 
+                                observations = test_observations_mat)
             est_kendall <- hermite_est %>% kendall()
             expect_equal(0.4585442, est_kendall, tolerance = get_eps())
             hermite_est <-
@@ -1547,8 +1547,9 @@ test_that("Print and Summary work as expected", {
                  "N = 30", "Standardize observations = TRUE",
                  "Exponential weighting for coefficents = FALSE",
                  "Number of observations = 0"))
-  hermite_est <- update_batch(hermite_est, x = matrix(c(1, 2, 3, 4,5, 6),nrow=3,
-                                                      ncol=2, byrow = TRUE))
+  hermite_est <- hermite_estimator(est_type = "bivariate", 
+                                   observations = matrix(c(1, 2, 3, 4,5, 6), 
+                                                nrow=3, ncol=2, byrow = TRUE))
   expect_equal(capture.output(summary(hermite_est)), 
                c('Bivariate Hermite Estimator:','N = 30',
                'Standardize observations = TRUE',

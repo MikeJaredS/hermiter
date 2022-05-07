@@ -4,10 +4,10 @@
 \alias{dens.hermite_estimator_univar}
 \title{Estimates the probability density for a vector of x values}
 \usage{
-\method{dens}{hermite_estimator_univar}(this, x, clipped = FALSE, accelerate_series = TRUE)
+\method{dens}{hermite_estimator_univar}(h_est_obj, x, clipped = FALSE, accelerate_series = TRUE)
 }
 \arguments{
-\item{this}{A hermite_estimator_univar object.}
+\item{h_est_obj}{A hermite_estimator_univar object.}
 
 \item{x}{A numeric vector. Values at which to estimate the probability
 density.}
@@ -23,13 +23,8 @@ A numeric vector of probability density values.
 }
 \description{
 This method calculates the probability density values at a vector of
-x values using the hermite_estimator_univar object (this).
+x values using the hermite_estimator_univar object (h_est_obj).
 }
 \details{
 The object must be updated with observations prior to the use of the method.
-}
-\examples{
-hermite_est <- hermite_estimator_univar(N = 10, standardize = TRUE)
-hermite_est <- update_batch(hermite_est, rnorm(30))
-pdf_est <- dens(hermite_est, c(0, 0.5, 1))
 }
