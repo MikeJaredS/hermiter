@@ -238,7 +238,7 @@ update_sequential.hermite_estimator_univar <- function(h_est_obj, x) {
     }
   }
   h_k <-
-    as.vector(hermite_function_N(h_est_obj$N_param, x))
+    as.vector(hermite_function(h_est_obj$N_param, x))
   if (is.na(h_est_obj$exp_weight)) {
     h_est_obj$coeff_vec <-
       (h_est_obj$coeff_vec * (h_est_obj$num_obs - 1) + h_k) / h_est_obj$num_obs
@@ -263,7 +263,7 @@ initialize_batch_univar <- function(h_est_obj, x) {
     x <-
       (x - h_est_obj$running_mean) / sqrt(h_est_obj$running_variance / (h_est_obj$num_obs - 1))
   }
-  h_est_obj$coeff_vec <- hermite_function_sum_N(h_est_obj$N_param, x) /
+  h_est_obj$coeff_vec <- hermite_function_sum(h_est_obj$N_param, x) /
     h_est_obj$num_obs
   return(h_est_obj)
 }
@@ -310,7 +310,7 @@ dens.hermite_estimator_univar <- function(h_est_obj, x, clipped = FALSE,
     factor <- 1 / running_std
   }
   h_k <-
-    hermite_function_N(h_est_obj$N_param, x)
+    hermite_function(h_est_obj$N_param, x)
   pdf_val <- series_calculate(h_k, h_est_obj$coeff_vec, accelerate_series = 
                                 accelerate_series) * factor
   if (clipped == TRUE) {
@@ -353,7 +353,7 @@ cum_prob.hermite_estimator_univar <- function(h_est_obj, x, clipped = FALSE,
     x <- (x - h_est_obj$running_mean) / running_std
   }
   h_k <-
-    hermite_function_N(h_est_obj$N_param, x)
+    hermite_function(h_est_obj$N_param, x)
   integrals_hermite <- hermite_int_lower(h_est_obj$N_param, x, 
                                          hermite_function_matrix = h_k)
   cdf_val <- series_calculate(integrals_hermite, h_est_obj$coeff_vec, 

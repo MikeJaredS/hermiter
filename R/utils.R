@@ -232,18 +232,6 @@ integrand_coeff_univar <- function(t,hermite_est_current,
 # This helper method is intended for internal use by the 
 # hermite_estimator_univar class.
 series_calculate <- function(h_input, coeffs, accelerate_series = TRUE){
-  if (!is.numeric(coeffs)) {
-    stop("coeffs must be numeric.")
-  }
-  if (!is.numeric(h_input)) {
-    stop("h_input must be numeric.")
-  }
-  if (is.null(nrow(h_input))) {
-    stop("h_input must be numeric matrix.")
-  }
-  if (nrow(h_input) != length(coeffs)) {
-    stop("Number of rows of h_input and length of coeffs must match.")
-  }
   sz <- nrow(h_input) - 1
   if (length(coeffs) < 3 | accelerate_series == FALSE){
     return(as.numeric(crossprod(h_input,coeffs)))

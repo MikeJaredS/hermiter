@@ -138,10 +138,10 @@ merge_standardized_helper_bivar <- function(hermite_estimators) {
       gauss_hermite_quad_100(function(t){integrand_coeff_univar(t, x, 
                                       hermite_estimator_merged, k, 2)})}, 
       FUN.VALUE=numeric(1)))}, FUN.VALUE=numeric(1))
-  herm_mod <- function(t,N){hermite_polynomial_N(N, t) *
-      hermite_normalization_N(N)}
+  herm_mod <- function(t,N){hermite_polynomial(N, t) *
+      hermite_normalization(N)}
   g_mat <- function(N,t_1,t_2, const_mult){sqrt(2) * const_mult * 
-      tcrossprod(hermite_function_N(N,t_1),herm_mod(t_2,N))}
+      tcrossprod(hermite_function(N,t_1),herm_mod(t_2,N))}
   g_mat_scale_shift <- function(N,scale,shift){
     res <- matrix(rep(0,(N+1)*(N+1)), nrow=N+1,ncol=N+1)
     root_x <- root_x_serialized
@@ -325,9 +325,9 @@ update_sequential.hermite_estimator_bivar <- function(h_est_obj, x)
     }
   }
   h_x <-
-    as.vector(hermite_function_N(h_est_obj$N_param, x[1]))
+    as.vector(hermite_function(h_est_obj$N_param, x[1]))
   h_y <-
-    as.vector(hermite_function_N(h_est_obj$N_param, x[2]))
+    as.vector(hermite_function(h_est_obj$N_param, x[2]))
   if (is.na(h_est_obj$exp_weight)) {
     h_est_obj$coeff_vec_x <-
       (h_est_obj$coeff_vec_x * (h_est_obj$num_obs - 1) + h_x) / h_est_obj$num_obs
@@ -371,9 +371,9 @@ initialize_batch_bivar <- function(h_est_obj, x) {
                                              (h_est_obj$num_obs - 1))
   }
   h_x <-
-    hermite_function_N(h_est_obj$N_param, x[,1])
+    hermite_function(h_est_obj$N_param, x[,1])
   h_y <-
-    hermite_function_N(h_est_obj$N_param, x[,2])
+    hermite_function(h_est_obj$N_param, x[,2])
   h_est_obj$coeff_vec_x <- rowSums(h_x) / h_est_obj$num_obs
   h_est_obj$coeff_vec_y <- rowSums(h_y) / h_est_obj$num_obs
   h_est_obj$coeff_mat_bivar <- tcrossprod(h_x,h_y) / h_est_obj$num_obs
@@ -409,9 +409,9 @@ dens_helper.hermite_estimator_bivar <- function(h_est_obj,x, clipped = FALSE){
     x <- (x - c(h_est_obj$running_mean_x,h_est_obj$running_mean_y))/running_std_vec
     factor <- 1 / (prod(running_std_vec))
   }
-  return(factor * t(hermite_function_N(h_est_obj$N_param, x[1])) %*%
+  return(factor * t(hermite_function(h_est_obj$N_param, x[1])) %*%
            h_est_obj$coeff_mat_bivar %*%
-           hermite_function_N(h_est_obj$N_param, x[2]))
+           hermite_function(h_est_obj$N_param, x[2]))
 }
 
 #' Estimates the probability densities for a matrix of 2-d x values
