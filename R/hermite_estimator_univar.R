@@ -595,15 +595,17 @@ summary.hermite_estimator_univar <- function(object,
     cat(paste0("Mean = ",round(object$running_mean,digits), "\n"))
     cat(paste0("Standard Deviation = ",
                round(calculate_running_std(object),digits), "\n"))
-    cat("Estimated Quantiles:\n")
-    cumulative_probs <- seq(10,90,10)
-    cum_probs_size <- length(cumulative_probs)
-    quantile_values <- matrix(round(quant(object,p=cumulative_probs/100),
-                                    digits),
-                              nrow = 1, ncol = cum_probs_size, byrow = TRUE)
-    colnames(quantile_values) <- paste0(cumulative_probs ,"%")
-    rownames(quantile_values) <- ""
-    print(quantile_values, quote = FALSE)
+    if (object$standardization == TRUE){
+      cat("Estimated Quantiles:\n")
+      cumulative_probs <- seq(10,90,10)
+      cum_probs_size <- length(cumulative_probs)
+      quantile_values <- matrix(round(quant(object,p=cumulative_probs/100),
+                                      digits),
+                                nrow = 1, ncol = cum_probs_size, byrow = TRUE)
+      colnames(quantile_values) <- paste0(cumulative_probs ,"%")
+      rownames(quantile_values) <- ""
+      print(quantile_values, quote = FALSE)
+    }
   }
 }
 
