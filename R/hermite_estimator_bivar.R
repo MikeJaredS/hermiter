@@ -30,23 +30,6 @@
 hermite_estimator_bivar <- function(N = 30, standardize=TRUE, 
                                     exp_weight_lambda=NA, observations = c())
 {
-  if (!is.numeric(N)) {
-    stop("N must be numeric.")
-  }
-  if (N < 0 | N > 75) {
-    stop("N must be >= 0 and N <= 75.")
-  }
-  if (!(standardize == TRUE | standardize == FALSE)) {
-    stop("standardize can only take on values TRUE or FALSE.")
-  }
-  if (!is.na(exp_weight_lambda)) {
-    if (!is.numeric(exp_weight_lambda)) {
-      stop("exp_weight_lambda must be numeric.")
-    }
-    if (exp_weight_lambda <= 0 | exp_weight_lambda > 1) {
-      stop("exp_weight_lambda must be a real number > 0 and <= 1.")
-    }
-  }
   h_est_obj <- list(
     N_param = N,
     standardize_obs=standardize,
@@ -342,11 +325,9 @@ update_sequential.hermite_estimator_bivar <- function(h_est_obj, x)
     }
   }
   h_x <-
-    as.vector(hermite_function_N(h_est_obj$N_param, x[1], 
-                               h_est_obj$normalization_hermite_vec))
+    as.vector(hermite_function_N(h_est_obj$N_param, x[1]))
   h_y <-
-    as.vector(hermite_function_N(h_est_obj$N_param, x[2], 
-                               h_est_obj$normalization_hermite_vec))
+    as.vector(hermite_function_N(h_est_obj$N_param, x[2]))
   if (is.na(h_est_obj$exp_weight)) {
     h_est_obj$coeff_vec_x <-
       (h_est_obj$coeff_vec_x * (h_est_obj$num_obs - 1) + h_x) / h_est_obj$num_obs
@@ -390,9 +371,9 @@ initialize_batch_bivar <- function(h_est_obj, x) {
                                              (h_est_obj$num_obs - 1))
   }
   h_x <-
-    hermite_function_N(h_est_obj$N_param, x[,1], h_est_obj$normalization_hermite_vec)
+    hermite_function_N(h_est_obj$N_param, x[,1])
   h_y <-
-    hermite_function_N(h_est_obj$N_param, x[,2], h_est_obj$normalization_hermite_vec)
+    hermite_function_N(h_est_obj$N_param, x[,2])
   h_est_obj$coeff_vec_x <- rowSums(h_x) / h_est_obj$num_obs
   h_est_obj$coeff_vec_y <- rowSums(h_y) / h_est_obj$num_obs
   h_est_obj$coeff_mat_bivar <- tcrossprod(h_x,h_y) / h_est_obj$num_obs
@@ -428,11 +409,9 @@ dens_helper.hermite_estimator_bivar <- function(h_est_obj,x, clipped = FALSE){
     x <- (x - c(h_est_obj$running_mean_x,h_est_obj$running_mean_y))/running_std_vec
     factor <- 1 / (prod(running_std_vec))
   }
-  return(factor * t(hermite_function_N(h_est_obj$N_param, x[1], 
-                                     h_est_obj$normalization_hermite_vec)) %*%
+  return(factor * t(hermite_function_N(h_est_obj$N_param, x[1])) %*%
            h_est_obj$coeff_mat_bivar %*%
-           hermite_function_N(h_est_obj$N_param, x[2], 
-                              h_est_obj$normalization_hermite_vec))
+           hermite_function_N(h_est_obj$N_param, x[2]))
 }
 
 #' Estimates the probability densities for a matrix of 2-d x values
@@ -488,11 +467,9 @@ cum_prob_helper.hermite_estimator_bivar <- function(h_est_obj,x, clipped = FALSE
     running_std_vec <- calculate_running_std(h_est_obj)
     x <- (x - c(h_est_obj$running_mean_x,h_est_obj$running_mean_y))/running_std_vec
   }
-  return(t(hermite_int_lower(N = h_est_obj$N_param,x = x[1],normalization_hermite=
-                               h_est_obj$normalization_hermite_vec)) 
+  return(t(hermite_int_lower(N = h_est_obj$N_param,x = x[1])) 
          %*% h_est_obj$coeff_mat_bivar %*% 
-           hermite_int_lower(N = h_est_obj$N_param,x = x[2],normalization_hermite=
-                               h_est_obj$normalization_hermite_vec))
+           hermite_int_lower(N = h_est_obj$N_param,x = x[2]))
 }
 
 #' Estimates the cumulative probabilities for a matrix of 2-d x values

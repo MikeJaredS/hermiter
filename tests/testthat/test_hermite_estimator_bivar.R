@@ -15,23 +15,23 @@ test_that("hermite_estimator_bivar constructor returns correct class", {
 })
 
 test_that("error trapping for hermite_estimator_bivar work as expected", {
-  expect_error(hermite_estimator_bivar(N = "a", standardize = TRUE))
-  expect_error(hermite_estimator_bivar(N = 80, standardize = TRUE))
-  expect_error(hermite_estimator_bivar(N = -1, standardize = TRUE))
-  expect_error(hermite_estimator_bivar(N = 10, standardize = 8))
-  expect_error(hermite_estimator_bivar(N = 10, exp_weight_lambda = -0.5))
-  expect_error(hermite_estimator_bivar(N = 10, exp_weight_lambda = 1.5))
-  expect_error(hermite_estimator_bivar(N = 10, exp_weight_lambda = "a"))
-  hermite_est <- hermite_estimator_bivar(N = 10, standardize = TRUE)
+  expect_error(hermite_estimator(N = "a", standardize = TRUE, est_type="bivariate"))
+  expect_error(hermite_estimator(N = 80, standardize = TRUE, est_type="bivariate"))
+  expect_error(hermite_estimator(N = -1, standardize = TRUE, est_type="bivariate"))
+  expect_error(hermite_estimator(N = 10, standardize = 8, est_type="bivariate"))
+  expect_error(hermite_estimator(N = 10, exp_weight_lambda = -0.5, est_type="bivariate"))
+  expect_error(hermite_estimator(N = 10, exp_weight_lambda = 1.5, est_type="bivariate"))
+  expect_error(hermite_estimator(N = 10, exp_weight_lambda = "a", est_type="bivariate"))
+  hermite_est <- hermite_estimator(N = 10, standardize = TRUE, est_type="bivariate")
   expect_error(update_sequential(hermite_est, "a"))
   expect_error(update_sequential(hermite_est, c(1,2,3)))
-  expect_error(hermite_estimator_bivar(N = 10, standardize = TRUE, 
-                                       observations = c("a","b")))
-  expect_error(hermite_estimator_bivar(N = 10, standardize = TRUE, 
-                                       observations = c(1,2,3)))
-  expect_error(hermite_estimator_bivar(N = 10, standardize = TRUE, 
+  expect_error(hermite_estimator(N = 10, standardize = TRUE, 
+                                       observations = c("a","b"), est_type="bivariate"))
+  expect_error(hermite_estimator(N = 10, standardize = TRUE, 
+                                       observations = c(1,2,3), est_type="bivariate"))
+  expect_error(hermite_estimator(N = 10, standardize = TRUE, 
                                        observations = matrix(c(1,2,3), 
-                                                             nrow=1,ncol=3)))
+                                                             nrow=1,ncol=3), est_type="bivariate"))
   expect_error(dens(hermite_est,x=c()))
   expect_error(dens(hermite_est,x=c("a","b")))
   expect_error(dens(hermite_est,x=c(1,2,3)))
@@ -42,7 +42,7 @@ test_that("error trapping for hermite_estimator_bivar work as expected", {
   expect_error(cum_prob(hermite_est,x=matrix(c(1,2,3), nrow=1,ncol=3)))
   expect_error(quant(hermite_est))
   expect_error(merge_hermite_bivar(list()))
-  hermite_est_1 <- hermite_estimator_bivar(N = 10, standardize = TRUE)
+  hermite_est_1 <- hermite_estimator(N = 10, standardize = TRUE, est_type="bivariate")
   hermite_est_2 <- hermite_estimator_univar(N = 10, standardize = TRUE)
   expect_error(merge_pair(hermite_est_1,hermite_est_2))
 })

@@ -28,23 +28,6 @@ hermite_estimator_univar <-
            standardize = TRUE,
            exp_weight_lambda = NA,
            observations = c()) {
-    if (!is.numeric(N)) {
-      stop("N must be numeric.")
-    }
-    if (N < 0 | N > 75) {
-      stop("N must be >= 0 and N <= 75.")
-    }
-    if (!(standardize == TRUE | standardize == FALSE)) {
-      stop("standardize can only take on values TRUE or FALSE.")
-    }
-    if (!is.na(exp_weight_lambda)) {
-      if (!is.numeric(exp_weight_lambda)) {
-        stop("exp_weight_lambda must be numeric.")
-      }
-      if (exp_weight_lambda <= 0 | exp_weight_lambda > 1) {
-        stop("exp_weight_lambda must be a real number > 0 and <= 1.")
-      }
-    }
     h_est_obj <-
       list(
         N_param = N,
@@ -58,11 +41,12 @@ hermite_estimator_univar <-
         h_int_lower_serialized = c(),
         h_int_upper_serialized = c()
       )
-    h_est_obj$normalization_hermite_vec <- h_norm_serialized[1:(h_est_obj$N_param+1)]
-    h_est_obj$h_int_lower_serialized <- h_int_lower_serialized[1:(h_est_obj$N_param+1),
-                                                          ,drop = FALSE]
-    h_est_obj$h_int_upper_serialized <- h_int_upper_serialized[1:(h_est_obj$N_param+1),
-                                                          ,drop = FALSE]
+    h_est_obj$normalization_hermite_vec <- 
+      h_norm_serialized[1:(h_est_obj$N_param+1)]
+    h_est_obj$h_int_lower_serialized <-
+      h_int_lower_serialized[1:(h_est_obj$N_param+1),,drop = FALSE]
+    h_est_obj$h_int_upper_serialized <- 
+      h_int_upper_serialized[1:(h_est_obj$N_param+1),,drop = FALSE]
     class(h_est_obj) <- c("hermite_estimator_univar", "list")
     if (length(observations) > 0) {
       if (!is.numeric(observations)) {
@@ -254,8 +238,7 @@ update_sequential.hermite_estimator_univar <- function(h_est_obj, x) {
     }
   }
   h_k <-
-    as.vector(hermite_function_N(h_est_obj$N_param, x, 
-                                 h_est_obj$normalization_hermite_vec))
+    as.vector(hermite_function_N(h_est_obj$N_param, x))
   if (is.na(h_est_obj$exp_weight)) {
     h_est_obj$coeff_vec <-
       (h_est_obj$coeff_vec * (h_est_obj$num_obs - 1) + h_k) / h_est_obj$num_obs
@@ -280,8 +263,8 @@ initialize_batch_univar <- function(h_est_obj, x) {
     x <-
       (x - h_est_obj$running_mean) / sqrt(h_est_obj$running_variance / (h_est_obj$num_obs - 1))
   }
-  h_est_obj$coeff_vec <- hermite_function_sum_N(h_est_obj$N_param, x,
-                                 h_est_obj$normalization_hermite_vec) / h_est_obj$num_obs
+  h_est_obj$coeff_vec <- hermite_function_sum_N(h_est_obj$N_param, x) /
+    h_est_obj$num_obs
   return(h_est_obj)
 }
 
@@ -327,8 +310,7 @@ dens.hermite_estimator_univar <- function(h_est_obj, x, clipped = FALSE,
     factor <- 1 / running_std
   }
   h_k <-
-    hermite_function_N(h_est_obj$N_param, x, h_est_obj$normalization_hermite_vec)
-  # pdf_val <- crossprod(h_k, h_est_obj$coeff_vec) * factor
+    hermite_function_N(h_est_obj$N_param, x)
   pdf_val <- series_calculate(h_k, h_est_obj$coeff_vec, accelerate_series = 
                                 accelerate_series) * factor
   if (clipped == TRUE) {
@@ -371,7 +353,7 @@ cum_prob.hermite_estimator_univar <- function(h_est_obj, x, clipped = FALSE,
     x <- (x - h_est_obj$running_mean) / running_std
   }
   h_k <-
-    hermite_function_N(h_est_obj$N_param, x, h_est_obj$normalization_hermite_vec)
+    hermite_function_N(h_est_obj$N_param, x)
   integrals_hermite <- hermite_int_lower(h_est_obj$N_param, x, 
                                          hermite_function_matrix = h_k)
   cdf_val <- series_calculate(integrals_hermite, h_est_obj$coeff_vec, 
@@ -395,12 +377,12 @@ quantile_helper_bisection <- function(h_est_obj, p_vec, accelerate_series) {
     res <- rep(NA,length(x))
     if (length(lower_idx)>0){
       res[lower_idx] <- series_calculate(hermite_int_lower(h_est_obj$N_param,
-         x[lower_idx], normalization_hermite = h_est_obj$normalization_hermite_vec), 
+         x[lower_idx]), 
          h_est_obj$coeff_vec, accelerate_series) - p[lower_idx]
     }
     if (length(upper_idx)>0){
       res[upper_idx] <- 1 - series_calculate(hermite_int_upper(h_est_obj$N_param,
-        x[upper_idx], normalization_hermite = h_est_obj$normalization_hermite_vec), 
+        x[upper_idx]), 
          h_est_obj$coeff_vec, accelerate_series) - p[upper_idx]
     }
     if (length(ambig_idx)>0){
@@ -434,8 +416,7 @@ quantile_helper_bisection <- function(h_est_obj, p_vec, accelerate_series) {
     x_lower <- tryCatch({
       stats::uniroot(
         f = function(x) {
-          series_calculate(hermite_int_lower(h_est_obj$N_param,x, 
-               normalization_hermite = h_est_obj$normalization_hermite_vec), 
+          series_calculate(hermite_int_lower(h_est_obj$N_param,x), 
                h_est_obj$coeff_vec, accelerate_series) - p_upper
         },
         interval = c(-100, 100)
@@ -445,8 +426,7 @@ quantile_helper_bisection <- function(h_est_obj, p_vec, accelerate_series) {
     x_upper <- tryCatch({
       stats::uniroot(
         f = function(x) {
-          1- series_calculate(hermite_int_upper(h_est_obj$N_param,x,
-             normalization_hermite = h_est_obj$normalization_hermite_vec), 
+          1- series_calculate(hermite_int_upper(h_est_obj$N_param,x), 
              h_est_obj$coeff_vec, accelerate_series) - p_lower
         },
         interval = c(-100, 100)
@@ -595,7 +575,7 @@ summary.hermite_estimator_univar <- function(object,
     cat(paste0("Mean = ",round(object$running_mean,digits), "\n"))
     cat(paste0("Standard Deviation = ",
                round(calculate_running_std(object),digits), "\n"))
-    if (object$standardization == TRUE){
+    if (object$standardize_obs == TRUE){
       cat("Estimated Quantiles:\n")
       cumulative_probs <- seq(10,90,10)
       cum_probs_size <- length(cumulative_probs)

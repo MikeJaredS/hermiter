@@ -45,22 +45,22 @@ test_that("error trapping for hermite_estimator work as expected", {
   expect_error(quant(hermite_est, p=0.5))
   expect_error(spearmans(hermite_est))
   # Univariate estimator specific error trapping tests
-  expect_error(hermite_estimator_univar(N = 10, est_type="other"))
-  expect_error(hermite_estimator_univar(N = "a", standardize = TRUE))
-  expect_error(hermite_estimator_univar(N = 80, standardize = TRUE))
-  expect_error(hermite_estimator_univar(N = -1, standardize = TRUE))
-  expect_error(hermite_estimator_univar(N = 10, standardize = 8))
-  expect_error(hermite_estimator_univar(N = 10, exp_weight_lambda = -0.5))
-  expect_error(hermite_estimator_univar(N = 10, exp_weight_lambda = 1.5))
-  expect_error(hermite_estimator_univar(N = 10, exp_weight_lambda = "a"))
-  hermite_est <- hermite_estimator_univar(N = 10, standardize = TRUE)
+  expect_error(hermite_estimator(N = 10, est_type="other"))
+  expect_error(hermite_estimator(N = "a", standardize = TRUE))
+  expect_error(hermite_estimator(N = 80, standardize = TRUE))
+  expect_error(hermite_estimator(N = -1, standardize = TRUE))
+  expect_error(hermite_estimator(N = 10, standardize = 8))
+  expect_error(hermite_estimator(N = 10, exp_weight_lambda = -0.5))
+  expect_error(hermite_estimator(N = 10, exp_weight_lambda = 1.5))
+  expect_error(hermite_estimator(N = 10, exp_weight_lambda = "a"))
+  hermite_est <- hermite_estimator(N = 10, standardize = TRUE)
   expect_true(is.na(cum_prob(hermite_est, x=2)))
   expect_true(is.na(quant(hermite_est, p=0.5)))
   expect_error(update_sequential(hermite_est, "a"))
   expect_error(update_sequential(hermite_est, c(1,2)))
-  expect_error(hermite_estimator_univar(N = 10, standardize = TRUE, 
+  expect_error(hermite_estimator(N = 10, standardize = TRUE, 
                                         observations = c("a","b")))
-  hermite_est <- hermite_estimator_univar(N = 10, standardize = TRUE, 
+  hermite_est <- hermite_estimator(N = 10, standardize = TRUE, 
                                           observations = c(1,2,3))
   expect_error(dens(hermite_est, "a"))
   expect_error(cum_prob(hermite_est, "a"))
@@ -69,12 +69,12 @@ test_that("error trapping for hermite_estimator work as expected", {
   expect_error(cum_prob(hermite_est, c()))
   expect_error(quant(hermite_est, c()))
   expect_error(merge_hermite_univar(list()))
-  hermite_est <- hermite_estimator_univar(N = 10, standardize = FALSE, 
+  hermite_est <- hermite_estimator(N = 10, standardize = FALSE, 
                                           observations = c(1,2,3))
   expect_error(quant(hermite_est, p=0.5))
   expect_error(spearmans(hermite_est))
   expect_error(kendall(hermite_est))
-  hermite_est_1 <- hermite_estimator_univar(N = 10, standardize = TRUE)
+  hermite_est_1 <- hermite_estimator(N = 10, standardize = TRUE)
   hermite_est_2 <- hermite_estimator_bivar(N = 10, standardize = TRUE)
   expect_error(merge_pair(hermite_est_1,hermite_est_2))
   expect_error(merge_hermite(list(hermite_est_1,hermite_est_2)))
