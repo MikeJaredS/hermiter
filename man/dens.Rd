@@ -31,6 +31,7 @@ represents a 2-d point.
 The object must be updated with observations prior to the use of the method.
 }
 \examples{
+\dontrun{
 hermite_est <- hermite_estimator(N = 10, standardize = TRUE, 
 est_type="univariate", observations = rnorm(30))
 pdf_est <- dens(hermite_est, c(0, 0.5, 1))
@@ -39,4 +40,5 @@ est_type="bivariate", observations = matrix(rnorm(60),
 nrow=30, ncol=2,byrow=TRUE))
 pdf_est <- dens(hermite_est, matrix(c(0,0,0.5,0.5,1,1),nrow=3,
 ncol=2,byrow=TRUE))
+}
 }

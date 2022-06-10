@@ -14,7 +14,8 @@ A numeric vector of length N+1
 }
 \description{
 The method returns numeric normalization factors that, when multiplied by 
-the physicist Hermite polynomials \eqn{H_k(x)}, yield orthonormal 
+the physicist Hermite polynomials times a Gaussian factor i.e.
+\eqn{\exp{x^2/2}H_k(x)}, yields orthonormal 
 Hermite functions \eqn{h_k(x)} for \eqn{k=0,\dots,N}.
 }
 \author{

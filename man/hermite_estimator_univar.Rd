@@ -5,7 +5,7 @@
 \title{A class to sequentially estimate univariate pdfs, cdfs and quantile functions}
 \usage{
 hermite_estimator_univar(
-  N = 30,
+  N = 50,
   standardize = TRUE,
   exp_weight_lambda = NA,
   observations = c()

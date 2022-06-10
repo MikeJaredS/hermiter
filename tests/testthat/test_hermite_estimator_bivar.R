@@ -1,3 +1,7 @@
+## to avoid ASAN/UBSAN errors on CRAN, following advice of Kevin Ushey
+## e.g. https://github.com/RcppCore/RcppParallel/issues/169
+Sys.setenv(RCPP_PARALLEL_BACKEND = "tinythread")
+
 context("hermite_estimator_bivar")
 library(hermiter)
 library(magrittr)

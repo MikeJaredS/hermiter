@@ -24,7 +24,7 @@
 #' @return An S3 object of class hermite_estimator_univar, with methods for
 #' density function, distribution function and quantile function estimation.
 hermite_estimator_univar <-
-  function(N = 30,
+  function(N = 50,
            standardize = TRUE,
            exp_weight_lambda = NA,
            observations = c()) {
@@ -38,15 +38,18 @@ hermite_estimator_univar <-
         running_variance = 0,
         exp_weight = exp_weight_lambda,
         normalization_hermite_vec = c(),
-        h_int_lower_serialized = c(),
-        h_int_upper_serialized = c()
+        h_int_full_domain_serialized
+        # h_int_lower_serialized = c(),
+        # h_int_upper_serialized = c()
       )
     h_est_obj$normalization_hermite_vec <- 
       h_norm_serialized[1:(h_est_obj$N_param+1)]
-    h_est_obj$h_int_lower_serialized <-
-      h_int_lower_serialized[1:(h_est_obj$N_param+1),,drop = FALSE]
-    h_est_obj$h_int_upper_serialized <- 
-      h_int_upper_serialized[1:(h_est_obj$N_param+1),,drop = FALSE]
+    # h_est_obj$h_int_lower_serialized <-
+    #   h_int_lower_serialized[1:(h_est_obj$N_param+1),,drop = FALSE]
+    # h_est_obj$h_int_upper_serialized <- 
+    #   h_int_upper_serialized[1:(h_est_obj$N_param+1),,drop = FALSE]
+    h_est_obj$h_int_full_domain_serialized <- 
+      h_int_full_domain_serialized[1:(h_est_obj$N_param+1),,drop = FALSE]
     class(h_est_obj) <- c("hermite_estimator_univar", "list")
     if (length(observations) > 0) {
       if (!is.numeric(observations)) {
@@ -263,7 +266,7 @@ initialize_batch_univar <- function(h_est_obj, x) {
     x <-
       (x - h_est_obj$running_mean) / sqrt(h_est_obj$running_variance / (h_est_obj$num_obs - 1))
   }
-  h_est_obj$coeff_vec <- hermite_function_sum(h_est_obj$N_param, x) /
+  h_est_obj$coeff_vec <- hermite_function_sum_N(h_est_obj$N_param, x) /
     h_est_obj$num_obs
   return(h_est_obj)
 }
@@ -475,15 +478,21 @@ quantile_helper_bisection <- function(h_est_obj, p_vec, accelerate_series) {
 #
 # This helper method is intended for internal use by the 
 # hermite_estimator_univar class.
-quantile_helper_interpolate <- function(h_est_obj, p_vec, accelerate_series = TRUE){
+quantile_helper_interpolate <- function(h_est_obj, p_vec, 
+                                        accelerate_series = TRUE){
   result <- rep(NA,length(p_vec))
-  p_lower_vals <- series_calculate(h_est_obj$h_int_lower_serialized,
-                                   h_est_obj$coeff_vec, accelerate_series)
-  p_upper_vals <- 1 - series_calculate(h_est_obj$h_int_upper_serialized,
-                                       h_est_obj$coeff_vec, accelerate_series)
-  p_all_vals <- cummax(c(p_lower_vals,p_upper_vals))
+  # p_lower_vals <- series_calculate(h_est_obj$h_int_lower_serialized,
+  #                                  h_est_obj$coeff_vec, accelerate_series)
+  # p_upper_vals <- 1 - series_calculate(h_est_obj$h_int_upper_serialized,
+  #                                      h_est_obj$coeff_vec, accelerate_series)
+  # p_all_vals <- cummax(c(p_lower_vals,p_upper_vals))
+  p_all_vals <- cummax(shift_pvec + scale_pvec * 
+    series_calculate(h_est_obj$h_int_full_domain_serialized,
+                     h_est_obj$coeff_vec, accelerate_series))
+  # p_vec_s <- psort(p_vec,seq_along(p_vec)-1)+1
   result <- stats::approx(p_all_vals,x_full_domain_serialized,
-                   xout = p_vec,method="linear",ties = "ordered")$y
+                   xout = p_vec, method="linear",ties = "ordered")$y
+  # result <- result[p_vec_s]
   if (is.na(h_est_obj$exp_weight)) {
     result <-
       result * sqrt(h_est_obj$running_variance / (h_est_obj$num_obs - 1)) +

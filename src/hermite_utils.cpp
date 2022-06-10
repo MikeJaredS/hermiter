@@ -1,9 +1,12 @@
 // [[Rcpp::depends(BH)]]
+// [[Rcpp::depends(RcppParallel)]]
 #include <Rcpp.h>
+#include <RcppParallel.h>
 #include <boost/math/special_functions/factorials.hpp>
 #include <boost/math/special_functions/erf.hpp>
 
 using namespace Rcpp;
+using namespace RcppParallel;
 
 //' Outputs physicist version of Hermite Polynomials
 //' 
@@ -45,7 +48,8 @@ NumericMatrix hermite_polynomial(int N, NumericVector x) {
 //' Outputs Hermite normalization factors 
 //' 
 //' The method returns numeric normalization factors that, when multiplied by 
-//' the physicist Hermite polynomials \eqn{H_k(x)}, yield orthonormal 
+//' the physicist Hermite polynomials times a Gaussian factor i.e.
+//' \eqn{\exp{x^2/2}H_k(x)}, yields orthonormal 
 //' Hermite functions \eqn{h_k(x)} for \eqn{k=0,\dots,N}.
 //'
 //' @author Michael Stephanou <michael.stephanou@gmail.com>
@@ -150,7 +154,7 @@ NumericMatrix hermite_function(int N, NumericVector x) {
 //' @return A numeric vector of length N+1.
 //' @export
 // [[Rcpp::export]]
-NumericVector hermite_function_sum(int N, NumericVector x) {
+NumericVector hermite_function_sum_serial(int N, NumericVector x) {
   int x_size = x.size();
   NumericMatrix out(N + 1, x_size);
   NumericVector expFac(x_size);
@@ -382,4 +386,168 @@ NumericVector standardizeInputsEW(double x, double n_obs,double lambda,
   double running_std = sqrt(current_var);
   outputVec[2] = (x - outputVec[0]) / running_std;
   return outputVec;
+}
+
+// struct HermiteS : public Worker
+// {
+//   // Input and output
+//   const std::size_t N;
+//   const RVector<double> input;
+//   std::vector<double> value;
+//   // constructors
+//   HermiteS(const std::size_t N, const NumericVector input) : N(N), input(input), value() {value.resize(N+1,0.0);}
+//   HermiteS(const HermiteS& hermite_sum, Split) : N(hermite_sum.N),input(hermite_sum.input), value() {value.resize(N+1,0.0);}
+//   // Hermite Sum calculation
+//   void operator()(std::size_t begin, std::size_t end) {
+//     double piConst = pow(M_PI,-0.25);
+//     double sqrt2 = sqrt((double) 2);
+//     double out_curr = 0;
+//     double out_0 = 0;
+//     double out_1 =0;
+//     for(std::size_t j = begin; j < end; j++) {
+//       out_0 = piConst * exp(-1 * input[j] * input[j] / 2);
+//       value[0] += out_0;
+//     }
+//     if (N >= 1){
+//       for(std::size_t j = begin; j < end; j++) {
+//         out_1  = sqrt2 * piConst * input[j]* exp(-1 * input[j] * input[j] / 2);
+//         value[1] += out_1;
+//       }
+//       if (N >= 2){
+//         for(std::size_t j = begin; j < end; j++) {
+//           for(std::size_t i = 2; i <= N; i++) {
+//             out_curr = sqrt(2 / ((double) i)) * input[j] * out_1 -
+//               sqrt(1 - 1/((double)i)) * out_0;
+//             value[i] += out_curr;
+//             out_0 = out_1;
+//             out_1 = out_curr;
+//           }
+//         }
+//       }
+//     }
+//   }
+//   void join(const HermiteS& rhs) {
+//     for(std::size_t i = 0; i <= N; i++) {
+//       value[i] += rhs.value[i];
+//     }
+//   }
+// };
+
+
+struct HermiteS : public Worker
+{
+  // Input and output
+  const size_t N;
+  const RVector<double> input;
+  std::vector<double> value;
+  // constructors
+  HermiteS(const size_t N, const NumericVector input) : N(N), input(input), value() {value.resize(N+1,0.0);}
+  HermiteS(const HermiteS& hermite_sum, Split) : N(hermite_sum.N),input(hermite_sum.input), value() {value.resize(N+1,0.0);}
+  // Hermite Sum calculation
+  void operator()(std::size_t begin, std::size_t end) {
+    double piConst = pow(M_PI,-0.25);
+    double sqrt2 = sqrt((double) 2);
+    double out_curr = 0;
+    double out_0 = 0;
+    double out_1 =0;
+    for(std::size_t j = begin; j < end; j++) {
+      out_0 = piConst * exp(-1 * input[j] * input[j] / 2);
+      value[0] += out_0;
+      out_1  = sqrt2 * piConst * input[j]* exp(-1 * input[j] * input[j] / 2);
+      value[1] += out_1;
+      for(size_t i = 2; i <= N; i++) {
+        out_curr = sqrt(2 / ((double) i)) * input[j] * out_1 -
+          sqrt(1 - 1/((double)i)) * out_0;
+        value[i] += out_curr;
+        out_0 = out_1;
+        out_1 = out_curr;
+      }
+    }
+  }
+  void join(const HermiteS& rhs) {
+    for(size_t i = 0; i <= N; i++) {
+      value[i] += rhs.value[i];
+    }
+  }
+};
+
+// [[Rcpp::export]]
+NumericVector hermite_function_sum_parallel(int N, NumericVector x) {
+  HermiteS hermites(N,x);
+  parallelReduce(0, x.length(), hermites);
+  return wrap(hermites.value);
+}
+
+struct SeriesCalc : public Worker {
+  const std::size_t N;
+  const RVector<double> preFac;
+  const RMatrix<double> h_input;
+  // input matrix to read from
+  const RVector<double> coeffs;
+  // output matrix to write to
+  RVector<double> rout;
+  SeriesCalc(const int N, const NumericVector preFac, 
+             const NumericMatrix h_input, const NumericVector coeffs, 
+             NumericVector rout)
+    : N(N), preFac(preFac), h_input(h_input), coeffs(coeffs), rout(rout) {}
+  void operator()(std::size_t begin, std::size_t end) {
+    for (std::size_t j = begin; j < end; j++) {
+      RMatrix<double>::Column h_input_col = h_input.column(j);
+      rout[j] = std::inner_product(h_input_col.begin(),
+                                   h_input_col.begin() + N - 7,
+                                   coeffs.begin(),
+                                   0.0)+
+                                     std::inner_product(h_input_col.begin() +
+                                                        N - 7,
+                                                        h_input_col.end(),
+                                                        preFac.begin(),
+                                                        0.0);       
+    }
+  }
+};
+
+// [[Rcpp::export]]
+NumericVector series_calc_parallel_8_fold(NumericMatrix h_input, 
+                                          NumericVector coeffs) {
+  int ncol_val = h_input.ncol();
+  int N = h_input.nrow() - 1;
+  NumericVector rout(ncol_val);
+  NumericVector preFactors(8);
+  preFactors[0] = 255.0/256.0*coeffs[N-7];
+  preFactors[1] = 247.0/256.0*coeffs[N-6];
+  preFactors[2] = 219.0/256.0*coeffs[N-5];
+  preFactors[3] = 163.0/256.0*coeffs[N-4];
+  preFactors[4] = 93.0/256.0*coeffs[N-3];
+  preFactors[5] = 37.0/256.0*coeffs[N-2];
+  preFactors[6] = 9.0/256.0*coeffs[N-1];
+  preFactors[7] = 1.0/256.0*coeffs[N];
+  SeriesCalc seriesCalc(N,preFactors,h_input, coeffs,rout);
+  parallelFor(0, ncol_val, seriesCalc);
+  return wrap(rout);
+}
+
+// [[Rcpp::export]]
+NumericVector psort(NumericVector& x, NumericVector x_idx) {
+  
+  // std::vector<size_t> idx(x.size());
+  // iota(idx.begin(), idx.end(), 0);
+  
+  // sort indexes based on comparing values in v
+  // using std::stable_sort instead of std::sort
+  // to avoid unnecessary index re-orderings
+  // when v contains elements of equal values 
+  
+  // NumericVector sorted_idx = clone(x_idx);
+  // tbb::parallel_sort(sorted_vec.begin(), sorted_vec.end());
+  // return sorted_vec;
+  // 
+  NumericVector sorted_idx = clone(x_idx);
+  tbb::parallel_sort(x_idx.begin(), x_idx.end(),
+              [&x](size_t i1, size_t i2) {return x[i1] < x[i2];});
+  return x_idx;
+  
+  
+  // NumericVector sorted_vec = clone(x);
+  // tbb::parallel_sort(sorted_vec.begin(), sorted_vec.end());
+  // return sorted_vec;
 }

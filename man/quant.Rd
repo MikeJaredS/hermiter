@@ -36,7 +36,9 @@ stability of numerical root finding. Note that this method is only applicable
 to the univariate Hermite estimator i.e. est_type = "univariate".
 }
 \examples{
+\dontrun{
 hermite_est <- hermite_estimator(N = 10, standardize = TRUE, 
 est_type="univariate", observations = rnorm(30))
 quant_est <- quant(hermite_est, c(0.25, 0.5, 0.75))
+}
 }

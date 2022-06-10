@@ -8,8 +8,8 @@
 #' estimation of the full probability density function and cumulative 
 #' distribution function in the univariate and bivariate settings. Sequential 
 #' or one-pass batch estimation methods are also provided for the full quantile 
-#' function in the univariate setting and the Spearman's rank correlation 
-#' estimator in the bivariate setting.
+#' function in the univariate setting along with the Spearman and Kendall 
+#' correlation coefficients in the bivariate setting.
 #'
 #' @author Michael Stephanou <michael.stephanou@gmail.com>
 #'
@@ -29,23 +29,19 @@
 #' hermite_estimator_bivar. 
 #' @export
 #' @examples
-#' hermite_est <- hermite_estimator(N = 30, standardize = TRUE,
+#' \dontrun{
+#' hermite_est <- hermite_estimator(N = 50, standardize = TRUE,
 #' est_type="univariate")
-#' hermite_est <- hermite_estimator(N = 30, standardize = TRUE,
+#' hermite_est <- hermite_estimator(N = 50, standardize = TRUE,
 #' est_type="univariate", observations = c(1,2,3))
-#' hermite_est <- hermite_estimator(N = 10, standardize = TRUE, 
+#' hermite_est <- hermite_estimator(N = 30, standardize = TRUE, 
 #' est_type="bivariate", observations = matrix(c(1,1,2,2,3,3), 
 #' nrow=3, ncol=2,byrow=TRUE))
+#' }
 hermite_estimator <-
-  function(N = 30,
+  function(N = NA,
            standardize = TRUE,
            exp_weight_lambda = NA, est_type = "univariate", observations = c()){
-    if (!is.numeric(N)) {
-      stop("N must be numeric.")
-    }
-    if (N < 0 | N > 75) {
-      stop("N must be >= 0 and N <= 75.")
-    }
     if (!(standardize == TRUE | standardize == FALSE)) {
       stop("standardize can only take on values TRUE or FALSE.")
     }
@@ -57,15 +53,44 @@ hermite_estimator <-
         stop("exp_weight_lambda must be a real number > 0 and <= 1.")
       }
     }
-    if (est_type=="univariate"){
-      return(hermite_estimator_univar(N,standardize,exp_weight_lambda,
-                                      observations))
-    }
-    else if (est_type=="bivariate"){
-      return(hermite_estimator_bivar(N,standardize,exp_weight_lambda,
-                                     observations))
+    if (is.na(N)){
+      if (est_type=="univariate"){
+        if (is.na(exp_weight_lambda)){
+          return(hermite_estimator_univar(N = 50,standardize,exp_weight_lambda,
+                                        observations))
+        } else {
+          return(hermite_estimator_univar(N = 20,standardize,exp_weight_lambda,
+                                          observations))
+        }
+      }
+      else if (est_type=="bivariate"){
+        if (is.na(exp_weight_lambda)){
+          return(hermite_estimator_bivar(N = 30,standardize,exp_weight_lambda,
+                                       observations))
+        } else {
+          return(hermite_estimator_bivar(N = 20,standardize,exp_weight_lambda,
+                                          observations))
+        }
+      } else {
+        stop("Unknown estimator type.")
+      }
     } else {
-      stop("Unknown estimator type.")
+      if (!is.numeric(N) | is.nan(N)) {
+        stop("N must be numeric.")
+      }
+      if (N < 0 | N > 75) {
+        stop("N must be >= 0 and N <= 75.")
+      }
+      if (est_type=="univariate"){
+        return(hermite_estimator_univar(N, standardize,exp_weight_lambda,
+                                        observations))
+      }
+      else if (est_type=="bivariate"){
+        return(hermite_estimator_bivar(N, standardize,exp_weight_lambda,
+                                       observations))
+      } else {
+        stop("Unknown estimator type.")
+      }
     }
   }
 
@@ -80,7 +105,7 @@ hermite_estimator <-
 #' a single estimator on the data set formed by combining the data sets used to 
 #' update the respective hermite_estimator inputs. If the input Hermite 
 #' estimators are standardized however, then the equivalence will be approximate
-#' but still accurate in most cases.
+#' but still reasonably accurate in most cases.
 #'
 #' @param h_est_obj A hermite_estimator_univar or hermite_estimator_bivar object. 
 #' The first Hermite series based estimator.
@@ -90,11 +115,13 @@ hermite_estimator <-
 #' hermite_estimator_bivar.
 #' @export
 #' @examples
+#' \dontrun{
 #' hermite_est_1 <- hermite_estimator(N = 10, standardize = FALSE, 
 #' observations = rnorm(30))
 #' hermite_est_2 <- hermite_estimator(N = 10, standardize = FALSE, 
 #' observations = rnorm(30))
 #' hermite_merged <- merge_pair(hermite_est_1, hermite_est_2)
+#' }
 merge_pair <- function(h_est_obj, hermite_estimator_other) {
   UseMethod("merge_pair", h_est_obj)
 }
@@ -110,7 +137,7 @@ merge_pair <- function(h_est_obj, hermite_estimator_other) {
 #' a single estimator on the data set formed by combining the data sets used to 
 #' update the respective hermite_estimator inputs. If the input Hermite 
 #' estimators are standardized however, then the equivalence will be approximate
-#' but still accurate in most cases.
+#' but still reasonably accurate in most cases.
 #'
 #' @param hermite_estimators A list of hermite_estimator_univar or 
 #' hermite_estimator_bivar objects. 
@@ -118,11 +145,13 @@ merge_pair <- function(h_est_obj, hermite_estimator_other) {
 #' hermite_estimator_bivar.
 #' @export
 #' @examples
+#' \dontrun{
 #' hermite_est_1 <- hermite_estimator(N = 10, standardize = FALSE, 
 #' observations = rnorm(30))
 #' hermite_est_2 <- hermite_estimator(N = 10, standardize = FALSE, 
 #' observations = rnorm(30))
 #' hermite_merged <- merge_hermite(list(hermite_est_1, hermite_est_2))
+#' }
 merge_hermite <- function(hermite_estimators) {
   UseMethod("merge_hermite", hermite_estimators)
 }
@@ -151,7 +180,8 @@ merge_hermite.list <- function(hermite_estimators){
 #' This method can be applied in sequential estimation settings.
 #' 
 #'
-#' @param h_est_obj A hermite_estimator_univar or hermite_estimator_bivar object.
+#' @param h_est_obj A hermite_estimator_univar or hermite_estimator_bivar 
+#' object.
 #' @param x A numeric value or vector. An observation to be incorporated into 
 #' the estimator. Note that for univariate estimators, x is a numeric value 
 #' whereas for bivariate estimators, x is a numeric vector of length 2.
@@ -159,12 +189,14 @@ merge_hermite.list <- function(hermite_estimators){
 #' hermite_estimator_bivar.
 #' @export
 #' @examples
+#' \dontrun{
 #' hermite_est <- hermite_estimator(N = 10, standardize = TRUE, 
 #' est_type="univariate")
 #' hermite_est <- update_sequential(hermite_est, x = 2)
 #' hermite_est <- hermite_estimator(N = 10, standardize = TRUE, 
 #' est_type="bivariate")
 #' hermite_est <- update_sequential(hermite_est, x = c(1,2))
+#' }
 update_sequential <- function(h_est_obj, x) {
   UseMethod("update_sequential", h_est_obj)
 }
@@ -195,6 +227,7 @@ calculate_running_std <- function(h_est_obj)
 #' @return A numeric vector of probability density values.
 #' @export
 #' @examples
+#' \dontrun{
 #' hermite_est <- hermite_estimator(N = 10, standardize = TRUE, 
 #' est_type="univariate", observations = rnorm(30))
 #' pdf_est <- dens(hermite_est, c(0, 0.5, 1))
@@ -203,6 +236,7 @@ calculate_running_std <- function(h_est_obj)
 #' nrow=30, ncol=2,byrow=TRUE))
 #' pdf_est <- dens(hermite_est, matrix(c(0,0,0.5,0.5,1,1),nrow=3,
 #' ncol=2,byrow=TRUE))
+#' }
 dens <- function(h_est_obj, x, clipped, accelerate_series = TRUE) {
   UseMethod("dens", h_est_obj)
 }
@@ -226,6 +260,7 @@ dens <- function(h_est_obj, x, clipped, accelerate_series = TRUE) {
 #' @return A numeric vector of cumulative probability values.
 #' @export
 #' @examples
+#' \dontrun{
 #' hermite_est <- hermite_estimator(N = 10, standardize = TRUE, 
 #' est_type="univariate", observations = rnorm(30))
 #' cdf_est <- cum_prob(hermite_est, c(0, 0.5, 1))
@@ -234,6 +269,7 @@ dens <- function(h_est_obj, x, clipped, accelerate_series = TRUE) {
 #' nrow=30, ncol=2,byrow=TRUE))
 #' cdf_est <- cum_prob(hermite_est, matrix(c(0,0,0.5,0.5,1,1),nrow=3,
 #' ncol=2,byrow=TRUE))
+#' }
 cum_prob <- function(h_est_obj, x, clipped, accelerate_series = TRUE) {
   UseMethod("cum_prob", h_est_obj)
 }
@@ -244,8 +280,11 @@ cum_prob <- function(h_est_obj, x, clipped, accelerate_series = TRUE) {
 #' Varughese, Melvin and Iain Macdonald. "Sequential quantiles via Hermite 
 #' series density estimation." Electronic Journal of Statistics 11.1 (2017): 
 #' 570-607 <doi:10.1214/17-EJS1245>, with some modifications to improve the 
-#' stability of numerical root finding. Note that this method is only applicable
-#' to the univariate Hermite estimator i.e. est_type = "univariate".
+#' stability of numerical root finding when using the bisection algorithm. 
+#' Note that this method is only applicable to the univariate Hermite 
+#' estimator i.e. est_type = "univariate".
+#' 
+#' The object must be updated with observations prior to the use of this method.
 #'
 #' @param h_est_obj A hermite_estimator_univar object.
 #' @param p A numeric vector. A vector of probability values.
@@ -263,18 +302,24 @@ cum_prob <- function(h_est_obj, x, clipped, accelerate_series = TRUE) {
 #' probabilities p.
 #' @export
 #' @examples
+#' \dontrun{
 #' hermite_est <- hermite_estimator(N = 10, standardize = TRUE, 
 #' est_type="univariate", observations = rnorm(30))
 #' quant_est <- quant(hermite_est, c(0.25, 0.5, 0.75))
-quant <- function(h_est_obj, p, algorithm="interpolate", accelerate_series = TRUE) {
+#' }
+quant <- function(h_est_obj, p, algorithm="interpolate", 
+                  accelerate_series = TRUE) {
   UseMethod("quant", h_est_obj)
 }
 
 #' Estimates the Spearman's rank correlation coefficient
-#'
-#' This method calculates the Spearman's rank correlation coefficient value. It 
-#' is only applicable to the bivariate Hermite estimator i.e. est_type = 
-#' "bivariate".
+#' 
+#' This method utilizes the estimator (8) in the paper Stephanou, Michael and 
+#' Varughese, Melvin. "Sequential estimation of Spearman rank correlation using 
+#' Hermite series estimators." Journal of Multivariate Analysis (2021) 
+#' <doi:10.1016/j.jmva.2021.104783> to calculate the Spearman rank correlation 
+#' coefficient. It is only applicable to the bivariate Hermite estimator 
+#' i.e. est_type = "bivariate".
 #'
 #' The object must be updated with observations prior to the use of this method.
 #'
@@ -284,10 +329,12 @@ quant <- function(h_est_obj, p, algorithm="interpolate", accelerate_series = TRU
 #' @return A numeric value.
 #' @export
 #' @examples
+#' \dontrun{
 #' hermite_est <- hermite_estimator(N = 10, standardize = TRUE,
 #' est_type="bivariate", observations = matrix(rnorm(30*2), nrow=30, 
 #' ncol=2, byrow = TRUE))
 #' spearmans_est <- spearmans(hermite_est)
+#' }
 spearmans <- function(h_est_obj, clipped = FALSE)
 {
   UseMethod("spearmans",h_est_obj)
@@ -307,10 +354,12 @@ spearmans <- function(h_est_obj, clipped = FALSE)
 #' @return A numeric value.
 #' @export
 #' @examples
+#' \dontrun{
 #' hermite_est <- hermite_estimator(N = 10, standardize = TRUE,
 #' est_type="bivariate", observations = matrix(rnorm(30*2), nrow=30, 
 #' ncol=2, byrow = TRUE))
 #' kendall_est <- kendall(hermite_est)
+#' }
 kendall <- function(h_est_obj, clipped = FALSE)
 {
   UseMethod("kendall",h_est_obj)

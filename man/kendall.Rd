@@ -24,8 +24,10 @@ is only applicable to the bivariate Hermite estimator i.e. est_type =
 The object must be updated with observations prior to the use of this method.
 }
 \examples{
+\dontrun{
 hermite_est <- hermite_estimator(N = 10, standardize = TRUE,
 est_type="bivariate", observations = matrix(rnorm(30*2), nrow=30, 
 ncol=2, byrow = TRUE))
 kendall_est <- kendall(hermite_est)
+}
 }

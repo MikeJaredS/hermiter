@@ -2,9 +2,8 @@
 # h_l(v)dvdu}
 W_matrix <- function(num_r,num_s, hermite_norm){
   integrand <- function(x,r,s, hermite_norm){
-    hermite_vec <- hermite_function_N(r,x,hermite_norm[1:(r+1)])
-    hermite_integral_vec <- hermite_int_lower(s,x,normalization_hermite =
-                                                hermite_norm[1:(s+1)])
+    hermite_vec <- hermite_function_N(r,x)
+    hermite_integral_vec <- hermite_int_lower(s,x)
     result <- hermite_integral_vec[s+1,]*hermite_vec[r+1,]
     return(result)
   }
@@ -12,8 +11,7 @@ W_matrix <- function(num_r,num_s, hermite_norm){
                    byrow = TRUE)
   for (r in c(0:num_r)) {
     for (s in c(0:num_s)) {
-      result[r+1,s+1] <- stats::integrate(function(t){integrand(t,r,s, 
-                              hermite_norm[1:(max(r,s)+1)])},
+      result[r+1,s+1] <- stats::integrate(function(t){integrand(t,r,s)},
                                           lower=-Inf,upper=Inf)$value
     }
   }
@@ -21,19 +19,19 @@ W_matrix <- function(num_r,num_s, hermite_norm){
 }
 
 # Vector \eqn{z_{k} = \int_{-\infty}^{\infty} h_k(u)du}
-z_vector <- function(num_r, hermite_norm){
+z_vector <- function(num_r){
   result <- hermite_int_full(num_r)
   return(result)
 }
 
 
 h_norm_serialized <-
-  hermite_normalization(N=75)
-W_serialized <- W_matrix(75,75,h_norm_serialized)
-z_serialized <- z_vector(75, h_norm_serialized)
+  hermite_normalization_N(N=75)
+W_serialized <- W_matrix(75,75)
+z_serialized <- z_vector(75)
 
 h_k_mat <-
-  hermite_function_N(N=75, x=0, h_norm_serialized)
+  hermite_function_N(N=75, x=0)
 h_int_lower_zero_serialized <-  hermite_int_lower(N=75,x=0,
                                                 hermite_function_matrix=h_k_mat)
 h_int_upper_zero_serialized <- hermite_int_upper(N=75,x=0,
@@ -54,12 +52,13 @@ x_upper_serialized <- c(x_upper_serialized, seq(6.05,10,by=0.05))
 x_upper_serialized <- c(x_upper_serialized, seq(10.5,25,by=0.5))
 
 x_full_domain_serialized <- c(x_lower_serialized,x_upper_serialized)
-h_int_lower_serialized <- hermite_int_lower(N=75,x_lower_serialized 
-                                 ,normalization_hermite = 
-                                   h_norm_serialized)
-h_int_upper_serialized <- hermite_int_upper(N=75,x_upper_serialized 
-                                 ,normalization_hermite = 
-                                   h_norm_serialized)
+h_int_lower_serialized <- hermite_int_lower(N=75,x_lower_serialized)
+h_int_upper_serialized <- hermite_int_upper(N=75,x_upper_serialized)
+h_int_full_domain_serialized <- cbind(h_int_lower_serialized, 
+                                      h_int_upper_serialized)
+
+shift_pvec <- c(rep(0,710), rep(1,711))
+scale_pvec <- c(rep(1,710), rep(-1,711))
 
 root_x_serialized <-  c(
   -13.4064873381449,
@@ -273,5 +272,8 @@ save(h_norm_serialized,W_serialized,z_serialized,
      h_int_upper_zero_serialized,
      h_int_lower_serialized, 
      h_int_upper_serialized,
+     h_int_full_domain_serialized,
      x_full_domain_serialized,
+     shift_pvec,
+     scale_pvec,
      file = "sysdata.rda",compress="xz")

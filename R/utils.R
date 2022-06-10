@@ -1,8 +1,9 @@
 #' Convenience function to output Hermite normalization factors 
 #' 
 #' The method returns numeric normalization factors that, when multiplied by 
-#' the physicist Hermite polynomials \eqn{H_k(x)}, yield orthonormal 
-#' Hermite functions \eqn{h_k(x)} for \eqn{k=0,\dots,N}.
+#' the physicist Hermite polynomials times a Gaussian factor i.e.
+#' \eqn{\exp{x^2/2}H_k(x)}, yields orthonormal Hermite functions \eqn{h_k(x)} 
+#' for \eqn{k=0,\dots,N}.
 #'
 #' @author Michael Stephanou <michael.stephanou@gmail.com>
 #'
@@ -84,7 +85,11 @@ hermite_function_sum_N <- function(N,x){
   if (length(x)<1) {
     stop("x must contain at least one value.")
   }
-  return(hermite_function_sum(N,x))
+  if (N < 2){
+    return(hermite_function_sum_serial(N,x))
+  } else {
+    return(hermite_function_sum_parallel(N,x))
+  }
 }
 
 #' Convenience function to output a definite integral of the orthonormal 
@@ -232,32 +237,35 @@ integrand_coeff_univar <- function(t,hermite_est_current,
 # This helper method is intended for internal use by the 
 # hermite_estimator_univar class.
 series_calculate <- function(h_input, coeffs, accelerate_series = TRUE){
-  sz <- nrow(h_input) - 1
+  N <- nrow(h_input) - 1
   if (length(coeffs) < 3 | accelerate_series == FALSE){
     return(as.numeric(crossprod(h_input,coeffs)))
   }
   if (length(coeffs) >=3 & length(coeffs) < 6){
-    result <- h_input[1,] * coeffs[1] + 1/2 * h_input[2,] * coeffs[2]
+    result <- crossprod(h_input[1:N,,drop=FALSE], coeffs[1:N])
+    result <- result + 1/2 * h_input[N+1,] * coeffs[N+1]
     return(as.numeric(result))
   }
   if (length(coeffs) >=6 & length(coeffs) < 12){
-    result <- crossprod(h_input[1:(sz-3),,drop=FALSE], coeffs[1:(sz-3)])
-    result <- result + 15/16*h_input[sz-2,]*coeffs[sz-2]+
-      11/16*h_input[sz-1,]*coeffs[sz-1]+
-      5/16*h_input[sz,]*coeffs[sz]+
-      1/16*h_input[sz+1,]*coeffs[sz+1]
+    result <- crossprod(h_input[1:(N-3),,drop=FALSE], coeffs[1:(N-3)])
+    result <- result + 15/16*h_input[N-2,]*coeffs[N-2]+
+      11/16*h_input[N-1,]*coeffs[N-1]+
+      5/16*h_input[N,]*coeffs[N]+
+      1/16*h_input[N+1,]*coeffs[N+1]
     return(as.numeric(result))
   }
   if (length(coeffs) >= 12){
-    result <- crossprod(h_input[1:(sz-8),,drop=FALSE], coeffs[1:(sz-8)])
-    result <- result + 255/256*h_input[sz-7,]*coeffs[sz-7]+
-      247/256*h_input[sz-6,]*coeffs[sz-6]+
-      219/256*h_input[sz-5,]*coeffs[sz-5]+
-      163/256*h_input[sz-4,]*coeffs[sz-4]+
-      93/256*h_input[sz-3,]*coeffs[sz-3]+
-      37/256*h_input[sz-2,]*coeffs[sz-2]+
-      9/256*h_input[sz-1,]*coeffs[sz-1]+
-      1/256*h_input[sz+1,]*coeffs[sz+1]
+    result <- crossprod(h_input[1:(N-7),,drop=FALSE], coeffs[1:(N-7)])
+    result <- result +
+    255/256*h_input[N-6,]*coeffs[N-6]+
+    247/256*h_input[N-5,]*coeffs[N-5]+
+    219/256*h_input[N-4,]*coeffs[N-4]+
+    163/256*h_input[N-3,]*coeffs[N-3]+
+    93/256*h_input[N-2,]*coeffs[N-2]+
+    37/256*h_input[N-1,]*coeffs[N-1]+
+    9/256*h_input[N,]*coeffs[N]+
+    1/256*h_input[N+1,]*coeffs[N+1]
     return(as.numeric(result))
+    # return(series_calc_parallel_8_fold(h_input,coeffs))
   }
 }

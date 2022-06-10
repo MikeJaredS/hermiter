@@ -30,9 +30,11 @@ estimators are standardized however, then the equivalence will be approximate
 but still accurate in most cases.
 }
 \examples{
+\dontrun{
 hermite_est_1 <- hermite_estimator(N = 10, standardize = FALSE, 
 observations = rnorm(30))
 hermite_est_2 <- hermite_estimator(N = 10, standardize = FALSE, 
 observations = rnorm(30))
 hermite_merged <- merge_pair(hermite_est_1, hermite_est_2)
+}
 }

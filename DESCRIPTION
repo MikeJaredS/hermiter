@@ -1,7 +1,7 @@
 Package: hermiter
 Title: Efficient Sequential and Batch Estimation of Univariate and Bivariate Probability Density Functions and Cumulative Distribution Functions along with Quantiles (Univariate) and Nonparametric Correlation (Bivariate)
-Version: 2.1.1
-Date: 2021-11-16
+Version: 2.2.0
+Date: 2022-06-05
 Authors@R: c(
   person("Michael","Stephanou",role=c("aut","cre"), email="michael.stephanou@gmail.com"),
   person("Melvin","Varughese",role="ctb"))
@@ -20,11 +20,14 @@ License: MIT + file LICENSE
 Depends: R (>= 3.5.0)
 Imports: 
   Rcpp (>= 1.0.5),
-  methods
+  methods,
+  RcppParallel (>= 5.1.1)
 LinkingTo: 
   Rcpp,
-  BH
-RoxygenNote: 7.1.2
+  BH,
+  RcppParallel
+SystemRequirements: GNU make
+RoxygenNote: 7.2.0
 Suggests: 
     testthat,
     magrittr,

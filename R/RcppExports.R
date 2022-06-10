@@ -20,7 +20,8 @@ hermite_polynomial <- function(N, x) {
 #' Outputs Hermite normalization factors 
 #' 
 #' The method returns numeric normalization factors that, when multiplied by 
-#' the physicist Hermite polynomials \eqn{H_k(x)}, yield orthonormal 
+#' the physicist Hermite polynomials times a Gaussian factor i.e.
+#' \eqn{\exp{x^2/2}H_k(x)}, yields orthonormal 
 #' Hermite functions \eqn{h_k(x)} for \eqn{k=0,\dots,N}.
 #'
 #' @author Michael Stephanou <michael.stephanou@gmail.com>
@@ -61,8 +62,8 @@ hermite_function <- function(N, x) {
 #' @param x A numeric vector.
 #' @return A numeric vector of length N+1.
 #' @export
-hermite_function_sum <- function(N, x) {
-    .Call(`_hermiter_hermite_function_sum`, N, x)
+hermite_function_sum_serial <- function(N, x) {
+    .Call(`_hermiter_hermite_function_sum_serial`, N, x)
 }
 
 #' Outputs lower integral of the orthonormal Hermite functions
@@ -146,5 +147,17 @@ standardizeInputs <- function(x, n_obs, current_mean, current_var) {
 #' @export
 standardizeInputsEW <- function(x, n_obs, lambda, current_mean, current_var) {
     .Call(`_hermiter_standardizeInputsEW`, x, n_obs, lambda, current_mean, current_var)
+}
+
+hermite_function_sum_parallel <- function(N, x) {
+    .Call(`_hermiter_hermite_function_sum_parallel`, N, x)
+}
+
+series_calc_parallel_8_fold <- function(h_input, coeffs) {
+    .Call(`_hermiter_series_calc_parallel_8_fold`, h_input, coeffs)
+}
+
+psort <- function(x, x_idx) {
+    .Call(`_hermiter_psort`, x, x_idx)
 }
 

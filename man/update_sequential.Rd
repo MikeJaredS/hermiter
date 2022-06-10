@@ -21,10 +21,12 @@ hermite_estimator_bivar.
 This method can be applied in sequential estimation settings.
 }
 \examples{
+\dontrun{
 hermite_est <- hermite_estimator(N = 10, standardize = TRUE, 
 est_type="univariate")
 hermite_est <- update_sequential(hermite_est, x = 2)
 hermite_est <- hermite_estimator(N = 10, standardize = TRUE, 
 est_type="bivariate")
 hermite_est <- update_sequential(hermite_est, x = c(1,2))
+}
 }

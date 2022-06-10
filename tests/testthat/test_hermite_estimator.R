@@ -1,3 +1,7 @@
+## to avoid ASAN/UBSAN errors on CRAN, following advice of Kevin Ushey
+## e.g. https://github.com/RcppCore/RcppParallel/issues/169
+Sys.setenv(RCPP_PARALLEL_BACKEND = "tinythread")
+
 context("hermite_estimator_univar")
 library(hermiter)
 library(magrittr)
@@ -842,12 +846,12 @@ test_that("quantile estimation works as expected", {
                       observations = test_observations)
   quantiles_est <- hermite_est %>% quant(c(0.25, 0.5, 0.75))
   expect_equal(quantiles_est,
-               c( -1.0114183, -0.1528504,  0.8384226),
+               c(-1.1394204, 0.0169664,  1.0930044),
                tolerance = get_eps())
   quantiles_est <- hermite_est %>% quant(c(0.25, 0.5, 0.75), 
                                          algorithm = "bisection")
   expect_equal(quantiles_est,
-               c(-1.0115987, -0.1510623,  0.8383335),
+               c(-1.13935192, 0.01706313,  1.09273375),
                tolerance = get_eps())
   quantiles_est <- hermite_est %>% quant(c(0.25, 0.5, 0.75), 
                                          accelerate_series = FALSE)
@@ -1041,17 +1045,16 @@ test_that("convenience and utility functions work as expected", {
 test_that("Print and Summary work as expected", {
   expect_equal(capture.output(print(hermite_estimator())), 
                c("Univariate Hermite Estimator:",
-                 "N = 30", "Standardize observations = TRUE",
+                 "N = 50", "Standardize observations = TRUE",
                  "Exponential weighting for coefficents = FALSE",
                  "Number of observations = 0"))
   h_est <- hermite_estimator(observations = c(1,2,3))
   expect_equal(capture.output(summary(h_est)), 
-               c('Univariate Hermite Estimator:','N = 30',
+               c('Univariate Hermite Estimator:','N = 50',
                  'Standardize observations = TRUE',
                  'Exponential weighting for coefficents = FALSE',
                  'Number of observations = 3','','Mean = 2',
                  'Standard Deviation = 1','Estimated Quantiles:',
-                 paste0('    10%    20%    30%    40%    50%    60%    70%    ',
-                 '80%    90%'),paste0(' 0.9083 1.0228 1.1513 1.8812 2.0042',
-                 ' 2.1188 2.8487 2.9772 3.0917')))
+                 paste0('    10%    20%    30%    40%    50%    60%   70%    ',
+                 '80%    90%'),paste0(' 0.9375 1.0375 1.1449 1.8919 2.0007 2.1081 2.295 2.9625 3.0625')))
 })
