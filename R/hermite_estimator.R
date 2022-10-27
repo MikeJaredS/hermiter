@@ -107,7 +107,8 @@ hermite_estimator <-
 #' estimators are standardized however, then the equivalence will be approximate
 #' but still reasonably accurate in most cases.
 #'
-#' @param h_est_obj A hermite_estimator_univar or hermite_estimator_bivar object. 
+#' @param h_est_obj A hermite_estimator_univar or hermite_estimator_bivar 
+#' object. 
 #' The first Hermite series based estimator.
 #' @param hermite_estimator_other A hermite_estimator_univar or
 #' hermite_estimator_bivar object. The second Hermite series based estimator.
@@ -217,7 +218,8 @@ calculate_running_std <- function(h_est_obj)
 #'
 #' The object must be updated with observations prior to the use of the method.
 #'
-#' @param h_est_obj A hermite_estimator_univar or hermite_estimator_bivar object.
+#' @param h_est_obj A hermite_estimator_univar or hermite_estimator_bivar 
+#' object.
 #' @param x A numeric vector (univariate) or a numeric matrix (bivariate) of
 #' values at which to calculate the probability density.
 #' @param clipped A boolean value. This value determines whether
@@ -250,7 +252,8 @@ dens <- function(h_est_obj, x, clipped, accelerate_series = TRUE) {
 #'
 #' The object must be updated with observations prior to the use of the method.
 #'
-#' @param h_est_obj A hermite_estimator_univar or hermite_estimator_bivar object.
+#' @param h_est_obj A hermite_estimator_univar or hermite_estimator_bivar 
+#' object.
 #' @param x A numeric vector (univariate) or a numeric matrix (bivariate).
 #' Values at which to calculate the cumulative probability.
 #' @param clipped A boolean value. This value determines whether

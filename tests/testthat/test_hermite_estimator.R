@@ -1055,6 +1055,7 @@ test_that("Print and Summary work as expected", {
                  'Exponential weighting for coefficents = FALSE',
                  'Number of observations = 3','','Mean = 2',
                  'Standard Deviation = 1','Estimated Quantiles:',
-                 paste0('    10%    20%    30%    40%    50%    60%   70%    ',
-                 '80%    90%'),paste0(' 0.9375 1.0375 1.1449 1.8919 2.0007 2.1081 2.295 2.9625 3.0625')))
+      paste0('    10%    20%    30%    40%    50%    60%   70%    ',
+                 '80%    90%'), 
+      paste0(' 0.9375 1.0375 1.1449 1.8919 2.0007 2.1081 2.295 2.9625 3.0625')))
 })

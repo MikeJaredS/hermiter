@@ -13,10 +13,10 @@
 `hermiter` is an R package that facilitates the estimation of the probability 
 density function and cumulative distribution function in univariate and 
 bivariate settings using Hermite series based estimators. In addition, 
-`hermiter` allows the estimation of the quantile function in the univariate 
-case and nonparametric correlation coefficients in the bivariate case. The 
-package is applicable to streaming, batch and grouped data. The core methods of 
-the package are written in C++ for speed.
+`hermiter` allows the estimation of the quantile function in the univariate case
+and nonparametric correlation coefficients in the bivariate case. The package is
+applicable to streaming, batch and grouped data. The core methods of the package
+are written in C++ for speed.
 
 These estimators are particularly useful in the sequential setting (both 
 stationary and non-stationary data streams). In addition, they are useful in 
@@ -42,62 +42,28 @@ article below.
 
 * [Stephanou, Michael and Varughese, Melvin. "hermiter: R package for Sequential Nonparametric Estimation." arXiv (2021)](https://arxiv.org/abs/2111.14091)
 
-## Features
-
-### Univariate
-
-* fast batch estimation of pdf, cdf and quantile function
-* consistent merging of estimates
-* fast sequential estimation of pdf, cdf and quantile function on streaming data
-* adaptive sequential estimation on non-stationary streams via exponential 
-weighting
-* provides online, O(1) time complexity estimates of arbitrary quantiles e.g. 
-median at any point in time along with probability densities and cumulative 
-probabilities at arbitrary x
-* uses small and constant memory for the estimator
-* provides a very compact, simultaneous representation of the pdf, cdf and 
-quantile function that can be efficiently stored and communicated using e.g. 
-saveRDS and readRDS functions
-
-### Bivariate
-
-* fast batch estimation of bivariate pdf, cdf and nonparametric correlation 
-coefficients (Spearman Rho and Kendall Tau)
-* consistent merging of estimates
-* fast sequential estimation of bivariate pdf, cdf and nonparametric correlation 
-coefficients on streaming data
-* adaptive sequential estimation on non-stationary bivariate streams via 
-exponential weighting
-* provides online, O(1) time complexity estimates of bivariate probability 
-densities and cumulative probabilities at arbitrary points, x
-* provides online, O(1) time complexity estimates of the Spearman and Kendall 
-rank correlation coefficients
-* uses small and constant memory for the estimator
-
-## Installation
-
-The release version of `hermiter` can be installed from CRAN with:
-
-```r
-install.packages("hermiter")
-```
-
-The development version of `hermiter` can be installed using `devtools` with:
-
-```r
-devtools::install_github("MikeJaredS/hermiter")
-```
-
-## Load Package
+## Load Packages
 
 In order to utilize the hermiter package, the package must be loaded using the 
 following command:
 
-```{r}
+```{r setup, message=FALSE, warning=FALSE}
 library(hermiter)
 ```
 
-# Construct Estimator
+Other packages that are used in this vignette are loaded as follows:
+
+```{r message=FALSE, warning=FALSE}
+library(magrittr)
+library(ggplot2)
+library(dplyr)
+library(data.table)
+library(DT)
+library(mvtnorm)
+library(patchwork)
+```
+
+## Construct Estimator
 
 A hermite_estimator S3 object is constructed as below. The argument, N, adjusts 
 the number of terms in the Hermite series based estimator and controls the 
@@ -123,19 +89,19 @@ hermite_est <- hermite_estimator(N=10, standardize=TRUE,
                                  est_type = "bivariate")
 ```
 
-# Batch Estimator Updating
+## Batch Estimator Updating
 
-Once the hermite_estimator object has been constructed, it can be updated with a
-batch of observations as below. 
+A hermite_estimator object can be initialized with a batch of observations as 
+below. 
 
-## Standard syntax
+### Standard syntax
 
 For univariate observations:
 
 ```{r}
 observations <- rlogis(n=1000)
-hermite_est <- hermite_estimator(N=10, standardize=TRUE)
-hermite_est <- update_batch(hermite_est,observations)
+hermite_est <- hermite_estimator(N=10, standardize=TRUE, observations = 
+                                   observations)
 ```
 
 For bivariate observations:
@@ -143,29 +109,14 @@ For bivariate observations:
 ```{r}
 observations <- matrix(data = rnorm(2000),nrow = 1000, ncol=2)
 hermite_est <- hermite_estimator(N=10, standardize=TRUE, 
-                                 est_type = "bivariate")
-hermite_est <- update_batch(hermite_est,observations)
+                                 est_type = "bivariate", observations = 
+                                   observations)
 ```
 
 Functional piped syntax can also be used as below provided the `magrittr` 
 package is installed.
 
-## Piped syntax
-
-```{r}
-observations <- rlogis(n=1000)
-hermite_est <- hermite_estimator(N=10, standardize=TRUE)
-hermite_est <- hermite_est %>% update_batch(observations)
-```
-
-```{r}
-observations <- matrix(data = rnorm(2000),nrow = 1000, ncol=2)
-hermite_est <- hermite_estimator(N=10, standardize=TRUE, 
-                                 est_type = "bivariate")
-hermite_est <- hermite_est %>% update_batch(observations)
-```
-
-# Sequential Estimator Updating
+## Sequential Estimator Updating
 
 In the sequential setting, observations are revealed one at a time. A 
 hermite_estimator object can be updated sequentially with a single new 
@@ -174,7 +125,7 @@ the Hermite series based estimator sequentially, observations are also
 standardized sequentially if the standardize argument is set to true in the 
 constructor.
 
-## Standard syntax
+### Standard syntax
 
 For univariate observations:
 
@@ -197,7 +148,7 @@ for (idx in seq_len(nrow(observations))) {
 }
 ```
 
-## Piped syntax
+### Piped syntax
 
 For univariate observations:
 
@@ -220,7 +171,7 @@ for (idx in seq_len(nrow(observations))) {
 }
 ```
 
-# Merging Hermite Estimators
+## Merging Hermite Estimators
 
 Hermite series based estimators can be consistently combined/merged in both
 the univariate and bivariate settings. In particular, when standardize = FALSE,
@@ -238,10 +189,10 @@ For the univariate case:
 ```{r}
 observations_1 <- rlogis(n=1000)
 observations_2 <- rlogis(n=1000)
-hermite_est_1 <- hermite_estimator(N=10, standardize=TRUE) %>% 
-  update_batch(observations_1)
-hermite_est_2 <- hermite_estimator(N=10, standardize=TRUE) %>% 
-  update_batch(observations_2)
+hermite_est_1 <- hermite_estimator(N=10, standardize=TRUE, 
+                                   observations = observations_1)
+hermite_est_2 <- hermite_estimator(N=10, standardize=TRUE, 
+                                   observations = observations_2)
 hermite_est_merged <- merge_hermite(list(hermite_est_1,hermite_est_2))
 ```
 
@@ -251,18 +202,18 @@ For the bivariate case:
 observations_1 <- matrix(data = rnorm(2000),nrow = 1000, ncol=2)
 observations_2 <- matrix(data = rnorm(2000),nrow = 1000, ncol=2)
 hermite_est_1 <- hermite_estimator(N=10, standardize=TRUE, 
-                                 est_type = "bivariate") %>% 
-  update_batch(observations_1)
+                                 est_type = "bivariate", 
+                                 observations = observations_1)
 hermite_est_2 <- hermite_estimator(N=10, standardize=TRUE, 
-                                 est_type = "bivariate") %>% 
-  update_batch(observations_2)
+                                 est_type = "bivariate", 
+                                 observations = observations_2)
 hermite_est_merged <- merge_hermite(list(hermite_est_1,hermite_est_2))
 ```
 
 The ability to combine/merge estimators is particularly useful in applications
 involving grouped data (see package vignette).
 
-# Estimate univariate pdf, cdf and quantile function
+## Estimate univariate pdf, cdf and quantile function
 
 The central advantage of Hermite series based estimators is that they can be 
 updated in a sequential/one-pass manner as above and subsequently probability 
@@ -272,12 +223,12 @@ small and fixed number of coefficients and thus uses minimal memory. The syntax
 to calculate probability densities, cumulative probabilities and quantiles in 
 the univariate setting is presented below.
 
-## Standard syntax
+### Standard syntax
 
 ```{r}
 observations <- rlogis(n=2000)
-hermite_est <- hermite_estimator(N=10, standardize=TRUE)
-hermite_est <- update_batch(hermite_est, observations)
+hermite_est <- hermite_estimator(N=10, standardize=TRUE, 
+                                 observations = observations)
 
 x <- seq(-15,15,0.1)
 pdf_est <- dens(hermite_est,x)
@@ -287,12 +238,12 @@ p <- seq(0.05,1,0.05)
 quantile_est <- quant(hermite_est,p)
 ```
 
-## Piped syntax
+### Piped syntax
 
 ```{r}
 observations <- rlogis(n=2000)
-hermite_est <- hermite_estimator(N=10, standardize=TRUE)
-hermite_est <- hermite_est %>% update_batch(observations)
+hermite_est <- hermite_estimator(N=10, standardize=TRUE, 
+                                 observations = observations)
 
 x <- seq(-15,15,0.1)
 pdf_est <- hermite_est %>% dens(x)
@@ -311,7 +262,7 @@ actual_quantiles <- qlogis(p)
 df_quant <- data.frame(p,quantile_est,actual_quantiles)
 ```
 
-## Comparing Estimated versus Actual
+### Comparing Estimated versus Actual
 
 ```{r}
 ggplot(df_pdf_cdf,aes(x=x)) + geom_line(aes(y=pdf_est, colour="Estimated")) +
@@ -343,7 +294,7 @@ ggplot(df_quant,aes(x=actual_quantiles)) + geom_point(aes(y=quantile_est),
 
 ![](./vignettes/quantile_static.png)
 
-# Estimate bivariate pdf, cdf and Nonparametric correlation
+## Estimate bivariate pdf, cdf and nonparametric correlation
 
 The aforementioned suitability of Hermite series based estimators in sequential 
 and one-pass batch estimation settings extends to the bivariate case. 
@@ -352,7 +303,7 @@ points. The syntax to calculate probability densities and
 cumulative probabilities along with the Spearman and Kendall correlation 
 coefficients in the bivariate setting is presented below.
 
-## Standard syntax
+### Standard syntax
 
 ```{r}
 # Prepare bivariate normal data
@@ -365,8 +316,8 @@ observations_mat <- mvtnorm::rmvnorm(n=num_obs,mean=rep(0,2),
           nrow=2,ncol=2, byrow = TRUE))
 
 hermite_est <- hermite_estimator(N = 30, standardize = TRUE, 
-                                 est_type = "bivariate") 
-hermite_est <-  update_batch(hermite_est,observations_mat)
+                                 est_type = "bivariate", 
+                                 observations = observations_mat) 
 vals <- seq(-5,5,by=0.25)
 x_grid <- as.matrix(expand.grid(X=vals, Y=vals))
 pdf_est <- dens(hermite_est,x_grid)
@@ -374,7 +325,8 @@ cdf_est <- cum_prob(hermite_est,x_grid)
 spear_est <- spearmans(hermite_est)
 kendall_est <- kendall(hermite_est)
 ```
-## Piped syntax
+
+### Piped syntax
 
 ```{r}
 sig_x <- 1
@@ -386,8 +338,8 @@ observations_mat <- mvtnorm::rmvnorm(n=num_obs,mean=rep(0,2),
           nrow=2, ncol=2, byrow = TRUE))
 
 hermite_est <- hermite_estimator(N = 30, standardize = TRUE, 
-                                 est_type = "bivariate") 
-hermite_est <-  hermite_est %>% update_batch(observations_mat)
+                                 est_type = "bivariate", 
+                                 observations = observations_mat) 
 
 vals <- seq(-5,5,by=0.25)
 x_grid <- as.matrix(expand.grid(X=vals, Y=vals))
@@ -412,7 +364,7 @@ actual_kendall <- cor(observations_mat,method = "kendall")[1,2]
 df_pdf_cdf <- data.frame(x_grid,pdf_est,cdf_est,actual_pdf,actual_cdf)
 ```
 
-## Comparing Estimated versus Actual
+### Comparing Estimated versus Actual
 
 ```{r}
 p1 <- ggplot(df_pdf_cdf) + geom_tile(aes(X, Y, fill= actual_pdf)) +
@@ -467,9 +419,9 @@ Kendall correlation coefficient results:
 | Actual      | 0.312       |
 | Estimated   | 0.309        |
 
-# Applying to stationary data (sequential setting)
+## Applying to stationary data (sequential setting)
 
-## Univariate Example
+### Univariate Example
 
 Another useful application of the hermite_estimator class is to obtain pdf, cdf 
 and quantile function estimates on streaming data. The speed of estimation 
@@ -548,9 +500,9 @@ shinyApp(ui = ui, server = server)
 
 ![](./vignettes/shiny_stream_example.gif)
 
-# Applying to non-stationary data (sequential setting)
+## Applying to non-stationary data (sequential setting)
 
-## Univariate Example
+### Univariate Example
 
 The hermite_estimator is also applicable to non-stationary data streams.
 A weighted form of the Hermite series based estimator can be applied to handle 
@@ -678,7 +630,7 @@ anim_save("quant.gif",p)
 
 ![](./vignettes/quant.gif)
 
-## Bivariate Example
+### Bivariate Example
 
 We illustrate tracking a non-stationary bivariate data stream with another 
 sample Shiny application. The bivariate Hermite estimator leverages an 
@@ -769,3 +721,23 @@ shinyApp(ui = ui, server = server)
 ```
 
 ![](./vignettes/shiny_stream_example2.gif)
+
+## Citation Information
+
+To cite this package, one can use the following code to generate the citation.
+
+```{r eval=FALSE}
+citation("hermiter")
+```
+
+This yields:
+
+Stephanou M (2022). hermiter: Efficient Sequential and Batch Estimation of 
+Univariate and Bivariate Probability Density Functions and Cumulative 
+Distribution Functions along with Quantiles (Univariate) and Nonparametric 
+Correlation (Bivariate). R package version 2.2.0, 
+<https://github.com/MikeJaredS/hermiter>.
+
+Stephanou M, Varughese M (2021). “hermiter: R package for Sequential 
+Nonparametric Estimation.” arXiv preprint arXiv:2111.14091.
+<https://arxiv.org/abs/2111.14091>.

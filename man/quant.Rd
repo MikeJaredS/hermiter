@@ -32,8 +32,12 @@ This method utilizes the estimator (13) in paper Stephanou, Michael,
 Varughese, Melvin and Iain Macdonald. "Sequential quantiles via Hermite 
 series density estimation." Electronic Journal of Statistics 11.1 (2017): 
 570-607 <doi:10.1214/17-EJS1245>, with some modifications to improve the 
-stability of numerical root finding. Note that this method is only applicable
-to the univariate Hermite estimator i.e. est_type = "univariate".
+stability of numerical root finding when using the bisection algorithm. 
+Note that this method is only applicable to the univariate Hermite 
+estimator i.e. est_type = "univariate".
+}
+\details{
+The object must be updated with observations prior to the use of this method.
 }
 \examples{
 \dontrun{

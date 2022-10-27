@@ -135,30 +135,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// series_calc_parallel_8_fold
-NumericVector series_calc_parallel_8_fold(NumericMatrix h_input, NumericVector coeffs);
-RcppExport SEXP _hermiter_series_calc_parallel_8_fold(SEXP h_inputSEXP, SEXP coeffsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericMatrix >::type h_input(h_inputSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type coeffs(coeffsSEXP);
-    rcpp_result_gen = Rcpp::wrap(series_calc_parallel_8_fold(h_input, coeffs));
-    return rcpp_result_gen;
-END_RCPP
-}
-// psort
-NumericVector psort(NumericVector& x, NumericVector x_idx);
-RcppExport SEXP _hermiter_psort(SEXP xSEXP, SEXP x_idxSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector& >::type x(xSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type x_idx(x_idxSEXP);
-    rcpp_result_gen = Rcpp::wrap(psort(x, x_idx));
-    return rcpp_result_gen;
-END_RCPP
-}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_hermiter_hermite_polynomial", (DL_FUNC) &_hermiter_hermite_polynomial, 2},
@@ -171,8 +147,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_hermiter_standardizeInputs", (DL_FUNC) &_hermiter_standardizeInputs, 4},
     {"_hermiter_standardizeInputsEW", (DL_FUNC) &_hermiter_standardizeInputsEW, 5},
     {"_hermiter_hermite_function_sum_parallel", (DL_FUNC) &_hermiter_hermite_function_sum_parallel, 2},
-    {"_hermiter_series_calc_parallel_8_fold", (DL_FUNC) &_hermiter_series_calc_parallel_8_fold, 2},
-    {"_hermiter_psort", (DL_FUNC) &_hermiter_psort, 2},
     {NULL, NULL, 0}
 };
 

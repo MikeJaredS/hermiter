@@ -43,8 +43,8 @@ S3 dispatch. Methods are included for the sequential or one-pass batch
 estimation of the full probability density function and cumulative 
 distribution function in the univariate and bivariate settings. Sequential 
 or one-pass batch estimation methods are also provided for the full quantile 
-function in the univariate setting and the Spearman's rank correlation 
-estimator in the bivariate setting.
+function in the univariate setting along with the Spearman and Kendall 
+correlation coefficients in the bivariate setting.
 }
 \examples{
 \dontrun{

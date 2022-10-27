@@ -7,8 +7,8 @@
 \method{merge_pair}{hermite_estimator_bivar}(h_est_obj, hermite_estimator_other)
 }
 \arguments{
-\item{h_est_obj}{A hermite_estimator_bivar object. The first Hermite series based
-estimator.}
+\item{h_est_obj}{A hermite_estimator_bivar object. The first Hermite series 
+based estimator.}
 
 \item{hermite_estimator_other}{A hermite_estimator_bivar object. The second 
 Hermite series based estimator.}

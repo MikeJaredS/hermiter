@@ -193,8 +193,8 @@ merge_standardized_helper_bivar <- function(hermite_estimators) {
 #' If the input Hermite estimators are standardized however, then the
 #' equivalence will be approximate but still accurate in most cases.
 #'
-#' @param h_est_obj A hermite_estimator_bivar object. The first Hermite series based
-#' estimator.
+#' @param h_est_obj A hermite_estimator_bivar object. The first Hermite series 
+#' based estimator.
 #' @param hermite_estimator_other A hermite_estimator_bivar object. The second 
 #' Hermite series based estimator.
 #' @return An object of class hermite_estimator_bivar.
@@ -219,13 +219,13 @@ merge_pair.hermite_estimator_bivar <-
                                                        hermite_estimator_other)
       hermite_estimator_merged$coeff_vec_x <-
         (
-          h_est_obj$coeff_vec_x * h_est_obj$num_obs + hermite_estimator_other$coeff_vec_x 
-          * hermite_estimator_other$num_obs
+          h_est_obj$coeff_vec_x * h_est_obj$num_obs + 
+           hermite_estimator_other$coeff_vec_x * hermite_estimator_other$num_obs
         ) / (h_est_obj$num_obs + hermite_estimator_other$num_obs)
       hermite_estimator_merged$coeff_vec_y <-
         (
-          h_est_obj$coeff_vec_y * h_est_obj$num_obs + hermite_estimator_other$coeff_vec_y 
-          * hermite_estimator_other$num_obs
+          h_est_obj$coeff_vec_y * h_est_obj$num_obs + 
+           hermite_estimator_other$coeff_vec_y * hermite_estimator_other$num_obs
         ) / (h_est_obj$num_obs + hermite_estimator_other$num_obs)
       hermite_estimator_merged$coeff_mat_bivar <-
         (
@@ -233,7 +233,7 @@ merge_pair.hermite_estimator_bivar <-
       hermite_estimator_other$coeff_mat_bivar * hermite_estimator_other$num_obs
         ) / (h_est_obj$num_obs + hermite_estimator_other$num_obs)
     } else {
-      hermite_estimator_merged <- merge_standardized_helper_bivar(list(h_est_obj,
+     hermite_estimator_merged <- merge_standardized_helper_bivar(list(h_est_obj,
                                                     hermite_estimator_other))
     }
     return(hermite_estimator_merged)
@@ -330,21 +330,25 @@ update_sequential.hermite_estimator_bivar <- function(h_est_obj, x)
     as.vector(hermite_function(h_est_obj$N_param, x[2]))
   if (is.na(h_est_obj$exp_weight)) {
     h_est_obj$coeff_vec_x <-
-      (h_est_obj$coeff_vec_x * (h_est_obj$num_obs - 1) + h_x) / h_est_obj$num_obs
+      (h_est_obj$coeff_vec_x * (h_est_obj$num_obs - 1) + h_x) / 
+      h_est_obj$num_obs
     h_est_obj$coeff_vec_y <-
-      (h_est_obj$coeff_vec_y * (h_est_obj$num_obs - 1) + h_y) / h_est_obj$num_obs
+      (h_est_obj$coeff_vec_y * (h_est_obj$num_obs - 1) + h_y) / 
+      h_est_obj$num_obs
   } else {
     h_est_obj$coeff_vec_x <-
-      h_est_obj$coeff_vec_x * (1 - h_est_obj$exp_weight) + h_x * h_est_obj$exp_weight
+      h_est_obj$coeff_vec_x * (1 - h_est_obj$exp_weight) + h_x * 
+      h_est_obj$exp_weight
     h_est_obj$coeff_vec_y <-
-      h_est_obj$coeff_vec_y * (1 - h_est_obj$exp_weight) + h_y * h_est_obj$exp_weight
+      h_est_obj$coeff_vec_y * (1 - h_est_obj$exp_weight) + h_y * 
+      h_est_obj$exp_weight
   }
   if (is.na(h_est_obj$exp_weight)){
-    h_est_obj$coeff_mat_bivar <- (h_est_obj$coeff_mat_bivar*(h_est_obj$num_obs-1) +
-                               tcrossprod(h_x,h_y))/(h_est_obj$num_obs)
+    h_est_obj$coeff_mat_bivar <- (h_est_obj$coeff_mat_bivar * 
+         (h_est_obj$num_obs-1) + tcrossprod(h_x,h_y))/(h_est_obj$num_obs)
   } else {
-    h_est_obj$coeff_mat_bivar<- h_est_obj$coeff_mat_bivar*(1-h_est_obj$exp_weight) +
-      tcrossprod(h_x,h_y)*h_est_obj$exp_weight
+    h_est_obj$coeff_mat_bivar<- h_est_obj$coeff_mat_bivar * 
+      (1-h_est_obj$exp_weight) + tcrossprod(h_x,h_y)*h_est_obj$exp_weight
   }
   return(h_est_obj)
 }
@@ -383,8 +387,10 @@ initialize_batch_bivar <- function(h_est_obj, x) {
 # Internal helper method to calculate running standard deviations
 calculate_running_std.hermite_estimator_bivar <- function(h_est_obj){
   if (is.na(h_est_obj$exp_weight)) {
-    running_std_x <- sqrt(h_est_obj$running_variance_x / (h_est_obj$num_obs - 1))
-    running_std_y <- sqrt(h_est_obj$running_variance_y / (h_est_obj$num_obs - 1))
+    running_std_x <- sqrt(h_est_obj$running_variance_x / 
+                            (h_est_obj$num_obs - 1))
+    running_std_y <- sqrt(h_est_obj$running_variance_y / 
+                            (h_est_obj$num_obs - 1))
   } else {
     running_std_x <- sqrt(h_est_obj$running_variance_x)
     running_std_y <- sqrt(h_est_obj$running_variance_y)
@@ -406,7 +412,8 @@ dens_helper.hermite_estimator_bivar <- function(h_est_obj,x, clipped = FALSE){
   factor <- 1
   if (h_est_obj$standardize_obs == TRUE) {
     running_std_vec <- calculate_running_std(h_est_obj)
-    x <- (x - c(h_est_obj$running_mean_x,h_est_obj$running_mean_y))/running_std_vec
+    x <- (x - c(h_est_obj$running_mean_x,h_est_obj$running_mean_y)) / 
+      running_std_vec
     factor <- 1 / (prod(running_std_vec))
   }
   return(factor * t(hermite_function(h_est_obj$N_param, x[1])) %*%
@@ -459,13 +466,15 @@ cum_prob_helper <- function(h_est_obj, x, clipped = FALSE)
   UseMethod("cum_prob_helper",h_est_obj)
 }
 
-cum_prob_helper.hermite_estimator_bivar <- function(h_est_obj,x, clipped = FALSE){
+cum_prob_helper.hermite_estimator_bivar <- function(h_est_obj,x, 
+                                                    clipped = FALSE){
   if (h_est_obj$num_obs < 2) {
     return(NA)
   }
   if (h_est_obj$standardize_obs == TRUE) {
     running_std_vec <- calculate_running_std(h_est_obj)
-    x <- (x - c(h_est_obj$running_mean_x,h_est_obj$running_mean_y))/running_std_vec
+    x <- (x - c(h_est_obj$running_mean_x,h_est_obj$running_mean_y)) / 
+      running_std_vec
   }
   return(t(hermite_int_lower(N = h_est_obj$N_param,x = x[1])) 
          %*% h_est_obj$coeff_mat_bivar %*% 
@@ -536,9 +545,9 @@ spearmans.hermite_estimator_bivar <- function(h_est_obj, clipped = FALSE)
   W_transpose <- t(W)
   result <- 12*(t(h_est_obj$coeff_vec_x) %*% W_transpose) %*% 
     h_est_obj$coeff_mat_bivar %*% (W %*% h_est_obj$coeff_vec_y) +
-    -6 * (t(h_est_obj$coeff_vec_x) %*% W_transpose) %*% (h_est_obj$coeff_mat_bivar %*% 
-                                                      z) +
-    -6 * (t(z)%*% h_est_obj$coeff_mat_bivar) %*% (W %*% h_est_obj$coeff_vec_y)+
+    -6 * (t(h_est_obj$coeff_vec_x) %*% W_transpose) %*% 
+    (h_est_obj$coeff_mat_bivar %*% z) +
+    -6 * (t(z)%*% h_est_obj$coeff_mat_bivar) %*% (W %*% h_est_obj$coeff_vec_y) +
     3 * t(z) %*% (h_est_obj$coeff_mat_bivar%*%z)
   if (clipped == TRUE) {
     result <- pmin(pmax(result, -1), 1)

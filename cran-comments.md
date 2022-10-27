@@ -1,27 +1,28 @@
-# hermiter v2.1.0
+# hermiter v2.2.0
 
-## New features
+## Breaking changes
 
-* A method has been added for estimating the Kendall rank correlation 
-coefficient in the bivariate setting.
-* The univariate quantile estimation method has been significantly enhanced in
-accuracy using series acceleration techniques. Series acceleration is enabled
-by default.
-* The univariate pdf and cdf methods have been significantly enhanced in
-accuracy using series acceleration techniques. Series acceleration is enabled
-by default.
-* The new default method for the univariate quantile estimation method, 
-'interpolate' is much faster than the alternate method, 'bisection' with nearly
-the same accuracy.
-* Added print and summary methods for both the univariate and bivariate 
-hermite_estimator objects.
-* Convenience function added to calculate sums of Hermite functions.
+* The interface of `hermiter` has been simplified. The `update_batch` method 
+has been removed in favor of providing the ability to initialize the 
+`hermite_estimator` with an initial batch of observations. Several internal 
+methods are no longer exported in the interests of simplicity.
+* The default values of N have been optimized for different settings. For 
+univariate, non-exponentially weighted estimators, the default is now N = 50. 
+For univariate, exponentially weighted estimators, the default is now N = 20. 
+For bivariate, non-exponentially weighted estimators, the default is now N = 30.
+Finally, For bivariate, exponentially weighted estimators, the default is now 
+N = 20.
 
-## Documentation improvements
+## Major enhancements
 
-* The vignette `hermiter`, namely `vignette("hermiter")` has been extended to 
-included examples pertaining to estimation of the Kendall Tau nonparametric
-correlation coefficient in the bivariate setting.
+* Parallel implementation of batch updating using RcppParallel provides 
+significant performance improvements on multicore systems.
+
+## Minor improvements and bug fixes
+
+* Updated citation information.
+* Additional test cases have been added.
+* Bug fixes for series acceleration algorithm.
 
 
 ## Test environments
@@ -40,22 +41,10 @@ correlation coefficient in the bivariate setting.
 
 There was 1 NOTE:
 
-Found the following (possibly) invalid URLs:
-  URL: https://projecteuclid.org/euclid.ejs/1488531636
-    From: inst/doc/hermiter.html
-    Status: 500
-    Message: Internal Server Error
-  URL: https://projecteuclid.org/journals/electronic-journal-of-statistics/volume-11/issue-1/Sequential-quantiles-via-Hermite-series-density-estimation/10.1214/17-EJS1245.full
-    From: README.md
-    Status: 500
-    Message: Internal Server Error
-
-Found the following (possibly) invalid DOIs:
-  DOI: 10.1214/17-EJS1245
-    From: DESCRIPTION
-    Status: Internal Server Error
-    Message: 500
+GNU make is a SystemRequirements.
     
     
-* The URL and DOI listed above appear to be valid and work when tested directly.
+* This appears to be related to using RcppParallel and does not seem 
+problematic. GNU make has been added to SystemRequirements in the Description
+file.
 

@@ -39,15 +39,9 @@ hermite_estimator_univar <-
         exp_weight = exp_weight_lambda,
         normalization_hermite_vec = c(),
         h_int_full_domain_serialized
-        # h_int_lower_serialized = c(),
-        # h_int_upper_serialized = c()
       )
     h_est_obj$normalization_hermite_vec <- 
       h_norm_serialized[1:(h_est_obj$N_param+1)]
-    # h_est_obj$h_int_lower_serialized <-
-    #   h_int_lower_serialized[1:(h_est_obj$N_param+1),,drop = FALSE]
-    # h_est_obj$h_int_upper_serialized <- 
-    #   h_int_upper_serialized[1:(h_est_obj$N_param+1),,drop = FALSE]
     h_est_obj$h_int_full_domain_serialized <- 
       h_int_full_domain_serialized[1:(h_est_obj$N_param+1),,drop = FALSE]
     class(h_est_obj) <- c("hermite_estimator_univar", "list")
@@ -128,8 +122,8 @@ merge_standardized_helper_univar <- function(hermite_estimators) {
 #' If the input Hermite estimators are standardized however, then the
 #' equivalence will be approximate but still accurate in most cases.
 #'
-#' @param h_est_obj A hermite_estimator_univar object. The first Hermite series based
-#' estimator.
+#' @param h_est_obj A hermite_estimator_univar object. The first Hermite series 
+#' based estimator.
 #' @param hermite_estimator_other A hermite_estimator_univar object. The 
 #' second Hermite series based estimator.
 #' @return An object of class hermite_estimator_univar.
@@ -154,12 +148,13 @@ merge_pair.hermite_estimator_univar <-
                                                       hermite_estimator_other)
       hermite_estimator_merged$coeff_vec <-
         (
-          h_est_obj$coeff_vec * h_est_obj$num_obs + hermite_estimator_other$coeff_vec 
-          * hermite_estimator_other$num_obs
+          h_est_obj$coeff_vec * h_est_obj$num_obs + 
+            hermite_estimator_other$coeff_vec * hermite_estimator_other$num_obs
         ) / (h_est_obj$num_obs + hermite_estimator_other$num_obs)
     } else {
       hermite_estimator_merged <- 
-        merge_standardized_helper_univar(list(h_est_obj,hermite_estimator_other))
+        merge_standardized_helper_univar(list(h_est_obj, 
+                                              hermite_estimator_other))
     }
     return(hermite_estimator_merged)
   }
@@ -218,13 +213,13 @@ update_sequential.hermite_estimator_univar <- function(h_est_obj, x) {
   if (h_est_obj$standardize_obs == TRUE) {
     if (is.na(h_est_obj$exp_weight)) {
       prev_running_mean <- h_est_obj$running_mean
-      h_est_obj$running_mean <-  (h_est_obj$running_mean * (h_est_obj$num_obs - 1) + x) /
-        h_est_obj$num_obs
+      h_est_obj$running_mean <-  (h_est_obj$running_mean * 
+                              (h_est_obj$num_obs - 1) + x) / h_est_obj$num_obs
       if (h_est_obj$num_obs < 2) {
         return(h_est_obj)
       }
-      h_est_obj$running_variance <- h_est_obj$running_variance + (x - prev_running_mean) *
-        (x - h_est_obj$running_mean)
+      h_est_obj$running_variance <- h_est_obj$running_variance + 
+        (x - prev_running_mean) * (x - h_est_obj$running_mean)
       x <- (x - h_est_obj$running_mean) /  sqrt(h_est_obj$running_variance /
                                             (h_est_obj$num_obs - 1))
     } else {
@@ -233,10 +228,11 @@ update_sequential.hermite_estimator_univar <- function(h_est_obj, x) {
         h_est_obj$running_variance <- 1
         return(h_est_obj)
       }
-      h_est_obj$running_mean <-  (1 - h_est_obj$exp_weight) * h_est_obj$running_mean +
-        h_est_obj$exp_weight * x
-      h_est_obj$running_variance <- (1 - h_est_obj$exp_weight) * h_est_obj$running_variance +
-        h_est_obj$exp_weight * (x - h_est_obj$running_mean)^2
+      h_est_obj$running_mean <-  (1 - h_est_obj$exp_weight) * 
+        h_est_obj$running_mean + h_est_obj$exp_weight * x
+      h_est_obj$running_variance <- (1 - h_est_obj$exp_weight) * 
+        h_est_obj$running_variance + h_est_obj$exp_weight * 
+        (x - h_est_obj$running_mean)^2
       x <- (x - h_est_obj$running_mean) / sqrt(h_est_obj$running_variance)
     }
   }
@@ -244,10 +240,12 @@ update_sequential.hermite_estimator_univar <- function(h_est_obj, x) {
     as.vector(hermite_function(h_est_obj$N_param, x))
   if (is.na(h_est_obj$exp_weight)) {
     h_est_obj$coeff_vec <-
-      (h_est_obj$coeff_vec * (h_est_obj$num_obs - 1) + h_k) / h_est_obj$num_obs
+      (h_est_obj$coeff_vec * (h_est_obj$num_obs - 1) + h_k) / 
+      h_est_obj$num_obs
   } else {
     h_est_obj$coeff_vec <-
-      h_est_obj$coeff_vec * (1 - h_est_obj$exp_weight) + h_k * h_est_obj$exp_weight
+      h_est_obj$coeff_vec * (1 - h_est_obj$exp_weight) + h_k * 
+      h_est_obj$exp_weight
   }
   return(h_est_obj)
 }
@@ -264,7 +262,8 @@ initialize_batch_univar <- function(h_est_obj, x) {
     h_est_obj$running_mean <- mean(x)
     h_est_obj$running_variance <- stats::var(x) * (length(x) - 1)
     x <-
-      (x - h_est_obj$running_mean) / sqrt(h_est_obj$running_variance / (h_est_obj$num_obs - 1))
+      (x - h_est_obj$running_mean) / sqrt(h_est_obj$running_variance / 
+                                            (h_est_obj$num_obs - 1))
   }
   h_est_obj$coeff_vec <- hermite_function_sum_N(h_est_obj$N_param, x) /
     h_est_obj$num_obs
@@ -384,8 +383,8 @@ quantile_helper_bisection <- function(h_est_obj, p_vec, accelerate_series) {
          h_est_obj$coeff_vec, accelerate_series) - p[lower_idx]
     }
     if (length(upper_idx)>0){
-      res[upper_idx] <- 1 - series_calculate(hermite_int_upper(h_est_obj$N_param,
-        x[upper_idx]), 
+      res[upper_idx] <- 1 - 
+        series_calculate(hermite_int_upper(h_est_obj$N_param, x[upper_idx]), 
          h_est_obj$coeff_vec, accelerate_series) - p[upper_idx]
     }
     if (length(ambig_idx)>0){
@@ -409,9 +408,9 @@ quantile_helper_bisection <- function(h_est_obj, p_vec, accelerate_series) {
     h_int_upper_zero_serialized[1:(h_est_obj$N_param+1)]
   dim(h_int_upper_zero_serialized_mat) <- c(h_est_obj$N_param+1,1)
   p_lower <- as.numeric(series_calculate(h_int_lower_zero_serialized_mat, 
-                                         h_est_obj$coeff_vec, accelerate_series))
+                                      h_est_obj$coeff_vec, accelerate_series))
   p_upper <- 1-as.numeric(series_calculate(h_int_upper_zero_serialized_mat, 
-                                           h_est_obj$coeff_vec, accelerate_series))
+                                      h_est_obj$coeff_vec, accelerate_series))
   if (is.na(p_lower) | is.na(p_upper)){
     return(rep(NA, length(p_vec)))
   }
@@ -466,7 +465,8 @@ quantile_helper_bisection <- function(h_est_obj, p_vec, accelerate_series) {
   }
   if (is.na(h_est_obj$exp_weight)) {
     est <-
-    est * sqrt(h_est_obj$running_variance / (h_est_obj$num_obs - 1)) + h_est_obj$running_mean
+    est * sqrt(h_est_obj$running_variance / (h_est_obj$num_obs - 1)) + 
+      h_est_obj$running_mean
   } else {
     est <- est * sqrt(h_est_obj$running_variance) + h_est_obj$running_mean
   }
@@ -481,18 +481,11 @@ quantile_helper_bisection <- function(h_est_obj, p_vec, accelerate_series) {
 quantile_helper_interpolate <- function(h_est_obj, p_vec, 
                                         accelerate_series = TRUE){
   result <- rep(NA,length(p_vec))
-  # p_lower_vals <- series_calculate(h_est_obj$h_int_lower_serialized,
-  #                                  h_est_obj$coeff_vec, accelerate_series)
-  # p_upper_vals <- 1 - series_calculate(h_est_obj$h_int_upper_serialized,
-  #                                      h_est_obj$coeff_vec, accelerate_series)
-  # p_all_vals <- cummax(c(p_lower_vals,p_upper_vals))
   p_all_vals <- cummax(shift_pvec + scale_pvec * 
     series_calculate(h_est_obj$h_int_full_domain_serialized,
                      h_est_obj$coeff_vec, accelerate_series))
-  # p_vec_s <- psort(p_vec,seq_along(p_vec)-1)+1
   result <- stats::approx(p_all_vals,x_full_domain_serialized,
                    xout = p_vec, method="linear",ties = "ordered")$y
-  # result <- result[p_vec_s]
   if (is.na(h_est_obj$exp_weight)) {
     result <-
       result * sqrt(h_est_obj$running_variance / (h_est_obj$num_obs - 1)) +
@@ -525,8 +518,9 @@ quantile_helper_interpolate <- function(h_est_obj, p_vec,
 #' are applied. If set to FALSE, then standard summation is applied.
 #' @return A numeric vector. The vector of quantile values associated with the
 #' probabilities p.
-quant.hermite_estimator_univar <- function(h_est_obj, p, algorithm="interpolate", 
-                                           accelerate_series = TRUE) {
+quant.hermite_estimator_univar <- function(h_est_obj, p, 
+                                   algorithm="interpolate", 
+                                   accelerate_series = TRUE) {
   if (!is.numeric(p)) {
     stop("p must be numeric.")
   }

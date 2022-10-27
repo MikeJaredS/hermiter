@@ -266,6 +266,5 @@ series_calculate <- function(h_input, coeffs, accelerate_series = TRUE){
     9/256*h_input[N,]*coeffs[N]+
     1/256*h_input[N+1,]*coeffs[N+1]
     return(as.numeric(result))
-    # return(series_calc_parallel_8_fold(h_input,coeffs))
   }
 }

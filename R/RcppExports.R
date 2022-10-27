@@ -153,11 +153,3 @@ hermite_function_sum_parallel <- function(N, x) {
     .Call(`_hermiter_hermite_function_sum_parallel`, N, x)
 }
 
-series_calc_parallel_8_fold <- function(h_input, coeffs) {
-    .Call(`_hermiter_series_calc_parallel_8_fold`, h_input, coeffs)
-}
-
-psort <- function(x, x_idx) {
-    .Call(`_hermiter_psort`, x, x_idx)
-}
-

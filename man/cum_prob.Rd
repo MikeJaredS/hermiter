@@ -7,7 +7,8 @@
 cum_prob(h_est_obj, x, clipped, accelerate_series = TRUE)
 }
 \arguments{
-\item{h_est_obj}{A hermite_estimator_univar or hermite_estimator_bivar object.}
+\item{h_est_obj}{A hermite_estimator_univar or hermite_estimator_bivar 
+object.}
 
 \item{x}{A numeric vector (univariate) or a numeric matrix (bivariate).
 Values at which to calculate the cumulative probability.}

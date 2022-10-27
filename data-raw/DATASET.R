@@ -24,7 +24,6 @@ z_vector <- function(num_r){
   return(result)
 }
 
-
 h_norm_serialized <-
   hermite_normalization_N(N=75)
 W_serialized <- W_matrix(75,75)
@@ -37,16 +36,10 @@ h_int_lower_zero_serialized <-  hermite_int_lower(N=75,x=0,
 h_int_upper_zero_serialized <- hermite_int_upper(N=75,x=0,
                                                 hermite_function_matrix=h_k_mat)
 
-
-# x_lower_serialized <- seq(-20,-5.1,by=0.1)
-# x_lower_serialized <- c(x_lower_serialized,seq(-5,-0.01,by=0.01))
-
 x_lower_serialized <- seq(-25,-10.5,by=0.5)
 x_lower_serialized <- c(x_lower_serialized,seq(-10,-6.05,by=0.05))
 x_lower_serialized <- c(x_lower_serialized,seq(-6,-0.01,by=0.01))
 
-# x_upper_serialized <- seq(0,5,by=0.01)
-# x_upper_serialized <- c(x_upper_serialized, seq(5.1,20,by=0.1))
 x_upper_serialized <- seq(0,6,by=0.01)
 x_upper_serialized <- c(x_upper_serialized, seq(6.05,10,by=0.05))
 x_upper_serialized <- c(x_upper_serialized, seq(10.5,25,by=0.5))
