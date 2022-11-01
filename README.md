@@ -42,25 +42,59 @@ article below.
 
 * [Stephanou, Michael and Varughese, Melvin. "hermiter: R package for Sequential Nonparametric Estimation." arXiv (2021)](https://arxiv.org/abs/2111.14091)
 
-## Load Packages
+## Features
+
+### Univariate
+
+* fast batch estimation of pdf, cdf and quantile function
+* consistent merging of estimates
+* fast sequential estimation of pdf, cdf and quantile function on streaming data
+* adaptive sequential estimation on non-stationary streams via exponential 
+weighting
+* provides online, O(1) time complexity estimates of arbitrary quantiles e.g. 
+median at any point in time along with probability densities and cumulative 
+probabilities at arbitrary x
+* uses small and constant memory for the estimator
+* provides a very compact, simultaneous representation of the pdf, cdf and 
+quantile function that can be efficiently stored and communicated using e.g. 
+saveRDS and readRDS functions
+
+### Bivariate
+
+* fast batch estimation of bivariate pdf, cdf and nonparametric correlation 
+coefficients (Spearman Rho and Kendall Tau)
+* consistent merging of estimates
+* fast sequential estimation of bivariate pdf, cdf and nonparametric correlation 
+coefficients on streaming data
+* adaptive sequential estimation on non-stationary bivariate streams via 
+exponential weighting
+* provides online, O(1) time complexity estimates of bivariate probability 
+densities and cumulative probabilities at arbitrary points, x
+* provides online, O(1) time complexity estimates of the Spearman and Kendall 
+rank correlation coefficients
+* uses small and constant memory for the estimator
+
+## Installation
+
+The release version of `hermiter` can be installed from CRAN with:
+
+```r
+install.packages("hermiter")
+```
+
+The development version of `hermiter` can be installed using `devtools` with:
+
+```r
+devtools::install_github("MikeJaredS/hermiter")
+```
+
+## Load Package
 
 In order to utilize the hermiter package, the package must be loaded using the 
 following command:
 
-```{r setup, message=FALSE, warning=FALSE}
+```{r}
 library(hermiter)
-```
-
-Other packages that are used in this vignette are loaded as follows:
-
-```{r message=FALSE, warning=FALSE}
-library(magrittr)
-library(ggplot2)
-library(dplyr)
-library(data.table)
-library(DT)
-library(mvtnorm)
-library(patchwork)
 ```
 
 ## Construct Estimator
@@ -92,9 +126,7 @@ hermite_est <- hermite_estimator(N=10, standardize=TRUE,
 ## Batch Estimator Updating
 
 A hermite_estimator object can be initialized with a batch of observations as 
-below. 
-
-### Standard syntax
+below.
 
 For univariate observations:
 
@@ -112,9 +144,6 @@ hermite_est <- hermite_estimator(N=10, standardize=TRUE,
                                  est_type = "bivariate", observations = 
                                    observations)
 ```
-
-Functional piped syntax can also be used as below provided the `magrittr` 
-package is installed.
 
 ## Sequential Estimator Updating
 

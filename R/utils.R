@@ -88,7 +88,11 @@ hermite_function_sum_N <- function(N,x){
   if (N < 2){
     return(hermite_function_sum_serial(N,x))
   } else {
-    return(hermite_function_sum_parallel(N,x))
+    if (getOption("hermiter.parallel", TRUE) == TRUE){
+      return(hermite_function_sum_parallel(N,x))
+    } else {
+      return(hermite_function_sum_serial(N,x))
+    }
   }
 }
 

@@ -9,12 +9,17 @@
 #' distribution function in the univariate and bivariate settings. Sequential 
 #' or one-pass batch estimation methods are also provided for the full quantile 
 #' function in the univariate setting along with the Spearman and Kendall 
-#' correlation coefficients in the bivariate setting.
+#' correlation coefficients in the bivariate setting. Note that RcppParallel is
+#' utilized to speed up batch updating in the univariate case. If one wishes to 
+#' switch to serial batch updating (typically slower), utilize 
+#' options(hermiter.parallel = FALSE).
 #'
 #' @author Michael Stephanou <michael.stephanou@gmail.com>
 #'
-#' @param N An integer between 0 and 75. The Hermite series based estimator
-#' is truncated at N+1 terms.
+#' @param N An integer between 0 and 75. The upper bound has been chosen
+#' as a value that yields an estimator that is reasonably fast and that remains 
+#' robust to numerical issues. The Hermite series based estimator is truncated 
+#' at N+1 terms.
 #' @param standardize A boolean value. Determines whether the observations are
 #' standardized, a transformation which often improves performance.
 #' @param exp_weight_lambda A numerical value between 0 and 1. This parameter
