@@ -326,10 +326,13 @@ update_sequential.hermite_estimator_bivar <- function(h_est_obj, x)
       x <- (x - upd_mean)/sqrt(upd_var)
     }
   }
+  if (any(is.na(x))){
+    return(h_est_obj)
+  }
   h_x <-
-    as.vector(hermite_function(h_est_obj$N_param, x[1]))
+    as.vector(hermite_function_N(h_est_obj$N_param, x[1]))
   h_y <-
-    as.vector(hermite_function(h_est_obj$N_param, x[2]))
+    as.vector(hermite_function_N(h_est_obj$N_param, x[2]))
   if (is.na(h_est_obj$exp_weight)) {
     h_est_obj$coeff_vec_x <-
       (h_est_obj$coeff_vec_x * (h_est_obj$num_obs - 1) + h_x) / 

@@ -238,6 +238,9 @@ update_sequential.hermite_estimator_univar <- function(h_est_obj, x) {
       x <- (x - h_est_obj$running_mean) / sqrt(h_est_obj$running_variance)
     }
   }
+  if (is.na(x)){
+    return(h_est_obj)
+  }
   h_k <-
     as.vector(hermite_function(h_est_obj$N_param, x))
   if (is.na(h_est_obj$exp_weight)) {

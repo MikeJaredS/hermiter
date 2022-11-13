@@ -12,8 +12,10 @@ hermite_estimator_univar(
 )
 }
 \arguments{
-\item{N}{An integer between 0 and 75. The Hermite series based estimator
-is truncated at N+1 terms.}
+\item{N}{An integer between 0 and 75. The upper bound has been chosen
+as a value that yields an estimator that is reasonably fast and that remains 
+robust to numerical issues. The Hermite series based estimator is truncated 
+at N+1 terms.}
 
 \item{standardize}{A boolean value. Determines whether the observations are
 standardized, a transformation which often improves performance.}

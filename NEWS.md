@@ -16,7 +16,8 @@ N = 20.
 ## Major enhancements
 
 * Parallel implementation of batch updating using RcppParallel provides 
-significant performance improvements on multicore systems.
+significant performance improvements on multicore systems. Note that this 
+can be disabled by using options(hermiter.parallel = FALSE).
 
 ## Minor improvements and bug fixes
 
