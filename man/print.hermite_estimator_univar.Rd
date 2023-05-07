@@ -9,7 +9,7 @@
 \arguments{
 \item{x}{A hermite_estimator_univar object.}
 
-\item{...}{Other arguments passed on to methods used in printing.}
+\item{...}{Unused}
 }
 \description{
 Prints univariate hermite_estimator object.

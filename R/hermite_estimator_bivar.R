@@ -270,27 +270,7 @@ merge_hermite_bivar <- function(hermite_estimators) {
   return(hermite_estimator_merged)
 }
 
-#' Updates the Hermite series based estimator sequentially
-#'
-#' This method can be applied in sequential estimation settings.
-#' 
-#'
-#' @param h_est_obj A hermite_estimator_bivar object.
-#' @param x A numeric vector of length 2. A bivariate observation to be 
-#' incorporated into the estimator.
-#' @return An object of class hermite_estimator_bivar.
-update_sequential.hermite_estimator_bivar <- function(h_est_obj, x)
-{
-  if (!is.numeric(x)) {
-    stop("x must be numeric.")
-  }
-  if (length(x) != 2){
-    stop("x must be a vector of length 2 (bivariate observation).")
-  }
-  if (any(is.na(x)) | any(!is.finite(x))){
-    stop("The sequential update method is only 
-         applicable to finite, non NaN, non NA values.")
-  }
+update_sequential_bivar_helper <- function(h_est_obj,x){
   h_est_obj$num_obs <- h_est_obj$num_obs + 1
   if (h_est_obj$standardize_obs == TRUE) {
     if (is.na(h_est_obj$exp_weight)) {
@@ -350,10 +330,47 @@ update_sequential.hermite_estimator_bivar <- function(h_est_obj, x)
   }
   if (is.na(h_est_obj$exp_weight)){
     h_est_obj$coeff_mat_bivar <- (h_est_obj$coeff_mat_bivar * 
-         (h_est_obj$num_obs-1) + tcrossprod(h_x,h_y))/(h_est_obj$num_obs)
+                                    (h_est_obj$num_obs-1) + tcrossprod(h_x,h_y))/(h_est_obj$num_obs)
   } else {
     h_est_obj$coeff_mat_bivar<- h_est_obj$coeff_mat_bivar * 
       (1-h_est_obj$exp_weight) + tcrossprod(h_x,h_y)*h_est_obj$exp_weight
+  }
+  return(h_est_obj)
+}
+
+#' Updates the Hermite series based estimator sequentially
+#'
+#' This method can be applied in sequential estimation settings.
+#' 
+#'
+#' @param h_est_obj A hermite_estimator_bivar object.
+#' @param x A numeric vector of length 2 or a n x 2 matrix with n bivariate 
+#' observations to be incorporated into the estimator.
+#' @return An object of class hermite_estimator_bivar.
+update_sequential.hermite_estimator_bivar <- function(h_est_obj, x)
+{
+  if (!is.numeric(x)) {
+    stop("x must be numeric.")
+  }
+  if (is.null(nrow(x))){
+    if (length(x) != 2){
+      stop("x must be a vector of length 2 (bivariate observation).")
+    } else {
+      dim(x) <- c(1,2)
+    }
+  } else {
+    if (ncol(x) != 2 | nrow(x) < 1){
+      stop("x must be a matrix with 2 columns (bivariate observations) and
+           at least one row.")
+    }
+  }
+  if (any(is.na(x)) | any(!is.finite(x))){
+    stop("The sequential update method is only 
+         applicable to finite, non NaN, non NA values.")
+  }
+  for (idx in seq_len(nrow(x))) {
+    h_est_obj <- update_sequential_bivar_helper(h_est_obj,
+                                     x[idx,])
   }
   return(h_est_obj)
 }
@@ -464,6 +481,70 @@ dens.hermite_estimator_bivar <- function(h_est_obj,x, clipped = FALSE,
   return(result)
 }
 
+
+#' Creates an object summarizing the bivariate PDF with associated generic 
+#' methods print and plot.
+#'
+#' The hermite_estimator_bivar object, x must be updated with observations prior 
+#' to the use of the method.
+#'
+#' @param x A hermite_estimator_bivar object.
+#' @param x_lower A numeric vector. This vector determines the lower limit of 
+#' x values at which to evaluate the density.
+#' @param x_upper A numeric vector. This vector determines the upper limit of 
+#' x values at which to evaluate the density.
+#' @param ... Additional arguments for the dens function.
+#' @return A hdensity_bivar object whose underlying structure is a list 
+#' containing the following components.
+#' 
+#' x: The points at which the density is calculated.
+#' x_vals_1: Marginal quantiles of first random variable, used for plotting.
+#' x_vals_2: Marginal quantiles of second random variable, used for plotting.
+#' density_vals: The density values at the points x.
+#' num_obs: The number of observations used to form the Hermite density 
+#' estimates.
+#' N: The number of terms N in the Hermite series estimator.
+#' @export
+density.hermite_estimator_bivar <- function(x, x_lower=NA, x_upper=NA, ...) {
+  if (x$standardize_obs == FALSE){
+    if (any(is.na(x_lower)) | any(is.na(x_upper))){
+      stop("For non-standardized hermite_estimator objects, a lower and 
+           upper x limits for the PDF summary must be provided i.e. x_lower and 
+           x_upper arguments must be provided.")
+    }
+  } 
+  if (all(!(is.na(x_lower))) & all(!is.na(x_upper))){
+    x_step_1 <- (x_upper[1] - x_lower[1])/19
+    x_vals_1 <- seq(x_lower[1], x_upper[1], by = x_step_1)
+    x_step_2 <- (x_upper[2] - x_lower[2])/19
+    x_vals_2 <- seq(x_lower[2], x_upper[2], by = x_step_2)
+  } else {
+    h_est_marginal_x <- hermite_estimator(N=x$N_param, 
+                                          exp_weight_lambda = x$exp_weight)
+    h_est_marginal_x$coeff_vec <- x$coeff_vec_x
+    h_est_marginal_x$num_obs <- x$num_obs
+    h_est_marginal_x$running_mean <- x$running_mean_x
+    h_est_marginal_x$running_variance <- x$running_variance_x
+    h_est_marginal_y <- hermite_estimator(N=x$N_param, 
+                                          exp_weight_lambda = x$exp_weight)
+    h_est_marginal_y$coeff_vec <- x$coeff_vec_y
+    h_est_marginal_y$num_obs <- x$num_obs
+    h_est_marginal_y$running_mean <- x$running_mean_y
+    h_est_marginal_y$running_variance <- x$running_variance_y
+    x_vals_1 <- quant(h_est_marginal_x, p = seq(0.05,0.95,0.05))
+    x_vals_2 <- quant(h_est_marginal_y, p = seq(0.05,0.95,0.05))
+  }
+  x_vals <- cbind(rep(x_vals_1, each = length(x_vals_2)), 
+                  rep(x_vals_2, length(x_vals_1)))
+  density_vals <- dens(h_est_obj = x, x = x_vals,...)
+  result <- list(x = x_vals, x_vals_1 = x_vals_1,
+                 x_vals_2 = x_vals_2, 
+                 density_vals = density_vals, num_obs = x$num_obs,
+                 N = x$N_param)
+  class(result) <- c("hdensity_bivar", "list")
+  return(result)
+}
+
 # Internal helper method to calculate the cumulative probability at a single 
 # 2-d x value
 cum_prob_helper <- function(h_est_obj, x, clipped = FALSE)
@@ -521,6 +602,79 @@ cum_prob.hermite_estimator_bivar <- function(h_est_obj,x, clipped = FALSE,
   if (clipped == TRUE) {
     result <- pmin(pmax(result, 1e-08), 1)
   }
+  return(result)
+}
+
+#' Creates an object summarizing the bivariate CDF with associated generic 
+#' methods print, plot and summary.
+#'
+#' The hermite_estimator_bivar object h_est_obj must be updated with 
+#' observations prior to the use of this method.
+#'
+#' @param h_est_obj A hermite_estimator_bivar object.
+#' @param clipped A boolean value. This value determines whether cumulative
+#' probabilities are clipped to lie within the range [0,1].
+#' @param accelerate_series A boolean value. This value determines whether
+#' Hermite series acceleration is applied.
+#' @param x_lower A numeric vector. This vector determines the lower limit of 
+#' x values at which to evaluate the CDF.
+#' @param x_upper A numeric value. This vector determines the upper limit of 
+#' x values at which to evaluate the CDF.
+#' @return A hcdf_bivar object whose underlying structure is a list 
+#' containing the following components.
+#' 
+#' x: The points at which the cumulative probability is calculated.
+#' x_vals_1: Marginal quantiles of first random variable, used for plotting.
+#' x_vals_2: Marginal quantiles of second random variable, used for plotting.
+#' cum_prob_vals: The cumulative probability values at the points x.
+#' num_obs: The number of observations used to form the Hermite cumulative 
+#' probability estimates.
+#' N: The number of terms N in the Hermite series estimator.
+#' @export
+hcdf.hermite_estimator_bivar <- function(h_est_obj, clipped = FALSE, 
+                                          accelerate_series = TRUE,
+                                         x_lower=NA,
+                                         x_upper=NA) {
+  
+  
+  if (h_est_obj$standardize_obs == FALSE){
+    if (any(is.na(x_lower)) | any(is.na(x_upper))){
+      stop("For non-standardized hermite_estimator objects, a lower and 
+           upper x limits for the PDF summary must be provided i.e. x_lower and 
+           x_upper arguments must be provided.")
+    }
+  } 
+  if (all(!is.na(x_lower)) & all(!is.na(x_upper))){
+    x_step_1 <- (x_upper[1] - x_lower[1])/19
+    x_vals_1 <- seq(x_lower[1], x_upper[1], by = x_step_1)
+    x_step_2 <- (x_upper[2] - x_lower[2])/19
+    x_vals_2 <- seq(x_lower[2], x_upper[2], by = x_step_2)
+  } else {
+    h_est_marginal_x <- hermite_estimator(N=h_est_obj$N_param, 
+                                      exp_weight_lambda = h_est_obj$exp_weight)
+    h_est_marginal_x$coeff_vec <- h_est_obj$coeff_vec_x
+    h_est_marginal_x$num_obs <- h_est_obj$num_obs
+    h_est_marginal_x$running_mean <- h_est_obj$running_mean_x
+    h_est_marginal_x$running_variance <- h_est_obj$running_variance_x
+    h_est_marginal_y <- hermite_estimator(N=h_est_obj$N_param, 
+                                      exp_weight_lambda = h_est_obj$exp_weight)
+    h_est_marginal_y$coeff_vec <- h_est_obj$coeff_vec_y
+    h_est_marginal_y$num_obs <- h_est_obj$num_obs
+    h_est_marginal_y$running_mean <- h_est_obj$running_mean_y
+    h_est_marginal_y$running_variance <- h_est_obj$running_variance_y
+    x_vals_1 <- quant(h_est_marginal_x, p = seq(0.05,0.95,0.05))
+    x_vals_2 <- quant(h_est_marginal_y, p = seq(0.05,0.95,0.05))
+  }
+  x_vals <- cbind(rep(x_vals_1, each = length(x_vals_2)), rep(x_vals_2, 
+                                                            length(x_vals_1)))
+  cum_prob_vals <- cum_prob(h_est_obj, x_vals, clipped, 
+                       accelerate_series)
+  
+  result <- list(x = x_vals, x_vals_1 = x_vals_1,
+                 x_vals_2 = x_vals_2, 
+                 cum_prob_vals = cum_prob_vals, num_obs = h_est_obj$num_obs,
+                 N = h_est_obj$N_param)
+  class(result) <- c("hcdf_bivar", "list")
   return(result)
 }
 

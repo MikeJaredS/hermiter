@@ -1,3 +1,24 @@
+# hermiter v2.3.0
+
+## Additions and improvements
+
+* Enhanced the update_sequential method to incorporate a single or multiple
+new observations.
+* Added density generic function which outputs an object with associated print
+and plot generics.
+* Added quantile generic function for convenience.
+* Added hcdf function which outputs an object with associated print, 
+plot and summary generics.
+* Added median and IQR convenience functions.
+* Added a wrapper around the stats::cor function with two new methods, namely
+"hermite.spearman" and "hermite.kendall".
+
+## Minor improvements and bug fixes
+
+* Additional test cases have been added.
+* Updated the vignette.
+* Fixed the SystemRequirements: C++11 note.
+
 # hermiter v2.2.0
 
 ## Breaking changes

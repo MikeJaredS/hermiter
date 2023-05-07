@@ -10,9 +10,11 @@ update_sequential(h_est_obj, x)
 \item{h_est_obj}{A hermite_estimator_univar or hermite_estimator_bivar 
 object.}
 
-\item{x}{A numeric value or vector. An observation to be incorporated into 
-the estimator. Note that for univariate estimators, x is a numeric value 
-whereas for bivariate estimators, x is a numeric vector of length 2.}
+\item{x}{A numeric vector or matrix. Observations to be incorporated into 
+the estimator. Note that for univariate estimators, x is a numeric vector 
+whereas for bivariate estimators, x is a numeric vector of length 2 or a 
+n x 2 matrix with n bivariate observations to be incorporated into the 
+estimator.}
 }
 \value{
 An object of class hermite_estimator_univar or 

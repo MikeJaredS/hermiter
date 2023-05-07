@@ -9,8 +9,8 @@
 \arguments{
 \item{h_est_obj}{A hermite_estimator_univar object.}
 
-\item{x}{A numeric value. An observation to be incorporated into the
-estimator.}
+\item{x}{A numeric vector. A vector of observations to be incorporated into 
+the estimator.}
 }
 \value{
 An object of class hermite_estimator_univar.

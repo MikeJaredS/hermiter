@@ -190,40 +190,22 @@ merge_hermite_univar <- function(hermite_estimators) {
   return(hermite_estimator_merged)
 }
 
-#' Updates the Hermite series based estimator sequentially
-#'
-#' This method can be applied in sequential estimation settings.
-#' 
-#'
-#' @param h_est_obj A hermite_estimator_univar object.
-#' @param x A numeric value. An observation to be incorporated into the
-#' estimator.
-#' @return An object of class hermite_estimator_univar.
-update_sequential.hermite_estimator_univar <- function(h_est_obj, x) {
-  if (!is.numeric(x)) {
-    stop("x must be numeric.")
-  }
-  if (length(x) != 1) {
-    stop("The sequential method is only 
-         applicable to one observation at a time.")
-  }
-  if (is.na(x) | !is.finite(x)){
-    stop("The sequential method is only 
-         applicable to finite, non NaN, non NA values.")
-  }
+# Helper function for univariate update_sequential function.
+update_sequential_univar_helper <- function(h_est_obj,x){
   h_est_obj$num_obs <- h_est_obj$num_obs + 1
   if (h_est_obj$standardize_obs == TRUE) {
     if (is.na(h_est_obj$exp_weight)) {
       prev_running_mean <- h_est_obj$running_mean
       h_est_obj$running_mean <-  (h_est_obj$running_mean * 
-                              (h_est_obj$num_obs - 1) + x) / h_est_obj$num_obs
+                                    (h_est_obj$num_obs - 1) + x) / 
+        h_est_obj$num_obs
       if (h_est_obj$num_obs < 2) {
         return(h_est_obj)
       }
       h_est_obj$running_variance <- h_est_obj$running_variance + 
         (x - prev_running_mean) * (x - h_est_obj$running_mean)
       x <- (x - h_est_obj$running_mean) /  sqrt(h_est_obj$running_variance /
-                                            (h_est_obj$num_obs - 1))
+                                                  (h_est_obj$num_obs - 1))
     } else {
       if (h_est_obj$num_obs < 2){
         h_est_obj$running_mean <- x
@@ -251,6 +233,33 @@ update_sequential.hermite_estimator_univar <- function(h_est_obj, x) {
     h_est_obj$coeff_vec <-
       h_est_obj$coeff_vec * (1 - h_est_obj$exp_weight) + h_k * 
       h_est_obj$exp_weight
+  }
+  return(h_est_obj)
+}
+
+#' Updates the Hermite series based estimator sequentially
+#'
+#' This method can be applied in sequential estimation settings.
+#' 
+#'
+#' @param h_est_obj A hermite_estimator_univar object.
+#' @param x A numeric vector. A vector of observations to be incorporated into 
+#' the estimator.
+#' @return An object of class hermite_estimator_univar.
+update_sequential.hermite_estimator_univar <- function(h_est_obj, x) {
+  if (!is.numeric(x)) {
+    stop("x must be numeric.")
+  }
+  if (length(x) < 1) {
+    stop("x must contain at least one observation.")
+  }
+  if (any(is.na(x) | !is.finite(x))){
+    stop("The sequential method is only 
+         applicable to finite, non NaN, non NA values.")
+  }
+  for (idx in seq_along(x)) {
+    h_est_obj <- update_sequential_univar_helper(h_est_obj,
+                                     x[idx])
   }
   return(h_est_obj)
 }
@@ -326,6 +335,49 @@ dens.hermite_estimator_univar <- function(h_est_obj, x, clipped = FALSE,
   return(as.vector(pdf_val))
 }
 
+#' Creates an object summarizing the PDF with associated generic methods 
+#' print and plot.
+#'
+#' The hermite_estimator_univar, x must be updated with observations prior to 
+#' the use of the method.
+#'
+#' @param x A hermite_estimator_univar object.
+#' @param x_lower A numeric value. This value determines the lower limit of 
+#' x values at which to evaluate the density.
+#' @param x_upper A numeric value. This value determines the upper limit of 
+#' x values at which to evaluate the density.
+#' @param ... Additional arguments for the dens function.
+#' @return A hdensity_univar object whose underlying structure is a list 
+#' containing the following components.
+#' 
+#' x: The points at which the density is calculated.
+#' density_vals: The density values at the points x.
+#' num_obs: The number of observations used to form the Hermite density 
+#' estimates.
+#' N: The number of terms N in the Hermite series estimator.
+#' @export
+density.hermite_estimator_univar <- function(x, x_lower = NA, x_upper = NA, 
+                                             ...) {
+  if (x$standardize_obs == FALSE){
+    if (is.na(x_lower) | is.na(x_upper)){
+      stop("For non-standardized hermite_estimator objects, a lower and an
+           upper x limit for the PDF summary must be provided i.e. x_lower and 
+           x_upper arguments must be provided.")
+    }
+  } 
+  if (!is.na(x_lower) & !is.na(x_upper)){
+    x_step <- (x_upper - x_lower)/99
+    x_vals <- seq(x_lower, x_upper, by = x_step)
+  } else {
+    x_vals <- quant(x, p = seq(0.01,0.99,0.01))
+  }
+  density_vals <- dens(x, x_vals, ...)
+  result <- list(x = x_vals, density_vals = density_vals, 
+                 num_obs = x$num_obs, N = x$N_param)
+  class(result) <- c("hdensity_univar", "list")
+  return(result)
+}
+
 #' Estimates the cumulative probability for a vector of x values
 #'
 #' This method calculates the cumulative probability values at a vector of
@@ -369,6 +421,54 @@ cum_prob.hermite_estimator_univar <- function(h_est_obj, x, clipped = FALSE,
     cdf_val <- pmin(pmax(cdf_val, 1e-08), 1)
   }
   return(as.vector(cdf_val))
+}
+
+#' Creates an object summarizing the CDF with associated generic methods print,
+#' plot and summary.
+#'
+#' The hermite_estimator_univar object, h_est_obj must be updated with 
+#' observations prior to the use of this method.
+#'
+#' @param h_est_obj A hermite_estimator_univar object.
+#' @param clipped A boolean value. This value determines whether cumulative
+#' probabilities are clipped to lie within the range [0,1].
+#' @param accelerate_series A boolean value. This value determines whether
+#' Hermite series acceleration is applied.
+#' @param x_lower A numeric value. This value determines the lower limit of 
+#' x values at which to evaluate the CDF.
+#' @param x_upper A numeric value. This value determines the upper limit of 
+#' x values at which to evaluate the CDF.
+#' @return A hcdf_univar object whose underlying structure is a list 
+#' containing the following components.
+#' 
+#' x: The points at which the cumulative probability is calculated.
+#' cum_prob_vals: The cumulative probability values at the points x.
+#' num_obs: The number of observations used to form the Hermite cumulative 
+#' probability estimates.
+#' N: The number of terms N in the Hermite series estimator.
+#' @export
+hcdf.hermite_estimator_univar <- function(h_est_obj, clipped = FALSE, 
+                                          accelerate_series = TRUE, x_lower=NA,
+                                          x_upper=NA) {
+  if (h_est_obj$standardize_obs == FALSE){
+    if (is.na(x_lower) | is.na(x_upper)){
+      stop("For non-standardized hermite_estimator objects, a lower and an
+           upper x limit for the CDF summary must be provided i.e. x_lower and 
+           x_upper arguments must be provided.")
+    }
+  } 
+  if (!is.na(x_lower) & !is.na(x_upper)){
+    x_step <- (x_upper - x_lower)/99
+    x_vals <- seq(x_lower, x_upper, by = x_step)
+  } else {
+    x_vals <- quant(h_est_obj, p = seq(0.01,0.99,0.01))
+  }
+  cum_prob_vals <- cum_prob(h_est_obj, x_vals, 
+                            clipped, accelerate_series)
+  result <- list(x = x_vals, cum_prob_vals = cum_prob_vals, 
+                 num_obs = h_est_obj$num_obs, N = h_est_obj$N_param)
+  class(result) <- c("hcdf_univar", "list")
+  return(result)
 }
 
 # Estimates the quantile at a vector of probability values using a vectorized
@@ -490,7 +590,8 @@ quantile_helper_interpolate <- function(h_est_obj, p_vec,
     series_calculate(h_est_obj$h_int_full_domain_serialized,
                      h_est_obj$coeff_vec, accelerate_series))
   result <- stats::approx(p_all_vals,x_full_domain_serialized,
-                   xout = p_vec, method="linear",ties = "ordered")$y
+                   xout = p_vec, method="linear",ties = "ordered",
+                   yleft = -10, yright = 10)$y
   if (is.na(h_est_obj$exp_weight)) {
     result <-
       result * sqrt(h_est_obj$running_variance / (h_est_obj$num_obs - 1)) +
@@ -557,13 +658,67 @@ quant.hermite_estimator_univar <- function(h_est_obj, p,
   return(result)
 }
 
+#' Estimates the quantiles at a vector of probability values
+#' 
+#' This generic method is a convenience wrapper around the quant method
+#'
+#' @param x A hermite_estimator_univar object.
+#' @param probs A numeric vector. A vector of probability values.
+#' @param ... Optional additional arguments to the quant function namely 
+#' algorithm and accelerate_series.
+#' @return A numeric vector. The vector of quantile values associated with the
+#' probabilities probs.
+#' @export
+quantile.hermite_estimator_univar <- function(x, probs = seq(0, 1, 0.25), ...){
+  quant(x, p = probs, ...)
+}
+
+#' Estimates the median
+#' 
+#' This generic method is a convenience wrapper around the quant method to 
+#' calculate the median.
+#'
+#' @param x A hermite_estimator_univar object.
+#' @param ... Optional additional arguments to the quant function namely 
+#' algorithm and accelerate_series.
+#' @return A numeric value.
+#' @export
+median.hermite_estimator_univar <- function(x, ...){
+  quant(x, p = 0.5, ...)
+}
+
+#' Estimates the Interquartile range (IQR)
+#' 
+#' This generic method is a convenience wrapper around the quant method to 
+#' calculate the interquartile range.
+#'
+#' @param x A hermite_estimator_univar object.
+#' @param ... Optional additional arguments to the quant function namely 
+#' algorithm and accelerate_series.
+#' @return A numeric value.
+#' @export
+IQR.hermite_estimator_univar <- function(x, ...){
+  quartiles <- quant(x, p = c(0.25,0.75), ...)
+  return(quartiles[2] - quartiles[1])
+}
+
 #' Prints univariate hermite_estimator object.
 #' 
 #'
 #' @param x A hermite_estimator_univar object.
-#' @param ... Other arguments passed on to methods used in printing.
+#' @param ... Unused
 print.hermite_estimator_univar <- function(x, ...) {
   describe_estimator(x,"univariate")
+}
+
+summary_quantiles_helper <- function(cumulative_probs, quantiles_at_p, digits){
+  cat("Estimated Quantiles:\n")
+  cum_probs_size <- length(cumulative_probs)
+  quantile_values <- matrix(round(quantiles_at_p,digits), nrow = 1, 
+                            ncol = cum_probs_size, byrow = TRUE)
+  colnames(quantile_values) <- paste0(cumulative_probs ,"%")
+  rownames(quantile_values) <- ""
+  print(quantile_values, quote = FALSE)
 }
 
 #' Summarizes univariate hermite_estimator object.
@@ -584,15 +739,9 @@ summary.hermite_estimator_univar <- function(object,
     cat(paste0("Standard Deviation = ",
                round(calculate_running_std(object),digits), "\n"))
     if (object$standardize_obs == TRUE){
-      cat("Estimated Quantiles:\n")
       cumulative_probs <- seq(10,90,10)
-      cum_probs_size <- length(cumulative_probs)
-      quantile_values <- matrix(round(quant(object,p=cumulative_probs/100),
-                                      digits),
-                                nrow = 1, ncol = cum_probs_size, byrow = TRUE)
-      colnames(quantile_values) <- paste0(cumulative_probs ,"%")
-      rownames(quantile_values) <- ""
-      print(quantile_values, quote = FALSE)
+      quantiles_at_p <- quant(object,p=cumulative_probs/100)
+      summary_quantiles_helper(cumulative_probs, quantiles_at_p, digits)
     }
   }
 }

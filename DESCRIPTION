@@ -1,7 +1,7 @@
 Package: hermiter
 Title: Efficient Sequential and Batch Estimation of Univariate and Bivariate Probability Density Functions and Cumulative Distribution Functions along with Quantiles (Univariate) and Nonparametric Correlation (Bivariate)
-Version: 2.2.0
-Date: 2022-11-12
+Version: 2.3.0
+Date: 2023-05-07
 Authors@R: c(
   person("Michael","Stephanou",role=c("aut","cre"), email="michael.stephanou@gmail.com"),
   person("Melvin","Varughese",role="ctb"))
@@ -17,7 +17,7 @@ Description: Facilitates estimation of full univariate and bivariate
   Based on: Stephanou, Michael, Varughese, Melvin and Macdonald, Iain. "Sequential quantiles via Hermite series density estimation." Electronic Journal of Statistics 11.1 (2017): 570-607 <doi:10.1214/17-EJS1245>, 
   Stephanou, Michael and Varughese, Melvin. "On the properties of Hermite series based distribution function estimators." Metrika (2020) <doi:10.1007/s00184-020-00785-z> and Stephanou, Michael and Varughese, Melvin. "Sequential estimation of Spearman rank correlation using Hermite series estimators." Journal of Multivariate Analysis (2021) <doi:10.1016/j.jmva.2021.104783>.
 License: MIT + file LICENSE
-Depends: R (>= 3.5.0)
+Depends: R (>= 3.6.0)
 Imports: 
   Rcpp (>= 1.0.5),
   methods,
@@ -27,7 +27,7 @@ LinkingTo:
   BH,
   RcppParallel
 SystemRequirements: GNU make
-RoxygenNote: 7.2.2
+RoxygenNote: 7.2.3
 Suggests: 
     testthat,
     magrittr,
@@ -38,7 +38,8 @@ Suggests:
     ggplot2,
     DT,
     mvtnorm,
-    patchwork
+    patchwork,
+    colorspace
 VignetteBuilder: knitr
 ByteCompile: true
 URL: https://github.com/MikeJaredS/hermiter

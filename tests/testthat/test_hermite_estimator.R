@@ -28,7 +28,6 @@ test_that("error trapping for hermite_estimator work as expected", {
   expect_true(is.na(cum_prob(hermite_est, x=2)))
   expect_true(is.na(quant(hermite_est, p=0.5)))
   expect_error(update_sequential(hermite_est, "a"))
-  expect_error(update_sequential(hermite_est, c(1,2)))
   expect_error(hermite_estimator(N = 10, standardize = TRUE,
                                  observations = c("a","b")))
   expect_error(dens(hermite_est, "a"))
@@ -61,7 +60,6 @@ test_that("error trapping for hermite_estimator work as expected", {
   expect_true(is.na(cum_prob(hermite_est, x=2)))
   expect_true(is.na(quant(hermite_est, p=0.5)))
   expect_error(update_sequential(hermite_est, "a"))
-  expect_error(update_sequential(hermite_est, c(1,2)))
   expect_error(hermite_estimator(N = 10, standardize = TRUE, 
                                         observations = c("a","b")))
   hermite_est <- hermite_estimator(N = 10, standardize = TRUE, 
@@ -231,7 +229,12 @@ test_that("sequential updates of hermite_estimator work as expected", {
   expect_equal(target_coeff_vec_standardized,
                hermite_est$coeff_vec,
                tolerance = get_eps())
-  
+  hermite_est <- hermite_estimator(N = 10, standardize = TRUE)
+  hermite_est <-
+      hermite_est %>% update_sequential(test_observations)
+  expect_equal(target_coeff_vec_standardized,
+               hermite_est$coeff_vec,
+               tolerance = get_eps())
   hermite_est <- hermite_estimator(N = 10, standardize = FALSE)
   for (idx in seq_along(test_observations)) {
     hermite_est <-

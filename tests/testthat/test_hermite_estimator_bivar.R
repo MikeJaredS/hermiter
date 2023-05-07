@@ -378,6 +378,18 @@ test_that("sequential updates of hermite_estimator_bivar work as expected",
                          tolerance = get_eps())
             hermite_est <-
               hermite_estimator(N = 10,
+                                standardize = TRUE,
+                                est_type = "bivariate")
+            hermite_est <-
+                hermite_est %>% update_sequential(test_observations_mat)
+            expect_equal(target_coeff_vec_standardized_x,
+                         hermite_est$coeff_vec_x,
+                         tolerance = get_eps())
+            expect_equal(target_coeff_vec_standardized_y,
+                         hermite_est$coeff_vec_y,
+                         tolerance = get_eps())
+            hermite_est <-
+              hermite_estimator(N = 10,
                                 standardize = FALSE,
                                 est_type = "bivariate")
             for (idx in seq_len(nrow(test_observations_mat))) {

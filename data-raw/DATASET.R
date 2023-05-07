@@ -36,13 +36,11 @@ h_int_lower_zero_serialized <-  hermite_int_lower(N=75,x=0,
 h_int_upper_zero_serialized <- hermite_int_upper(N=75,x=0,
                                                 hermite_function_matrix=h_k_mat)
 
-x_lower_serialized <- seq(-25,-10.5,by=0.5)
-x_lower_serialized <- c(x_lower_serialized,seq(-10,-6.05,by=0.05))
+x_lower_serialized <- seq(-10,-6.05,by=0.05)
 x_lower_serialized <- c(x_lower_serialized,seq(-6,-0.01,by=0.01))
 
 x_upper_serialized <- seq(0,6,by=0.01)
 x_upper_serialized <- c(x_upper_serialized, seq(6.05,10,by=0.05))
-x_upper_serialized <- c(x_upper_serialized, seq(10.5,25,by=0.5))
 
 x_full_domain_serialized <- c(x_lower_serialized,x_upper_serialized)
 h_int_lower_serialized <- hermite_int_lower(N=75,x_lower_serialized)
@@ -50,8 +48,8 @@ h_int_upper_serialized <- hermite_int_upper(N=75,x_upper_serialized)
 h_int_full_domain_serialized <- cbind(h_int_lower_serialized, 
                                       h_int_upper_serialized)
 
-shift_pvec <- c(rep(0,710), rep(1,711))
-scale_pvec <- c(rep(1,710), rep(-1,711))
+shift_pvec <- c(rep(0,680), rep(1,681))
+scale_pvec <- c(rep(1,680), rep(-1,681))
 
 root_x_serialized <-  c(
   -13.4064873381449,

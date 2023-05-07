@@ -9,8 +9,8 @@
 \arguments{
 \item{h_est_obj}{A hermite_estimator_bivar object.}
 
-\item{x}{A numeric vector of length 2. A bivariate observation to be 
-incorporated into the estimator.}
+\item{x}{A numeric vector of length 2 or a n x 2 matrix with n bivariate 
+observations to be incorporated into the estimator.}
 }
 \value{
 An object of class hermite_estimator_bivar.

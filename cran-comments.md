@@ -1,33 +1,27 @@
-# hermiter v2.2.0
+# hermiter v2.3.0
 
-## Breaking changes
+## Additions and improvements
 
-* The interface of `hermiter` has been simplified. The `update_batch` method 
-has been removed in favor of providing the ability to initialize the 
-`hermite_estimator` with an initial batch of observations. Several internal 
-methods are no longer exported in the interests of simplicity.
-* The default values of N have been optimized for different settings. For 
-univariate, non-exponentially weighted estimators, the default is now N = 50. 
-For univariate, exponentially weighted estimators, the default is now N = 20. 
-For bivariate, non-exponentially weighted estimators, the default is now N = 30.
-Finally, For bivariate, exponentially weighted estimators, the default is now 
-N = 20.
-
-## Major enhancements
-
-* Parallel implementation of batch updating using RcppParallel provides 
-significant performance improvements on multicore systems. Note that this 
-can be disabled by using options(hermiter.parallel = FALSE).
+* Enhanced the update_sequential method to incorporate a single or multiple
+new observations.
+* Added density generic function which outputs an object with associated print
+and plot generics.
+* Added quantile generic function for convenience.
+* Added hcdf function which outputs an object with associated print, 
+plot and summary generics.
+* Added median and IQR convenience functions.
+* Added a wrapper around the stats::cor function with two new methods, namely
+"hermite.spearman" and "hermite.kendall".
 
 ## Minor improvements and bug fixes
 
-* Updated citation information.
 * Additional test cases have been added.
-* Bug fixes for series acceleration algorithm.
+* Updated the vignette.
+* Fixed the SystemRequirements: C++11 note.
 
 
 ## Test environments
-* local R installation, Windows 10, R 4.2.2
+* local R installation, Windows 10, R 4.3.0
 * Ubuntu Linux 20.04.1 LTS, R-release, GCC (r-hub)
 * Debian Linux, R-devel, GCC ASAN/UBSAN (r-hub)
 * Fedora Linux, R-devel, clang, gfortran (r-hub)

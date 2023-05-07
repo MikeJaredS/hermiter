@@ -188,9 +188,11 @@ merge_hermite.list <- function(hermite_estimators){
 #'
 #' @param h_est_obj A hermite_estimator_univar or hermite_estimator_bivar 
 #' object.
-#' @param x A numeric value or vector. An observation to be incorporated into 
-#' the estimator. Note that for univariate estimators, x is a numeric value 
-#' whereas for bivariate estimators, x is a numeric vector of length 2.
+#' @param x A numeric vector or matrix. Observations to be incorporated into 
+#' the estimator. Note that for univariate estimators, x is a numeric vector 
+#' whereas for bivariate estimators, x is a numeric vector of length 2 or a 
+#' n x 2 matrix with n bivariate observations to be incorporated into the 
+#' estimator.
 #' @return An object of class hermite_estimator_univar or 
 #' hermite_estimator_bivar.
 #' @export
@@ -280,6 +282,30 @@ dens <- function(h_est_obj, x, clipped, accelerate_series = TRUE) {
 #' }
 cum_prob <- function(h_est_obj, x, clipped, accelerate_series = TRUE) {
   UseMethod("cum_prob", h_est_obj)
+}
+
+#' Creates an object summarizing the CDF with associated generic methods print,
+#' plot and summary.
+#'
+#' The h_est_obj object must be updated with observations prior to the use of 
+#' the method.
+#'
+#' @param h_est_obj A hermite_estimator_univar or hermite_estimator_bivar 
+#' object.
+#' @param clipped A boolean value. This value determines whether
+#' cumulative probabilities are clipped to lie between 0 and 1.
+#' @param accelerate_series A boolean value. This value determines whether
+#' Hermite series acceleration is applied.
+#' @param x_lower A numeric value (univariate) or a numeric vector (bivariate).
+#' This value determines the lower limit of x values at which to evaluate 
+#' the CDF.
+#' @param x_upper A numeric value (univariate) or a numeric vector (bivariate).
+#' This value determines the upper limit of x values at which to evaluate 
+#' the CDF.
+#' @return A hcdf_univar or hcdf_bivar object.
+hcdf <- function(h_est_obj, clipped = FALSE, accelerate_series = TRUE, 
+                 x_lower = NA, x_upper = NA) {
+  UseMethod("hcdf", h_est_obj)
 }
 
 #' Estimates the quantiles at a vector of probability values
