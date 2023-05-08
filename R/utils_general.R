@@ -2,7 +2,6 @@
 #' on a hermite_estimator_univar object.
 #' 
 #' Mirrors the print method of the stats::ecdf function 
-#' 
 #'
 #' @param x A hcdf_univar object.
 #' @param digits A numeric value. Number of digits to round to.
@@ -113,7 +112,7 @@ print.hcdf_bivar <- function (x,
 #' @export
 plot.hcdf_bivar <- function (x, main="Hermite CDF",xlab = "X", ylab="Y",...) 
 {
-  z = matrix(x$cum_prob_vals,byrow = FALSE,nrow=length(x$x_vals_1))
+  z <- matrix(x$cum_prob_vals,byrow = FALSE,nrow=length(x$x_vals_1))
   filled.contour(x = x$x_vals_1,y = x$x_vals_2, z= z,
                  color.palette = function(n) hcl.colors(n, "Oslo", rev = TRUE),
                  main=main,xlab=xlab,ylab=ylab)
@@ -231,7 +230,7 @@ print.hdensity_bivar <- function (x,
 plot.hdensity_bivar <- function(x, main="Hermite PDF",xlab = "X", ylab = "Y", 
                                 ...) 
 {
-  z = matrix(x$density_vals,byrow = FALSE,nrow=length(x$x_vals_1))
+  z <- matrix(x$density_vals,byrow = FALSE,nrow=length(x$x_vals_1))
   cols <- hcl.colors(10, "Oslo")
   filled.contour(x = x$x_vals_1,y = x$x_vals_2, z= z,
                  color.palette = function(n) hcl.colors(n, "Oslo", rev = TRUE),
@@ -241,9 +240,9 @@ plot.hdensity_bivar <- function(x, main="Hermite PDF",xlab = "X", ylab = "Y",
 #' A wrapper around the stats::cor function adding two additional methods, 
 #' namely method = "hermite.spearman" and method = "hermite.kendall" (can be
 #' abbreviated). The input parameters and output value semantics closely match 
-#' the stats::cor method for easy interchange. If neither the "hermite.spearman" 
-#' nor the "hermite.kendall" method is selected, then this function will call 
-#' stats::cor with the arguments provided.
+#' the stats::cor method for easy interchange. If neither the 
+#' "hermite.spearman" nor the "hermite.kendall" method is selected, then this 
+#' function will call stats::cor with the arguments provided.
 #'
 #' @param x a numeric vector, matrix or data frame. 
 #' @param y NULL (default) or a vector, matrix or data frame with 

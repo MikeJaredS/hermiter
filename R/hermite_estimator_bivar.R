@@ -330,7 +330,7 @@ update_sequential_bivar_helper <- function(h_est_obj,x){
   }
   if (is.na(h_est_obj$exp_weight)){
     h_est_obj$coeff_mat_bivar <- (h_est_obj$coeff_mat_bivar * 
-                                    (h_est_obj$num_obs-1) + tcrossprod(h_x,h_y))/(h_est_obj$num_obs)
+              (h_est_obj$num_obs-1) + tcrossprod(h_x,h_y))/(h_est_obj$num_obs)
   } else {
     h_est_obj$coeff_mat_bivar<- h_est_obj$coeff_mat_bivar * 
       (1-h_est_obj$exp_weight) + tcrossprod(h_x,h_y)*h_est_obj$exp_weight
@@ -485,8 +485,8 @@ dens.hermite_estimator_bivar <- function(h_est_obj,x, clipped = FALSE,
 #' Creates an object summarizing the bivariate PDF with associated generic 
 #' methods print and plot.
 #'
-#' The hermite_estimator_bivar object, x must be updated with observations prior 
-#' to the use of the method.
+#' The hermite_estimator_bivar object, x must be updated with observations 
+#' prior to the use of the method.
 #'
 #' @param x A hermite_estimator_bivar object.
 #' @param x_lower A numeric vector. This vector determines the lower limit of 

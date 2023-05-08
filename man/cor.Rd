@@ -5,9 +5,9 @@
 \title{A wrapper around the stats::cor function adding two additional methods, 
 namely method = "hermite.spearman" and method = "hermite.kendall" (can be
 abbreviated). The input parameters and output value semantics closely match 
-the stats::cor method for easy interchange. If neither the "hermite.spearman" 
-nor the "hermite.kendall" method is selected, then this function will call 
-stats::cor with the arguments provided.}
+the stats::cor method for easy interchange. If neither the 
+"hermite.spearman" nor the "hermite.kendall" method is selected, then this 
+function will call stats::cor with the arguments provided.}
 \usage{
 cor(x, y = NULL, use = "everything", method = "pearson", ...)
 }
@@ -35,7 +35,7 @@ object if method is "hermite.spearman" or "hermite.kendall".}
 A wrapper around the stats::cor function adding two additional methods, 
 namely method = "hermite.spearman" and method = "hermite.kendall" (can be
 abbreviated). The input parameters and output value semantics closely match 
-the stats::cor method for easy interchange. If neither the "hermite.spearman" 
-nor the "hermite.kendall" method is selected, then this function will call 
-stats::cor with the arguments provided.
+the stats::cor method for easy interchange. If neither the 
+"hermite.spearman" nor the "hermite.kendall" method is selected, then this 
+function will call stats::cor with the arguments provided.
 }

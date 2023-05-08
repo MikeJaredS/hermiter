@@ -31,6 +31,6 @@ estimates.
 N: The number of terms N in the Hermite series estimator.
 }
 \description{
-The hermite_estimator_bivar object, x must be updated with observations prior 
-to the use of the method.
+The hermite_estimator_bivar object, x must be updated with observations 
+prior to the use of the method.
 }

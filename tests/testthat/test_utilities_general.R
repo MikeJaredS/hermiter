@@ -457,7 +457,7 @@ test_that("quantile, median and IQR generics work correctly", {
   hermite_est <- hermite_estimator(observations = test_observations,
                                    standardize = TRUE)
   quantiles_est <- quantile(hermite_est)
-  target_quantiles = c(-14.64905596,
+  target_quantiles <- c(-14.64905596,
                        -1.57302308,
                        0.04009478,
                        1.01244707,

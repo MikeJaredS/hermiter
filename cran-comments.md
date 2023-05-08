@@ -23,15 +23,15 @@ plot and summary generics.
 ## Test environments
 * local R installation, Windows 10, R 4.3.0
 * Ubuntu Linux 20.04.1 LTS, R-release, GCC (r-hub)
-* Debian Linux, R-devel, GCC ASAN/UBSAN (r-hub)
+* Debian Linux, R-release, GCC (r-hub)
 * Fedora Linux, R-devel, clang, gfortran (r-hub)
-* macOS 10.13.6 High Sierra, R-release, brew
+* macOS 10.13.6 High Sierra, R-release, brew (r-hub)
 * Windows Server 2022, R-devel, 64 bit (r-hub)
 * win-builder (devel, release. oldrel)
 
 ## R CMD check results
 
-There was 1 NOTE across environments:
+There was 1 NOTE across all environments:
 
 GNU make is a SystemRequirements.
     
@@ -39,8 +39,18 @@ GNU make is a SystemRequirements.
 problematic. GNU make has been added to SystemRequirements in the Description
 file.
 
-* In addition, on Ubuntu 20.04.1 LTS, the package 
-appears to be slightly larger than 5MB, around 5.9 MB. This does not
+* In addition, on Debian and Ubuntu Linux, the package 
+appears to be slightly larger than 5MB, around 5.2- 6 MB. This does not
 appear to occur on any of the other environments however (i.e. Fedora Linux, 
 Windows, MacOS)
 
+* Finally, there is the following note on Ubuntu and Fedora Linux:
+
+* checking HTML version of manual ... NOTE
+Skipping checking HTML validation: no command 'tidy' found
+Skipping checking math rendering: package 'V8' unavailable
+
+This seems build system specific and not directly tied to the package.
+
+* There is also a PREPERROR for Debian Linux, R-devel, GCC ASAN/UBSAN on rhub 
+- we believe this is an issue on the build server and not package specific.
