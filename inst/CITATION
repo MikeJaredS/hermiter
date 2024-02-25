@@ -1,12 +1,24 @@
-citation(auto = meta)
+citHeader("To cite hermiter in publications use:")
 
-## hermiter paper
-bibentry(bibtype = "article",
-         title = "hermiter: R package for Sequential Nonparametric Estimation",
-         author = c(person("Michael", "Stephanou"),
-                    person("Melvin", "Varughese")),
-         year = "2021", journal = "arXiv preprint arXiv:2111.14091",
-         url = "https://arxiv.org/abs/2111.14091")
-         
-         
-         
+bibentry(
+  key = "hermiter",
+  bibtype  = "Manual",
+  title    = "hermiter: Efficient Sequential and Batch Estimation of Univariate and
+Bivariate Probability Density Functions and Cumulative
+Distribution Functions along with Quantiles (Univariate) and
+Nonparametric Correlation (Bivariate)",
+  author = c(person("Stephanou", "Michael"), person("Varughese", "Melvin")),
+  note  = "R package version 2.3.1",
+  year     = "2024",
+  url      = "https://github.com/MikeJaredS/hermiter"
+)
+
+bibentry(
+  key = "hermiterPaper",
+  bibtype  = "Article",
+  title    = "hermiter: R package for sequential nonparametric estimation",
+  author   = c(person("Stephanou", "Michael"), person("Varughese", "Melvin")),
+  journal  = "Computational Statistics",
+  year     = "2023",
+  url = "https://doi.org/10.1007/s00180-023-01382-0"
+)

@@ -394,21 +394,21 @@ struct HermiteS : public Worker
   const RVector<double> input;
   std::vector<double> value;
   HermiteS(const size_t N, const NumericVector input) : N(N), input(input), 
-  value() {value.resize(N+1,0.0);}
+  value(N+1) {}
   HermiteS(const HermiteS& hermite_sum, Split) : N(hermite_sum.N),
-  input(hermite_sum.input), value() {value.resize(N+1,0.0);}
+  input(hermite_sum.input), value(N+1) {}
   void operator()(std::size_t begin, std::size_t end) {
     double piConst = pow(M_PI,-0.25);
     double sqrt2 = sqrt((double) 2);
     double out_curr = 0;
     double out_0 = 0;
     double out_1 =0;
-    for(std::size_t j = begin; j < end; j++) {
+    for(std::size_t j = begin; j < end && j < input.size(); j++) {
       out_0 = piConst * exp(-1 * input[j] * input[j] / 2);
       value[0] += out_0;
       out_1  = sqrt2 * piConst * input[j]* exp(-1 * input[j] * input[j] / 2);
       value[1] += out_1;
-      for(size_t i = 2; i <= N; i++) {
+      for(size_t i = 2; i <= N && i < value.size(); i++) {
         out_curr = sqrt(2 / ((double) i)) * input[j] * out_1 -
           sqrt(1 - 1/((double)i)) * out_0;
         value[i] += out_curr;

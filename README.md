@@ -39,7 +39,7 @@ function and Spearman correlation estimation.
 A summary of the estimators and algorithms in `hermiter` can be found in the 
 article below.
 
-* [Stephanou, Michael and Varughese, Melvin. "hermiter: R package for Sequential Nonparametric Estimation." arXiv (2021)](https://arxiv.org/abs/2111.14091)
+* [Stephanou, Michael and Varughese, Melvin. "hermiter: R package for Sequential Nonparametric Estimation." Computational Statistics (2023)](https://doi.org/10.1007/s00180-023-01382-0)
 
 ## Features
 
@@ -299,7 +299,6 @@ ggplot(df_pdf_cdf,aes(x=x)) + geom_line(aes(y=pdf_est, colour="Estimated")) +
                       breaks = c("Estimated", "Actual"),
                       values = c("blue", "black")) + ylab("Probability Density")
 ```
-
 ![](./vignettes/pdf_static.png)
 
 ```{r}
@@ -310,7 +309,6 @@ ggplot(df_pdf_cdf,aes(x=x)) + geom_line(aes(y=cdf_est, colour="Estimated")) +
                       values = c("blue", "black")) +
   ylab("Cumulative Probability")
 ```
-
 ![](./vignettes/cdf_static.png)
 
 ```{r}
@@ -319,8 +317,41 @@ ggplot(df_quant,aes(x=actual_quantiles)) + geom_point(aes(y=quantile_est),
   geom_abline(slope=1,intercept = 0) +xlab("Theoretical Quantiles") +
   ylab("Estimated Quantiles")
 ```
-
 ![](./vignettes/quantile_static.png)
+
+### Convenience functions
+
+Note that there are also generic methods facilitating summarizing and plotting
+univariate densities and distribution functions as illustrated below.
+
+```{r}
+h_dens <- density(hermite_est)
+print(h_dens)
+plot(h_dens)
+```
+
+![](./vignettes/pdf_convenience_fnc.png)
+
+```{r}
+h_cdf <- hcdf(hermite_est)
+print(h_cdf)
+plot(h_cdf)
+summary(h_cdf)
+```
+
+![](./vignettes/cdf_convenience_fnc.png)
+
+Finally there are the following convenience functions providing familiar syntax
+to the ordinary R functions.
+
+```{r}
+quantile(hermite_est)
+
+median(hermite_est)
+
+IQR(hermite_est)
+```
+
 
 ## Estimate bivariate pdf, cdf and nonparametric correlation
 
@@ -396,35 +427,32 @@ df_pdf_cdf <- data.frame(x_grid,pdf_est,cdf_est,actual_pdf,actual_cdf)
 
 ```{r}
 p1 <- ggplot(df_pdf_cdf) + geom_tile(aes(X, Y, fill= actual_pdf)) +
-  scale_fill_gradient2(low="blue", mid="cyan", high="purple",
-                       midpoint=.1,    
-                       breaks=seq(0,.2,by=.05), 
-                       limits=c(0,.2))  
+  scale_fill_continuous_sequential(palette="Oslo",
+                                   breaks=seq(0,.2,by=.05),
+                                   limits=c(0,.2))
 
 p2 <- ggplot(df_pdf_cdf) + geom_tile(aes(X, Y, fill= pdf_est)) +
-  scale_fill_gradient2(low="blue", mid="cyan", high="purple",
-                       midpoint=.1,
-                       breaks=seq(0,.2,by=.05), 
-                       limits=c(0,.2))
+  scale_fill_continuous_sequential(palette="Oslo",
+                                   breaks=seq(0,.2,by=.05),
+                                   limits=c(0,.2))
 
 p1+ ggtitle("Actual PDF")+ theme(legend.title = element_blank()) + p2 +
   ggtitle("Estimated PDF") +theme(legend.title = element_blank()) +
   plot_layout(guides = 'collect')
 ```
+
 ![](./vignettes/pdf_bivar_static.png)
 
 ```{r}
 p1 <- ggplot(df_pdf_cdf) + geom_tile(aes(X, Y, fill= actual_cdf)) +
-  scale_fill_gradient2(low="blue", mid="cyan", high="purple", 
-                       midpoint=0.5,    
-                       breaks=seq(0,1,by=.2), 
-                       limits=c(0,1)) 
+  scale_fill_continuous_sequential(palette="Oslo",
+                       breaks=seq(0,1,by=.2),
+                       limits=c(0,1))
 
 p2 <- ggplot(df_pdf_cdf) + geom_tile(aes(X, Y, fill= cdf_est)) +
-  scale_fill_gradient2(low="blue", mid="cyan", high="purple",
-                       midpoint=0.5,
-                       breaks=seq(0,1,by=.2), #breaks in the scale bar
-                       limits=c(0,1))
+  scale_fill_continuous_sequential(palette="Oslo",
+                                   breaks=seq(0,1,by=.2),
+                                   limits=c(0,1))
 
 p1+ ggtitle("Actual CDF") + theme(legend.title = element_blank()) + p2 +
   ggtitle("Estimated CDF") + theme(legend.title = element_blank())+
@@ -433,19 +461,20 @@ p1+ ggtitle("Actual CDF") + theme(legend.title = element_blank()) + p2 +
 
 ![](./vignettes/cdf_bivar_static.png)
 
+
 Spearman's correlation coefficient results:
 
 |             | Spearman's Correlation |
 | ----------- | ----------- |
 | Actual      | 0.453       |
-| Estimated   | 0.449        |
+| Estimated   | 0.447        |
 
 Kendall correlation coefficient results:
 
 |             | Kendall Correlation |
 | ----------- | ----------- |
 | Actual      | 0.312       |
-| Estimated   | 0.309        |
+| Estimated   | 0.308        |
 
 ## Applying to stationary data (sequential setting)
 
