@@ -789,12 +789,12 @@ citation("hermiter")
 
 This yields:
 
-Stephanou M (2022). hermiter: Efficient Sequential and Batch Estimation of 
-Univariate and Bivariate Probability Density Functions and Cumulative 
-Distribution Functions along with Quantiles (Univariate) and Nonparametric 
-Correlation (Bivariate). R package version 2.2.0, 
+Michael S, Melvin V (2024). _hermiter: Efficient Sequential and Batch
+Estimation of Univariate and Bivariate Probability Density Functions and
+Cumulative Distribution Functions along with Quantiles (Univariate) and
+Nonparametric Correlation (Bivariate)_. R package version 2.3.1,
 <https://github.com/MikeJaredS/hermiter>.
 
-Stephanou M, Varughese M (2021). “hermiter: R package for Sequential 
-Nonparametric Estimation.” arXiv preprint arXiv:2111.14091.
-<https://arxiv.org/abs/2111.14091>.
+Michael S, Melvin V (2023). “hermiter: R package for sequential
+nonparametric estimation.” _Computational Statistics_.
+<https://doi.org/10.1007/s00180-023-01382-0>.
