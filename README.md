@@ -2,7 +2,8 @@
 
 <!-- badges: start -->
 [![codecov](https://codecov.io/gh/MikeJaredS/hermiter/branch/master/graph/badge.svg)](https://app.codecov.io/gh/MikeJaredS/hermiter)
-[![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/hermiter?color=green)](https://cran.r-project.org/package=hermiter)
+[![CRAN
+status](http://www.r-pkg.org/badges/version/hermiter)](https://cran.r-project.org/package=hermiter)
 ![](https://cranlogs.r-pkg.org/badges/grand-total/hermiter?color=green)
 <!-- badges: end -->
 
